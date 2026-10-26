@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/room_exit.gd" id="2_exit"]
+
+[node name="Hall" type="Node2D"]
+script = ExtResource("1_room")
+room_id = "hall"
+
+[node name="ToKitchen" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "kitchen"
+
+[node name="ToLivingRoom" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "living_room"
+
+[node name="ToGuestWc" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "guest_wc"
+
+[node name="ToHomeOffice" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "home_office"
+
+[node name="ToOutside" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "outside"
+
+[node name="ToUpstairsHall" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "upstairs_hall"
+direction = 1
+travel_minutes = 2
+
+[node name="ToBasementHall" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "basement_hall"
+direction = 2
+travel_minutes = 2

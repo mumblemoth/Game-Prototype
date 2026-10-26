@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/room_exit.gd" id="2_exit"]
+
+[node name="Restaurant" type="Node2D"]
+script = ExtResource("1_room")
+room_id = "restaurant"
+
+[node name="ToOutside" type="Area2D" parent="."]
+position = Vector2(1080, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "outside"
+direction = 4
+travel_minutes = 20

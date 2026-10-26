@@ -1,0 +1,245 @@
+class_name RoomActions
+## Vad man kan göra i varje rum, kopplat till en sak i rummet. Varje handling är en
+## dictionary med:
+##   id          – unikt namn (används för "en gång per dag")
+##   object      – möbeltypen i FloorPlanArt.FURNITURE som handlingen hör till; den
+##                 markeras i planen när man håller musen över valet ("" = ingen)
+##   label       – knapptexten
+##   text        – vad som händer (visas i textrutan)
+##   time        – true: en aktivitet som flyttar dygnet till nästa tidszon
+##   effects     – ändringar i mätarna, t.ex. {"home": 10}
+##   social      – XP i mammans egenskaper, t.ex. {"fitness": 5} (se SocialStats)
+##   requires    – krav på egenskaper eller Attractiveness, t.ex. {"charm": 3} eller
+##                 {"attractiveness": 4}; valet syns men är låst tills de uppfylls
+##   link        – relation som får poäng (social link), och link_points hur många
+##   needs       – personen måste vara i rummet; needs_home – någonstans hemma
+##   periods     – bara under dessa tidszoner
+##   panel       – öppnar en panel i stället ("wardrobe", "vanity", "salon" eller "map");
+##                 salongens panel tar betalt och tid själv när besöket bokas
+##   sets_flag   – en händelse i storyn som handlingen sätter (låser upp platser m.m.)
+##   hidden_flag – valet döljs när den här händelsen redan har hänt
+##   completes   – en quest som handlingen avslutar
+##   weekdays    – bara dessa veckodagar (index 0 = måndag)
+##   reveal_flag – valet syns först när den här händelsen har hänt (t.ex. en hittad
+##                 sidoinkomst, se Economy.SIDE_INCOME)
+## Pengar (se Economy):
+##   cost        – vad det kostar; går inte att välja om pengarna inte räcker
+##   waived_by   – gratis med ett abonnemang som har den här "waives" (t.ex. gym_visit)
+##   earn        – vad det ger; earn_scale höjer det per nivå, t.ex. {"knowledge": 10}
+##   income      – vilken sidoinkomst pengarna räknas till (Economy.SIDE_INCOME)
+##   groceries   – räknas som veckohandlingen (annars blir det hämtmat, se Economy.TAKEOUT)
+##   gives_item  – ger en sak (Economy.ITEMS); needs_item kräver och förbrukar en
+##   buys/sells/subscribe/unsubscribe – sätts av Economy.actions_for_room()
+##   ledger_label – namnet i kontoutdraget, om det ska skilja sig från label
+## Gardiner (sätts av Curtains.actions_for_room()):
+##   curtains    – läget som gardinerna dras till ("open" eller "closed")
+## Förfrågningar (sätts av Requests.actions_for_room()):
+##   fulfills/declines – personen vars öppna förfrågan görs eller avböjs
+##   delegates         – personen som gör sysslan i stället (betalar av en skuld)
+## Snabba handlingar som ger något går bara en gång per dag (GameState). Texterna är
+## platshållare tills riktig story skrivs. All text spelaren ser är på engelska.
+
+const ACTIONS := {
+	"kitchen": [
+		{"id": "kitchen_dishes", "object": "sink", "label": "Do the dishes", "text": "You do the dishes.", "time": true, "effects": {"home": 15}},
+		{"id": "kitchen_cook", "object": "stove", "label": "Cook dinner", "text": "You cook dinner for the family.", "time": true, "effects": {"home": 20, "romance": 5}},
+		{"id": "kitchen_fridge", "object": "fridge", "label": "Check the fridge", "text": "You go through the fridge and write a shopping list.", "effects": {"home": 5}},
+	],
+	"hall": [
+		{"id": "hall_leave", "object": "", "label": "Leave the house", "text": "", "panel": "map"},
+		{"id": "hall_shoes", "object": "shoe_rack", "label": "Tidy up the shoes", "text": "You line up the boys' sneakers. Again.", "effects": {"home": 3}},
+		{"id": "hall_walk_dog", "object": "", "label": "Walk the dog", "text": "You take the dog around the block. The fresh air clears your head.", "time": true, "effects": {"home": 5, "romance": 3}, "social": {"fitness": 3}},
+	],
+	"living_room": [
+		{"id": "living_tv", "object": "tv", "label": "Watch a show with your husband", "text": "You curl up next to him and watch an episode together.", "time": true, "effects": {"romance": 10}, "link": "husband", "link_points": 2, "needs": "husband"},
+		{"id": "living_sofa", "object": "sofa", "label": "Rest on the sofa", "text": "You put your feet up for a while.", "time": true},
+		{"id": "living_flirt", "object": "sofa", "label": "Flirt with your husband", "text": "You sit on the armrest and tease him until he forgets the TV is on.", "effects": {"romance": 8}, "social": {"charm": 1}, "link": "husband", "link_points": 2, "needs": "husband", "requires": {"charm": 2}},
+		{"id": "living_books","object": "shelf", "label": "Browse the bookshelf", "text": "You pick out a novel you have been meaning to read.", "social": {"knowledge": 2}},
+	],
+	"guest_wc": [
+		{"id": "wc_freshen", "object": "basin", "label": "Freshen up", "text": "You splash some water on your face."},
+	],
+	"home_office": [
+		{"id": "office_grade", "object": "desk", "label": "Grade tests", "text": "You grade a stack of tests.", "time": true, "effects": {"work": 15}},
+		{"id": "office_plan", "object": "desk", "label": "Plan lessons", "text": "You plan this week's lessons.", "time": true, "effects": {"work": 10}, "social": {"knowledge": 3}},
+		{"id": "office_read", "object": "shelf", "label": "Read up on teaching", "text": "You skim a chapter on classroom management.", "effects": {"work": 3}, "social": {"knowledge": 2}},
+	],
+	"upstairs_hall": [
+		{"id": "upstairs_photos", "object": "photo_wall", "label": "Look at the family photos", "text": "Beach trips, school photos, the boys in matching sweaters. You smile."},
+		{"id": "upstairs_laundry", "object": "basket", "label": "Gather the dirty laundry", "text": "You collect the laundry from the hamper.", "effects": {"home": 3}},
+	],
+	"bathroom": [
+		{"id": "bath_bath", "object": "bathtub", "label": "Take a long bath", "text": "You light a candle and soak until the water cools.", "time": true, "effects": {"romance": 5}, "social": {"charm": 3}},
+		{"id": "bath_freshen", "object": "basin", "label": "Freshen up", "text": "You wash your face and brush your hair."},
+	],
+	"bedroom": [
+		{"id": "bedroom_wardrobe", "object": "wardrobe", "label": "Change clothes", "text": "", "panel": "wardrobe"},
+		{"id": "bedroom_vanity", "object": "vanity", "label": "Makeup, accessories & hair up", "text": "", "panel": "vanity"},
+		{"id": "bedroom_laptop_game", "object": "desk", "label": "Play an online game with Son 1", "text": "You log in and he invites you to his squad. You are terrible. He laughs and carries you through the match.", "time": true, "link": "son_1", "link_points": 3, "needs_home": "son_1"},
+		{"id": "bedroom_laptop_mail", "object": "desk", "label": "Answer school emails", "text": "You clear out your inbox on the laptop.", "time": true, "effects": {"work": 10}},
+		{"id": "bedroom_nap", "object": "bed", "label": "Take a nap", "text": "You lie down for a nap.", "time": true},
+	],
+	"son_room_1": [
+		{"id": "son1_console", "object": "media_stand", "label": "Play co-op on the console", "text": "You squeeze onto the beanbag next to him and play until he finally beats the boss.", "time": true, "link": "son_1", "link_points": 3, "needs": "son_1"},
+		{"id": "son1_pc", "object": "gaming_desk", "label": "Ask about his game", "text": "He explains his build in great detail. You understand about half of it.", "link": "son_1", "link_points": 1, "needs": "son_1", "social": {"knowledge": 1}},
+		{"id": "son1_lore", "object": "gaming_desk", "label": "Debate the game's lore with him", "text": "You have actually read up on the lore. He stares at you, then talks for an hour straight.", "time": true, "social": {"knowledge": 1}, "link": "son_1", "link_points": 4, "needs": "son_1", "requires": {"knowledge": 3}},
+		{"id": "son1_figures","object": "collectible_shelf", "label": "Look at his figure collection", "text": "He tells you the story behind every figure on the shelf.", "link": "son_1", "link_points": 1, "needs": "son_1"},
+		{"id": "son1_bed", "object": "bed", "label": "Make his bed", "text": "You make his bed and find three empty energy drink cans.", "effects": {"home": 3}},
+	],
+	"son_room_2": [
+		{"id": "son2_bench", "object": "weight_bench", "label": "Spot him on the bench press", "text": "You spot him while he pushes for a new personal best. He gets it.", "time": true, "link": "son_2", "link_points": 3, "needs": "son_2", "social": {"fitness": 2}},
+		{"id": "son2_homework", "object": "desk", "label": "Help with his homework", "text": "You help him through his history essay between his complaints.", "time": true, "effects": {"work": 3}, "link": "son_2", "link_points": 2, "needs": "son_2", "social": {"knowledge": 3}},
+		{"id": "son2_run", "object": "football_gear", "label": "Challenge him to a run", "text": "You keep up with him the whole way and pull ahead on the last hill. He demands a rematch.", "time": true, "social": {"fitness": 3}, "link": "son_2", "link_points": 4, "needs": "son_2", "requires": {"fitness": 3}},
+		{"id": "son2_trophies","object": "trophy_shelf", "label": "Ask about his trophies", "text": "He walks you through the championship game, play by play.", "link": "son_2", "link_points": 1, "needs": "son_2"},
+		{"id": "son2_jersey", "object": "football_gear", "label": "Wash his practice jersey", "text": "You fish the jersey out of his bag. It smells exactly as you feared.", "effects": {"home": 3}, "link": "son_2", "link_points": 1},
+	],
+	"outside": [
+		{"id": "yard_leave", "object": "car", "label": "Head out", "text": "", "panel": "map"},
+		{"id": "yard_neighbor", "object": "", "label": "Wave to the new neighbor", "text": "A moving van is parked next door. You walk over and introduce yourself to the new neighbor, who invites you over sometime.", "sets_flag": "met_neighbor", "hidden_flag": "met_neighbor"},
+		{"id": "yard_football", "object": "", "label": "Throw the football with Son 2", "text": "He runs routes across the lawn and you throw him passes until the sun gets low.", "time": true, "link": "son_2", "link_points": 3, "needs": "son_2", "social": {"fitness": 3}},
+		{"id": "yard_plants", "object": "plant", "label": "Water the plants", "text": "You water the flower beds by the path.", "effects": {"home": 3}},
+	],
+	# Trädgården: små sysslor och en stund för sig själv (platshållartexter).
+	"backyard": [
+		{"id": "garden_weed", "object": "veg_bed", "label": "Weed the vegetable bed", "text": "You pull weeds and pick a handful of tomatoes for dinner.", "effects": {"home": 3}},
+		{"id": "garden_laundry", "object": "clothesline", "label": "Hang the laundry outside", "text": "You peg the wet laundry on the line. It will smell like summer.", "effects": {"home": 3}},
+		{"id": "garden_relax", "object": "sun_lounger", "label": "Relax in the sun", "text": "You stretch out on the lounger and close your eyes for a while.", "time": true},
+	],
+	"attic": [
+		{"id": "attic_trunk", "object": "trunk", "label": "Look through old keepsakes", "text": "You find a stack of old love letters from your husband.", "effects": {"romance": 3}},
+		{"id": "attic_boxes", "object": "boxes", "label": "Sort the old boxes", "text": "You sort through boxes of baby clothes and old toys.", "time": true, "effects": {"home": 10}},
+	],
+	"laundry": [
+		{"id": "laundry_wash", "object": "washer", "label": "Do the laundry", "text": "You start a load of laundry.", "time": true, "effects": {"home": 10}},
+		{"id": "laundry_fold", "object": "rack", "label": "Fold the dry clothes", "text": "You fold the clothes from the drying rack.", "effects": {"home": 3}},
+	],
+	"basement_hall": [
+		{"id": "basement_supplies", "object": "shelf", "label": "Grab supplies", "text": "You grab a light bulb and some batteries from the shelf."},
+	],
+	"hobby_room": [
+		{"id": "hobby_workout", "object": "gym_mat", "label": "Do a workout", "text": "You get through a full workout and feel great afterwards.", "time": true, "effects": {"romance": 5}, "social": {"fitness": 4}},
+		{"id": "hobby_paint", "object": "easel", "label": "Paint for a while", "text": "You lose track of time painting a little landscape.", "time": true, "social": {"charm": 2, "knowledge": 2}, "gives_item": "painting"},
+	],
+	"storage": [
+		{"id": "storage_dig", "object": "boxes", "label": "Dig through storage", "text": "You find the holiday decorations and a tent nobody has used in years.", "sets_flag": "found_marketplace"},
+	],
+	# --- Platserna i grannskapet (Locations). Texterna är platshållare. ---
+	"classroom": [
+		{"id": "class_prepare", "object": "whiteboard", "label": "Prepare tomorrow's lesson", "text": "You write tomorrow's lesson on the board.", "time": true, "effects": {"work": 10}, "social": {"knowledge": 3}},
+		{"id": "class_grade", "object": "desk", "label": "Grade papers at your desk", "text": "You grade a stack of papers in the quiet classroom.", "time": true, "effects": {"work": 15}},
+		{"id": "class_tidy", "object": "shelf", "label": "Tidy the classroom", "text": "You straighten the shelves and collect forgotten pencils.", "effects": {"work": 3}},
+		{"id": "class_tutor", "object": "desk", "label": "Tutor a student after class", "text": "You go through fractions one more time until it finally clicks. The parent pays you in cash.", "time": true, "effects": {"work": 3}, "earn": 35, "earn_scale": {"knowledge": 10}, "income": "tutoring", "requires": {"knowledge": 2}, "reveal_flag": "found_tutoring"},
+	],
+	"teachers_lounge": [
+		{"id": "lounge_chat", "object": "table", "label": "Chat with colleagues", "text": "You catch up on school gossip over coffee.", "time": true, "effects": {"work": 5}, "social": {"charm": 4}},
+		{"id": "lounge_meeting", "object": "table", "label": "Lead the staff meeting", "text": "You run the meeting with a plan nobody can argue with. The principal takes notes.", "time": true, "effects": {"work": 20}, "social": {"charm": 2}, "requires": {"knowledge": 4, "charm": 2}},
+		{"id": "lounge_coffee","object": "counter", "label": "Grab a coffee", "text": "The staff room coffee is terrible, but it's coffee."},
+		{"id": "lounge_board", "object": "", "label": "Read the notice board", "text": "Between the fire drill schedule and a lost cardigan: three notes from parents looking for a tutor. Paid.", "sets_flag": "found_tutoring", "hidden_flag": "found_tutoring"},
+	],
+	"neighbor_living": [
+		{"id": "neighbor_coffee", "object": "coffee_table", "label": "Have coffee with the neighbor", "text": "You sit down for coffee and hear all about the move. It's nice to have someone to talk to. (Placeholder scene.)", "time": true, "effects": {"romance": 3}, "social": {"charm": 4}, "link": "neighbor", "link_points": 2, "needs": "neighbor"},
+		{"id": "neighbor_wine", "object": "coffee_table", "label": "Stay for a glass of wine", "text": "Coffee turns into wine, and the conversation turns personal. (Placeholder scene.)", "time": true, "effects": {"romance": 5}, "social": {"charm": 2}, "periods": ["evening"], "requires": {"attractiveness": 4, "charm": 3}, "link": "neighbor", "link_points": 3, "needs": "neighbor"},
+		{"id": "neighbor_help","object": "boxes", "label": "Help unpack boxes", "text": "You help unpack a few boxes and learn a bit more about your new neighbor, who travels a lot for work and hates leaving the house empty.", "time": true, "effects": {"home": 3}, "link": "neighbor", "link_points": 2, "needs": "neighbor", "sets_flag": "found_house_sitting"},
+		{"id": "neighbor_sit", "object": "", "label": "Look after the house", "text": "You water the plants, bring in the mail and feed the cat. An envelope with your name on it waits on the counter.", "time": true, "earn": 40, "income": "house_sitting", "link": "neighbor", "link_points": 1, "reveal_flag": "found_house_sitting"},
+	],
+	"gym": [
+		{"id": "gym_run", "object": "treadmill", "label": "Run on the treadmill", "text": "You put on a podcast and run until your legs burn.", "time": true, "effects": {"romance": 5}, "social": {"fitness": 5}, "cost": 12, "waived_by": "gym_visit"},
+		{"id": "gym_weights", "object": "weight_bench", "label": "Lift weights", "text": "You work through a full strength session.", "time": true, "effects": {"romance": 5}, "social": {"fitness": 5}, "cost": 12, "waived_by": "gym_visit"},
+		{"id": "gym_coach", "object": "gym_mat", "label": "Coach the beginners' class", "text": "The regular trainer is sick and asks you to step in. The class actually applauds at the end, and the manager slips you an envelope.", "time": true, "effects": {"romance": 5}, "social": {"charm": 3, "fitness": 2}, "requires": {"fitness": 4}, "earn": 50, "income": "coaching", "sets_flag": "found_coaching"},
+		{"id": "gym_stretch","object": "gym_mat", "label": "Stretch", "text": "You stretch out the stiffness from a day of standing in class.", "social": {"fitness": 1}},
+	],
+	"yoga_studio": [
+		{"id": "yoga_class", "object": "gym_mat", "label": "Join a yoga class", "text": "An hour of slow breathing. You leave feeling lighter than you have in weeks.", "time": true, "effects": {"romance": 8}, "social": {"fitness": 4, "charm": 1}, "cost": 18},
+	],
+	# Köpcentret: gångarna och butikerna.
+	"center_court": [
+		{"id": "court_directory", "object": "directory", "label": "Read the mall directory", "text": "West: the grocery store, the restaurant and the café. East: the clothing boutique, the hair salon and the bookstore. You are here, by the fountain."},
+		{"id": "court_fountain", "object": "fountain", "label": "Toss a coin in the fountain", "text": "You close your eyes and make a wish. You're not telling anyone what it was.", "effects": {"romance": 2}, "cost": 1},
+		{"id": "court_people", "object": "bench", "label": "Sit and people-watch", "text": "Teenagers on a first date, a toddler negotiating for a pretzel, a couple holding hands at sixty. You smile.", "social": {"charm": 1}},
+	],
+	"grocery": [
+		{"id": "grocery_shop", "object": "store_shelf", "label": "Do the weekly shopping", "text": "You fill the cart with everything on the list – and remember the coffee.", "time": true, "effects": {"home": 15}, "completes": "coffee", "cost": 150, "groceries": true},
+		{"id": "grocery_snack", "object": "checkout", "label": "Buy snacks for the boys", "text": "You grab chips and energy drinks. The boys will be thrilled.", "effects": {"home": 3}, "cost": 15},
+	],
+	"boutique": [
+		{"id": "boutique_browse", "object": "clothes_rack", "label": "Browse the new collection", "text": "You try on a few things and find a dress you can't stop thinking about.", "time": true, "effects": {"romance": 5}, "social": {"charm": 3}},
+		{"id": "boutique_model", "object": "mirror_wall", "label": "Model the new collection", "text": "The owner asks if you would model the new collection for the shop window. People stop on the sidewalk to look. (Placeholder scene.)", "time": true, "effects": {"romance": 10}, "social": {"charm": 3}, "requires": {"attractiveness": 4}, "earn": 120, "income": "modeling", "sets_flag": "found_modeling"},
+		{"id": "boutique_mirror","object": "mirror_wall", "label": "Check yourself in the mirror", "text": "Not bad for a mom of two teenagers.", "social": {"charm": 1}},
+	],
+	# Frisörsalongen är stället för frisyr och hårfärg (panelen "salon", se Economy.SALON).
+	"salon": [
+		{"id": "salon_book", "object": "salon_station", "label": "Book a hair appointment", "text": "", "panel": "salon", "time": true},
+		{"id": "salon_magazines", "object": "coffee_table", "label": "Flip through the style magazines", "text": "You dog-ear a few looks you would never dare to try. Or would you?", "social": {"charm": 1}},
+	],
+	"cafe": [
+		{"id": "cafe_latte", "object": "espresso_bar", "label": "Order a latte", "text": "You take your latte to a corner seat and let the hum of the mall wash over you.", "effects": {"romance": 2}, "cost": 5},
+		{"id": "cafe_grade", "object": "table", "label": "Grade papers over a latte", "text": "Nobody here needs anything from you. You get through the whole stack in record time.", "time": true, "effects": {"work": 18}, "cost": 5},
+	],
+	"bookstore": [
+		{"id": "books_browse", "object": "shelf", "label": "Browse the new releases", "text": "You read the first pages of three novels and the last page of one. Don't tell anyone.", "social": {"knowledge": 2}},
+		{"id": "books_read", "object": "armchair", "label": "Read in the armchair corner", "text": "One chapter turns into four. The staff pretends not to notice.", "time": true, "effects": {"romance": 3}, "social": {"knowledge": 4}},
+	],
+	"restaurant": [
+		{"id": "restaurant_date", "object": "table", "label": "Dinner date with your husband", "text": "You share a bottle of wine and talk like you used to.", "time": true, "effects": {"romance": 15}, "link": "husband", "link_points": 3, "needs_home": "husband", "periods": ["evening"], "social": {"charm": 3}, "cost": 90},
+		{"id": "restaurant_lunch", "object": "table", "label": "Grab a bite alone", "text": "You enjoy a quiet meal with nobody asking you for anything.", "time": true, "cost": 20},
+	],
+	"park": [
+		{"id": "park_walk", "object": "path", "label": "Go for a walk", "text": "You walk the loop around the park and watch the ducks.", "time": true, "effects": {"romance": 3}, "social": {"fitness": 3}},
+		{"id": "park_read", "object": "bench", "label": "Read on a bench", "text": "You read a few chapters in the sun.", "time": true, "social": {"knowledge": 4}},
+		{"id": "park_ducks", "object": "pond", "label": "Feed the ducks", "text": "The ducks are very enthusiastic about your leftover bread."},
+		{"id": "park_market_browse", "object": "path", "label": "Look at the market stalls", "text": "Local artists sell paintings by the pond. Some of them are… not better than yours. A woman tells you anyone can rent a table on weekends.", "weekdays": [5, 6], "sets_flag": "found_art_market", "hidden_flag": "found_art_market"},
+		{"id": "park_sell_painting", "object": "bench", "label": "Sell a painting at the art market", "text": "You set up a little easel by the path. Someone stops, looks for a long time, and buys it.", "time": true, "weekdays": [5, 6], "needs_item": "painting", "earn": 30, "earn_scale": {"charm": 15, "knowledge": 5}, "income": "art_market", "social": {"charm": 1}, "reveal_flag": "found_art_market"},
+	],
+}
+
+
+## Rummets val: de fasta handlingarna plus köp och försäljningar från Economy, utan
+## dem som är dolda just nu (redan gjort, köpt, sålt eller inte hittat ännu).
+static func for_room(room_id: String) -> Array:
+	var actions: Array = Requests.actions_for_room(room_id) + ACTIONS.get(room_id, []) + Economy.actions_for_room(room_id) + Curtains.actions_for_room(room_id)
+	return actions.filter(func(action: Dictionary) -> bool:
+		if action.get("hidden_flag", "") != "" and GameState.has_flag(action["hidden_flag"]):
+			return false
+		if action.get("reveal_flag", "") != "" and not GameState.has_flag(action["reveal_flag"]):
+			return false
+		if action.get("buys", "") in GameState.owned or action.get("sells", "") in GameState.sold:
+			return false
+		if action.has("subscribe") and action["subscribe"] in GameState.subscriptions:
+			return false
+		if action.has("unsubscribe") and not action["unsubscribe"] in GameState.subscriptions:
+			return false
+		return true)
+
+
+## Korta taggar för ett val: tid, mätare, egenskaper och relation, t.ex.
+## "takes time · +Home · +Fitness · ♥ Son 1".
+static func tags(action: Dictionary) -> String:
+	var parts: Array[String] = []
+	if action.get("panel", "") == "map":
+		parts.append("opens the map")
+	if action.get("panel", "") == "salon":
+		parts.append("from " + Economy.format(Economy.salon_min_price()))
+	if action.get("fulfills", "") != "":
+		var owes: int = Requests.find_type(GameState.requests.get(action["fulfills"], {}).get("type", "")).get("owes", 0)
+		parts.append("★ Request" + (" · owes you %d" % owes if owes > 0 else ""))
+	if action.get("delegates", "") != "":
+		parts.append("no time for you")
+	if action.get("completes", "") != "" and GameState.quests.get(action["completes"], "") == "active":
+		parts.append("✓ " + PhoneData.QUESTS[action["completes"]]["title"])
+	if action.get("time", false):
+		parts.append("takes time")
+	var cost := GameState.action_cost(action)
+	if cost > 0:
+		parts.append(Economy.format(-cost))
+	elif action.has("cost"):
+		parts.append("free with membership")
+	if action.has("earn"):
+		parts.append("+" + Economy.format(GameState.action_earnings(action)))
+	for key in action.get("effects", {}):
+		if action["effects"][key] > 0:
+			parts.append("+" + GameState.STAT_NAMES[key])
+	for key in action.get("social", {}):
+		parts.append("+" + SocialStats.STATS[key]["name"])
+	if action.get("link", "") != "":
+		parts.append("♥ " + GameState.CHARACTERS[action["link"]]["name"])
+	return "  ·  ".join(parts)
