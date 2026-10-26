@@ -1111,9 +1111,28 @@ func _introduce(character_id: String) -> void:
 	character_introduced.emit(character_id)
 
 
-## Platshållare tills dialogsystemet finns.
-func talk_to(character_id: String) -> void:
-	message_posted.emit("You talk to %s. (Dialogue comes later.)" % character_name(character_id))
+## Frågar Dispatcher om personen har en rankscen klar just nu och startar den i så fall
+## genom Dialogue Manager. Annars platshållartexten. Returnerar true om en scen startade.
+func talk_to(character_id: String) -> bool:
+	var scene_id := Dispatcher.resolve_slot(period, character_id)
+	if scene_id == "":
+		message_posted.emit("You talk to %s. (Dialogue comes later.)" % character_name(character_id))
+		return false
+	var path := Dispatcher.dialogue_path(scene_id)
+	if not ResourceLoader.exists(path):
+		push_error("Dialogfilen för %s saknas: %s" % [scene_id, path])
+		return false
+	var manager: Node = Engine.get_singleton("DialogueManager")
+	if not manager.dialogue_ended.is_connected(_on_dialogue_ended):
+		manager.dialogue_ended.connect(_on_dialogue_ended)
+	manager.show_dialogue_balloon_scene(STORY_BALLOON, load(path), Dispatcher.cue(scene_id))
+	return true
+
+
+func _on_dialogue_ended(_resource: Resource) -> void:
+	var stage := get_node_or_null(STAGE_NAME) as StoryStage
+	if stage:
+		stage.clear()
 
 
 func start_next_day() -> void:
@@ -1235,11 +1254,39 @@ static func format_duration(total_minutes: int) -> String:
 
 
 # --- Dialogfunktioner (CONTRACT.md, avsnitt 2) ------------------------------------
-# Anropas från dialogfilerna. Än så länge bara stubbar som skriver ut vad som hände.
+# Anropas från dialogfilerna.
 
-## Slutet på en rankscen: ska lägga på Balance.EFFECTS[scene_id] och sätta scenens flaggor.
+## Dialogrutan rankscenerna spelas i.
+const STORY_BALLOON := "res://scenes/balloon/balloon.tscn"
+## Namnet på StoryStage-noden (figurer och rank-kort) under GameState.
+const STAGE_NAME := "StoryStage"
+
+
+## Slutet på en rankscen: lägger på Balance.EFFECTS[scene_id], sätter scenens flaggor
+## och markerar scenen som spelad. En _bonus-scen utan egen rad får grundscenens effekter.
 func apply(scene_id: String) -> void:
-	print("GameState.apply(%s)" % scene_id)
+	var base := Dispatcher.base_id(scene_id)
+	if not Balance.GATES.has(base):
+		push_error("apply(): %s saknas i Balance.GATES" % scene_id)
+		return
+	var effects: Dictionary = Balance.EFFECTS.get(scene_id, Balance.EFFECTS.get(base, {}))
+	var char_id: String = Balance.GATES[base]["char"]
+	var notes: Array[String] = []
+	if effects.has("link_points"):
+		notes.append(add_link_points(char_id, effects["link_points"]))
+	if effects.has("lust"):
+		links[char_id]["lust"] = clampf(links[char_id]["lust"] + effects["lust"], 0.0, Balance.LUST_MAX)
+		link_changed.emit(char_id)
+	for key in effects.get("stats", {}):
+		var delta: int = effects["stats"][key]
+		stats[key] = clampi(stats[key] + delta, 0, STAT_MAX)
+		notes.append("%s %+d" % [STAT_NAMES[key], delta])
+	for flag in effects.get("flags", []):
+		set_flag(flag)
+	set_flag(Dispatcher.DONE_FLAG + base)
+	stats_changed.emit()
+	if not notes.is_empty():
+		message_posted.emit(" · ".join(notes))
 
 
 ## Platskort när en scen byter plats.
@@ -1249,12 +1296,28 @@ func location(text: String) -> void:
 
 ## Rank-upp-kort. Kommer sist i scenen.
 func rank_card(char_id: String, rank: int) -> void:
-	print("GameState.rank_card(%s, %d)" % [char_id, rank])
+	if not CHARACTERS.has(char_id):
+		push_error("rank_card(): okänd person %s" % char_id)
+		return
+	_stage().show_rank_card(char_id, rank)
 
 
-## Visar en figur eller byter dess pose.
+## Visar en figur eller byter dess pose. Saknas bilden blir det en platshållare.
 func sprite(char_id: String, pose: String) -> void:
-	print("GameState.sprite(%s, %s)" % [char_id, pose])
+	if not CHARACTERS.has(char_id):
+		push_error("sprite(): okänd person %s" % char_id)
+		return
+	_stage().show_sprite(char_id, pose)
+
+
+## StoryStage skapas första gången den behövs.
+func _stage() -> StoryStage:
+	var stage := get_node_or_null(STAGE_NAME) as StoryStage
+	if stage == null:
+		stage = StoryStage.new()
+		stage.name = STAGE_NAME
+		add_child(stage)
+	return stage
 
 
 ## Byter ansiktsuttryck på en figur.

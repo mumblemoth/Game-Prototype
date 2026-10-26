@@ -269,6 +269,8 @@ func _open_menu(room_id: String) -> void:
 			_add_action(talk, room_id)
 			continue
 		_add_action(talk, room_id, func() -> void:
+			if GameState.talk_to(character_id):
+				return
 			_dialog.play([
 				{"speaker": "mom", "text": "Hey, %s. Got a minute?" % character_name},
 				{"speaker": character_id, "text": "Hi! (Placeholder – the real dialogue comes later.)"},

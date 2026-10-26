@@ -1,0 +1,24 @@
+# STUB — engineer-written test scene for the rank pipeline. Not canon.
+# Writer: replace with dialogue/husband/eric_r1.dialogue and remove the
+# "eric_r1" entry from Dispatcher.SCENES.
+
+~ start
+
+$> GameState.location("Living room · Evening")
+$> GameState.sprite("husband", "couch")
+The TV is on. Eric isn't really watching it. [#action]
+Eric: Long day? [#mood=neutral, pose=couch]
+Mom: They're all long. [#mood=neutral, pose=standing, sfx=sit]
+Eric: I saved you the good mug. It's on the side table. [#mood=soft]
+- Thank him.
+	Mom: Thanks. I mean it. [#mood=soft]
+	Eric: I know. [#mood=soft]
+- Say nothing. Drink the coffee.
+	She drinks it. It's still warm. He timed it. [#action]
+Eric: Same time tomorrow? [#mood=neutral]
+Mom: Same time tomorrow. [#mood=averted]
+
+$> GameState.apply("eric_r1")
+$> GameState.rank_card("husband", 1)
+
+=> END
