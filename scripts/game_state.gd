@@ -180,8 +180,9 @@ var phone_wallpapers := PhoneData.DEFAULT_WALLPAPERS.duplicate()
 # Mamman och relationerna.
 ## Hur mamman ser ut: kategori -> val (se AppearanceData).
 var appearance := AppearanceData.DEFAULTS.duplicate()
-## Relationer (social links) i Persona-anda: person -> {rank, points}.
-var links := {"son_1": {"rank": 1, "points": 0}, "son_2": {"rank": 1, "points": 0}, "husband": {"rank": 1, "points": 0}}
+## Relationer (social links) i Persona-anda: person -> {rank, points, lust}.
+## lust är 0–100 (se CONTRACT.md, avsnitt 2).
+var links := {"son_1": {"rank": 1, "points": 0, "lust": 0.0}, "son_2": {"rank": 1, "points": 0, "lust": 0.0}, "husband": {"rank": 1, "points": 0, "lust": 0.0}}
 ## Mammans egenskaper: egenskap -> XP (nivåer och namn finns i SocialStats).
 var social := {"charm": 0, "knowledge": 0, "fitness": 0}
 ## Dagen då en egenskap som kan tappas (SocialStats.DECAY) senast tränades.
@@ -1104,7 +1105,7 @@ func clear_schedule_override(override_id: String) -> void:
 ## En framtida NPC kliver in i världen: får en social link och hamnar i telefonen.
 func _introduce(character_id: String) -> void:
 	if not links.has(character_id):
-		links[character_id] = {"rank": 1, "points": 0}
+		links[character_id] = {"rank": 1, "points": 0, "lust": 0.0}
 		link_changed.emit(character_id)
 	add_contact(character_id)
 	character_introduced.emit(character_id)
@@ -1231,3 +1232,31 @@ static func format_duration(total_minutes: int) -> String:
 	if h > 0:
 		return "%d h" % h
 	return "%d min" % m
+
+
+# --- Dialogfunktioner (CONTRACT.md, avsnitt 2) ------------------------------------
+# Anropas från dialogfilerna. Än så länge bara stubbar som skriver ut vad som hände.
+
+## Slutet på en rankscen: ska lägga på Balance.EFFECTS[scene_id] och sätta scenens flaggor.
+func apply(scene_id: String) -> void:
+	print("GameState.apply(%s)" % scene_id)
+
+
+## Platskort när en scen byter plats.
+func location(text: String) -> void:
+	print("GameState.location(%s)" % text)
+
+
+## Rank-upp-kort. Kommer sist i scenen.
+func rank_card(char_id: String, rank: int) -> void:
+	print("GameState.rank_card(%s, %d)" % [char_id, rank])
+
+
+## Visar en figur eller byter dess pose.
+func sprite(char_id: String, pose: String) -> void:
+	print("GameState.sprite(%s, %s)" % [char_id, pose])
+
+
+## Byter ansiktsuttryck på en figur.
+func mood(char_id: String, mood_id: String) -> void:
+	print("GameState.mood(%s, %s)" % [char_id, mood_id])
