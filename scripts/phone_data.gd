@@ -6,9 +6,9 @@ class_name PhoneData
 ## Kontakter som kan finnas i telefonen. Kontakter som är familjemedlemmar har samma
 ## id som i GameState.CHARACTERS.
 const CONTACTS := {
-	"husband": {"name": "Husband", "color": Color(0.25, 0.4, 0.7)},
-	"son_1": {"name": "Son 1", "color": Color(0.3, 0.6, 0.35)},
-	"son_2": {"name": "Son 2", "color": Color(0.85, 0.6, 0.2)},
+	"husband": {"name": "Eric", "color": Color(0.25, 0.4, 0.7)},
+	"son_1": {"name": "Miles", "color": Color(0.3, 0.6, 0.35)},
+	"son_2": {"name": "Tyler", "color": Color(0.85, 0.6, 0.2)},
 	"principal": {"name": "Principal", "color": Color(0.5, 0.42, 0.62)},
 	"best_friend": {"name": "Best Friend", "color": Color(0.85, 0.4, 0.55)},
 	"neighbor": {"name": "Neighbor", "color": Color(0.55, 0.6, 0.85)},
@@ -19,7 +19,7 @@ const CONTACTS := {
 ## Vad som sägs när man ringer någon: repliker i ordning, [talare, text].
 ## "default" används för kontakter utan egna repliker.
 const CALLS := {
-	"husband": [["Husband", "Hey, you. Everything okay?"], ["Mom", "Just wanted to hear your voice. (Placeholder call.)"]],
+	"husband": [["Eric", "Hey, you. Everything okay?"], ["Mom", "Just wanted to hear your voice. (Placeholder call.)"]],
 	"default": [["", "The phone rings for a while…"], ["", "(Placeholder – the real call comes later.)"]],
 }
 

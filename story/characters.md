@@ -4,9 +4,29 @@ Canon. Do not contradict without updating this file.
 
 \---
 
+
+
+\## Names
+
+
+
+\- Mother — player-named. Family name: \*\*Marsh\*\*.
+
+\- Husband — \*\*Eric Marsh\*\*, 40
+
+\- son\_1 — \*\*Miles Marsh\*\*, 14
+
+\- son\_2 — \*\*Tyler Marsh\*\*, 18. Shortens to "Ty"; his mother using the full name is a beat.
+
+\- Dog — \*\*Rex\*\*
+
+
+
+Speaker prefixes in dialogue files: `Mom`, `Eric`, `Miles`, `Tyler`, `Rex`.
+
 ## The mother — player-named
 
-**38. Biology and Health \& Sex Ed teacher.** Homeroom teacher for `son\_1`'s class.
+**38. Biology and Health \& Sex Ed teacher.** Homeroom teacher for `son\\\_1`'s class.
 Had her first son at 20.
 
 **What she is:** the appetite was always there, fully formed, and never had an outlet
@@ -16,7 +36,7 @@ been confused about what she wants, only about whether she's allowed the hours.
 **Why:** twenty years of being needed. She went from girl to wife to mother without a
 gap. The calendar is the villain of this game, not any person in it.
 
-**Good liar. Bad at lying to herself.** She can tell Anders nothing happened with a
+**Good liar. Bad at lying to herself.** She can tell Eric nothing happened with a
 straight face, then lie awake replaying it.
 
 **Becomes a different woman with each person**, driven by the player's tone choices
@@ -30,7 +50,7 @@ Never gushes. When she's affected, she gets *quieter*, not louder.
 
 \---
 
-## Anders — husband, 40
+## \## Eric — husband, 40 (husband)
 
 **Architect.** Restoring a vintage motorcycle in the hobby room. Weekends only.
 
@@ -55,7 +75,7 @@ about us."** That's what makes the complicit ending earned rather than a twist.
 
 \---
 
-## son\_1 — younger son, 14
+## \## Miles — younger son, 14 (son\_1)
 
 **Nerd, gamer. In her homeroom and her health class.**
 
@@ -81,7 +101,7 @@ when nervous. Goes silent and then says one devastating thing.
 
 \---
 
-## son\_2 — older son, 18
+## \## Tyler — older son, 18 (son\_2)
 
 **Football. Star of the school. Not in her class — they only overlap at home.**
 
@@ -89,7 +109,7 @@ when nervous. Goes silent and then says one devastating thing.
 someone who has never had to try.
 
 **The switch:** she's the only person in his life who isn't reacting to him. Teachers
-are pleased, girls are impressed, teammates defer, Anders is proud in a way that's
+are pleased, girls are impressed, teammates defer, Eric is proud in a way that's
 really about himself. She's just *used to him*. First time he's ever wanted to change
 someone's mind.
 
@@ -98,14 +118,14 @@ remembered in a kitchen, and it's a problem.
 
 **His route is desire.** Active, forward, physical. He works for it for the first time.
 
-**Dinner table:** bragging, teasing, showing off. Needs a move from her and Anders or
+**Dinner table:** bragging, teasing, showing off. Needs a move from her and Eric or
 he eats the scene.
 
 **Voice:** blunt, short sentences, no hedging. Says the thing. Fumbles when it matters.
 
 \---
 
-## Rex — family dog
+## Rex — family dog (dog)
 
 Big scruffy mutt. Enormous, calm, undignified. **Belongs to the family, but has always
 preferred her.**
@@ -128,14 +148,14 @@ whoever is being too much.
 son can do anything. Best scene location in the game.
 * **The brothers notice nothing about each other until late.** Acts 1-2 they operate
 privately, each thinking he's alone. The collision in act 3 is an ambush for both.
-* **The scarcity is the villain.** Not Anders, not the sons. The hours.
-* **The classroom** is shared only by her and `son\_1`, where she has formal authority.
-* **The house at home** is shared only by her and `son\_2`, with no institutional framing.
+* **The scarcity is the villain.** Not Eric, not the sons. The hours.
+* **The classroom** is shared only by her and `son\\\_1`, where she has formal authority.
+* **The house at home** is shared only by her and `son\\\_2`, with no institutional framing.
 
 ## Open
 
 * Son names
 * What she finds during the mid-game porn discovery, and what she does with it
-* The act 4 climax: hide it, or bring Anders in
+* The act 4 climax: hide it, or bring Eric in
 * Whether player-named mother means `{{placeholders}}` in dialogue files
 

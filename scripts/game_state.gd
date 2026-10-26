@@ -117,15 +117,15 @@ const ROOM_LINKS := {
 const HOME_FLOORS := ["Attic", "Upstairs", "Ground Floor", "Basement", "Outside"]
 const START_ROOM := "kitchen"
 
-## Familjen och huvud-NPC:erna. Namn och initialer är platshållare. Var de är står i
+## Familjen och huvud-NPC:erna. Familjens namn är satta, NPC:ernas är platshållare. Var de är står i
 ## Schedules. Framtida NPC:er har introduced_by: händelsen (flags) som för in dem i
 ## världen. Innan dess heter de stranger_name om de syns, och då har de ingen social link.
 const CHARACTERS := {
 	"mom": {"name": "Mom", "initials": "Ma", "color": Color(0.78, 0.3, 0.2)},
-	"husband": {"name": "Husband", "initials": "Mk", "color": Color(0.25, 0.4, 0.7)},
-	"son_1": {"name": "Son 1", "initials": "S1", "color": Color(0.3, 0.6, 0.35)},
-	"son_2": {"name": "Son 2", "initials": "S2", "color": Color(0.85, 0.6, 0.2)},
-	"dog": {"name": "Dog", "initials": "H", "color": Color(0.55, 0.4, 0.28)},
+	"husband": {"name": "Eric", "initials": "Er", "color": Color(0.25, 0.4, 0.7)},
+	"son_1": {"name": "Miles", "initials": "Mi", "color": Color(0.3, 0.6, 0.35)},
+	"son_2": {"name": "Tyler", "initials": "Ty", "color": Color(0.85, 0.6, 0.2)},
+	"dog": {"name": "Rex", "initials": "R", "color": Color(0.55, 0.4, 0.28)},
 	"neighbor": {"name": "Neighbor", "initials": "Nb", "color": Color(0.55, 0.6, 0.85), "introduced_by": "met_neighbor", "stranger_name": "New Neighbor"},
 	"principal": {"name": "Principal", "initials": "Pr", "color": Color(0.5, 0.42, 0.62), "introduced_by": "met_principal", "stranger_name": "Principal"},
 	"best_friend": {"name": "Best Friend", "initials": "BF", "color": Color(0.85, 0.4, 0.55), "introduced_by": "met_best_friend", "stranger_name": "Familiar Face"},

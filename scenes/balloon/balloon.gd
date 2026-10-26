@@ -216,7 +216,7 @@ func _apply_tags(line: DialogueLine) -> void:
 		_play_sfx(line.get_tag_value("sfx"))
 
 
-## Talarens namn i dialogfilen ("Mom", "Son 1" ...) -> id i GameState.CHARACTERS.
+## Talarens namn i dialogfilen ("Mom", "Miles" ...) -> id i GameState.CHARACTERS.
 func _character_id(speaker: String) -> String:
 	for char_id in GameState.CHARACTERS:
 		if GameState.CHARACTERS[char_id]["name"] == speaker:

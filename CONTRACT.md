@@ -59,3 +59,11 @@ Every rank scene has a `_bonus` twin. `tone >= 2` fires the `_bonus` variant ins
 
     { "id", "type", "char", "rank", "slot", "location",
       "requires", "act", "trigger": {}, "effects", "priority", "once" }
+
+## 5. Meters vs lust
+
+Two separate numbers. Do not use one in place of the other.
+
+- `GameState.meters[char]` (curves in `Requests`) = how much THEY want her / want things
+  from her. Drives requests. For the sons this is the `wants` track only.
+- `links[char]["lust"]` = how physically charged the relationship is. Drives scene gates.
