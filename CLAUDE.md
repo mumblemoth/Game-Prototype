@@ -56,6 +56,8 @@ Read this before every session.
 
 \- Never rewrite dialogue prose.
 
+\- When a task is specified, build it. Don't stop to ask. Flag concerns afterwards.
+
 \- All balance numbers live in `scripts/balance.gd`. No magic numbers inline in logic.
 
 \- Dialogue files are English. Code comments stay Swedish, as the repo already does.
