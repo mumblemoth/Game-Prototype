@@ -1291,7 +1291,7 @@ func apply(scene_id: String) -> void:
 
 ## Platskort när en scen byter plats.
 func location(text: String) -> void:
-	print("GameState.location(%s)" % text)
+	_stage().show_location(text)
 
 
 ## Rank-upp-kort. Kommer sist i scenen.
@@ -1320,6 +1320,10 @@ func _stage() -> StoryStage:
 	return stage
 
 
-## Byter ansiktsuttryck på en figur.
+## Byter ansiktsuttryck på en figur. Står figuren inte på scenen än sparas uttrycket
+## tills sprite() ställer fram den.
 func mood(char_id: String, mood_id: String) -> void:
-	print("GameState.mood(%s, %s)" % [char_id, mood_id])
+	if not CHARACTERS.has(char_id):
+		push_error("mood(): okänd person %s" % char_id)
+		return
+	_stage().show_mood(char_id, mood_id)

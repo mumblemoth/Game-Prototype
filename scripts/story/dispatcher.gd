@@ -14,7 +14,6 @@ const BONUS_SUFFIX := "_bonus"
 
 ## Undantag från standardvägen: scen_id -> {"dialogue": sökväg, "cue": cue}.
 const SCENES := {
-	"eric_r1": {"dialogue": "res://dialogue/_stub_eric_r1.dialogue"},
 }
 
 

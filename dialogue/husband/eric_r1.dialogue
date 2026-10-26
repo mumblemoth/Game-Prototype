@@ -1,0 +1,62 @@
+# =========================================================
+# RANK 1 - "The good mug"
+# GATE: char husband, rank 1, period evening, room living_room
+# =========================================================
+
+~ start
+
+$> locals.tone = 0
+$> GameState.location("Living room · Evening")
+$> GameState.sprite("husband", "couch")
+
+The film's been on for forty minutes. He hasn't looked at it once.
+
+Eric: [#mood=neutral, #pose=couch] Long day.
+
+Mom: [#mood=neutral, #pose=standing] They're all long.
+
+He nods like that was a real answer. Then he reaches over and puts a mug on the side table in front of her.
+
+Eric: [#mood=soft] The good one. Top shelf.
+
+Mom: [#mood=surprised] You got the good mug out.
+
+Eric: [#mood=soft] It's Tuesday.
+
+Mom: [#mood=neutral] What's wrong with the other mugs.
+
+Eric: [#mood=soft] Nothing. This one's better.
+
+He goes back to not watching the film.
+
+- Thank him properly.
+	$> locals.tone += 1
+	Mom: [#mood=soft] Thank you. Properly.
+	Eric: [#mood=surprised] ...For a mug?
+	Mom: [#mood=soft] For noticing I was tired.
+	Eric: [#mood=averted] Huh.
+- Say nothing. Drink it.
+	Mom: [#mood=neutral] Mm.
+	She drinks it. Still warm. He timed it.
+- Ask why he's still up.
+	Mom: [#mood=neutral] You're still up.
+	Eric: [#mood=neutral] So are you.
+
+The film ends. Neither of them watched it.
+
+Eric: [#mood=neutral] Same time tomorrow?
+
+Mom: [#mood=neutral] Same time tomorrow.
+
+He takes both mugs through to the kitchen. She listens to him rinsing them.
+
+Sixteen years. She has never once thought about what he does with the good mug.
+
+if locals.tone >= 2
+	$> GameState.apply("eric_r1_bonus")
+else
+	$> GameState.apply("eric_r1")
+
+$> GameState.rank_card("husband", 1)
+
+=> END

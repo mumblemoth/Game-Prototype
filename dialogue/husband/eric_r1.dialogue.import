@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dcixfsm0oqmyh"
+path="res://.godot/imported/eric_r1.dialogue-892052379f4e21ce45e8d414fcedb1cf.tres"
+
+[deps]
+
+source_file="res://dialogue/husband/eric_r1.dialogue"
+dest_files=["res://.godot/imported/eric_r1.dialogue-892052379f4e21ce45e8d414fcedb1cf.tres"]
+
+[params]
+
+defaults=true
