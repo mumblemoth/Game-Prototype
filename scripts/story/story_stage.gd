@@ -23,11 +23,14 @@ const CARD_TOP := 80.0
 const CARD_FONT_SIZE := 34
 const CARD_FADE := 0.3
 const CARD_HOLD := 2.0
-const LOCATION_POS := Vector2(32, 32)
+## Platskortets överkant; det står mitt på skärmen så att det inte täcker HUD:ens plattor.
+const LOCATION_TOP := 20.0
 const LOCATION_PADDING := 14
 const LOCATION_FONT_SIZE := 22
-const LOCATION_COLOR := Color(0, 0, 0, 0.6)
 const LOCATION_HOLD := 2.5
+## Platshållarens ram och skugga, i UI-kitets stil (inramad vinjett).
+const FRAME_WIDTH := 4
+const FRAME_SHADOW := Vector2(8, 8)
 
 ## char_id -> figurens nod, i den ordning de kom in.
 var _sprites := {}
@@ -61,23 +64,18 @@ func show_mood(char_id: String, mood_id: String) -> void:
 		show_sprite(char_id, _poses[char_id])
 
 
-## Platskortet: tonar in uppe till vänster, står en stund och tonar ut.
+## Platskortet: tonar in överst i mitten, står en stund och tonar ut.
 func show_location(text: String) -> void:
 	if is_instance_valid(_location_card):
 		_location_card.queue_free()
 	var card := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = LOCATION_COLOR
-	style.set_corner_radius_all(6)
-	style.set_content_margin_all(LOCATION_PADDING)
-	card.add_theme_stylebox_override("panel", style)
+	card.add_theme_stylebox_override("panel", UiKit.plate(UiKit.INK, UiKit.SLANT, Color(0, 0, 0, 0), 0, UiKit.RED, Vector2(LOCATION_PADDING * 2, LOCATION_PADDING * 0.5)))
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var label := Label.new()
-	label.text = text
-	label.add_theme_font_size_override("font_size", LOCATION_FONT_SIZE)
+	var label := UiKit.display(text.to_upper(), LOCATION_FONT_SIZE, UiKit.YELLOW, Color(0, 0, 0, 0))
 	card.add_child(label)
 	add_child(card)
-	card.position = LOCATION_POS
+	card.reset_size()
+	card.position = Vector2(roundf((_screen().x - card.size.x) / 2.0), LOCATION_TOP)
 	card.modulate.a = 0.0
 	_location_card = card
 	var tween := card.create_tween()
@@ -90,18 +88,20 @@ func show_location(text: String) -> void:
 ## Rank-upp-kortet: tonar in överst, står en stund och tonar ut.
 func show_rank_card(char_id: String, rank: int) -> void:
 	var card := PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = GameState.CHARACTERS[char_id]["color"]
-	style.set_corner_radius_all(8)
-	card.add_theme_stylebox_override("panel", style)
+	card.add_theme_stylebox_override("panel", UiKit.plate(UiKit.INK, UiKit.SLANT, UiKit.YELLOW, 3, UiKit.RED))
 	card.custom_minimum_size = CARD_SIZE
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var label := Label.new()
-	label.text = "%s\nRank %d" % [GameState.character_name(char_id), rank]
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_theme_constant_override("separation", 0)
+	card.add_child(column)
+	var person := UiKit.label(GameState.character_name(char_id).to_upper(), UiKit.SMALL, (GameState.CHARACTERS[char_id]["color"] as Color).lightened(0.35), true)
+	person.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(person)
+	var label := UiKit.display("Rank %d" % rank, CARD_FONT_SIZE)
+	label.uppercase = true
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", CARD_FONT_SIZE)
-	card.add_child(label)
+	column.add_child(label)
 	add_child(card)
 	card.position = Vector2((_screen().x - CARD_SIZE.x) / 2.0, CARD_TOP)
 	card.modulate.a = 0.0
@@ -134,25 +134,29 @@ func _make_sprite(char_id: String, pose: String, mood_id: String) -> Control:
 		picture.size = SPRITE_SIZE
 		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		return picture
-	var box := ColorRect.new()
-	box.color = GameState.CHARACTERS[char_id]["color"]
+	# Platshållaren är en inramad vinjett: personens färg i en ljus ram med svart kant och
+	# hård skugga, initialerna i kitets rubriktypsnitt och namnet på en platta.
+	var color: Color = GameState.CHARACTERS[char_id]["color"]
+	var box := PanelContainer.new()
+	var style := UiKit.plate(color.darkened(0.25), 0.0, UiKit.PAPER, FRAME_WIDTH, Color(UiKit.INK, 0.85), Vector2.ZERO)
+	style.shadow_offset = FRAME_SHADOW
+	box.add_theme_stylebox_override("panel", style)
 	box.size = SPRITE_SIZE
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var initials := Label.new()
-	initials.text = GameState.CHARACTERS[char_id]["initials"]
-	initials.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var column := VBoxContainer.new()
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_child(column)
+	var initials := UiKit.display(GameState.character_initials(char_id), INITIALS_FONT_SIZE, color.lightened(0.6), UiKit.INK)
 	initials.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	initials.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	initials.add_theme_font_size_override("font_size", INITIALS_FONT_SIZE)
-	box.add_child(initials)
-	# Pose och uttryck syns längst ned så att man ser att taggarna kom fram.
-	var pose_label := Label.new()
-	pose_label.text = "%s · %s" % [pose, mood_id]
-	pose_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	pose_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	pose_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	pose_label.add_theme_font_size_override("font_size", POSE_FONT_SIZE)
-	box.add_child(pose_label)
+	column.add_child(initials)
+	var name_plate := UiKit.label(GameState.character_name(char_id).to_upper(), UiKit.BODY, UiKit.INK, true)
+	name_plate.add_theme_stylebox_override("normal", UiKit.plate(UiKit.PAPER, UiKit.SLANT, Color(0, 0, 0, 0), 0, Color(0, 0, 0, 0), Vector2(16, 2)))
+	name_plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	column.add_child(name_plate)
+	# Pose och uttryck syns under namnet så att man ser att taggarna kom fram.
+	var pose_label := UiKit.label("%s · %s" % [pose, mood_id], POSE_FONT_SIZE - 4, Color(UiKit.PAPER, 0.75))
+	pose_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(pose_label)
 	return box
 
 

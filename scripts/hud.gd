@@ -5,6 +5,10 @@ extends CanvasLayer
 ## är slut.
 
 const PAD := 16
+const DAY_END_LAYER := 6
+## Dagens slut: sammanfattningens vänsterkant och hur högt den står (mitt på skärmen).
+const DAY_END_LEFT := 380.0
+const DAY_END_WIDTH := 600.0
 
 var _place: Control
 var _meters: Control
@@ -66,19 +70,22 @@ func _build_place() -> void:
 ## Mätarna nere till vänster: namnet på en svart platta, en sned stapel och värdet.
 func _build_stats() -> void:
 	_meters = Control.new()
-	_meters.size = Vector2(280, 96)
+	_meters.size = Vector2(290, 96)
 	_meters.position = Vector2(PAD, 720 - PAD - _meters.size.y)
 	_meters.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_meters.draw.connect(func() -> void:
 		var font := UiKit.display_font()
+		var body := UiKit.body_font(true)
 		var y := 0.0
 		for key in GameState.STAT_NAMES:
 			var value: int = GameState.stats[key]
 			var color: Color = UiKit.METERS[key]
 			UiKit.draw_slant(_meters, Rect2(0, y, 98, 28), UiKit.INK)
 			_meters.draw_string(font, Vector2(14, y + UiKit.baseline(font, 17, 28)), GameState.STAT_NAMES[key].to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 17, UiKit.PAPER)
-			UiKit.draw_meter(_meters, Rect2(104, y + 7, 128, 14), float(value) / GameState.STAT_MAX, color)
-			UiKit.draw_display(_meters, Vector2(240, y + UiKit.baseline(font, 20, 28)), str(value), 20, color, Color(0, 0, 0, 0))
+			UiKit.draw_meter(_meters, Rect2(108, y + 7, 128, 14), float(value) / GameState.STAT_MAX, color, true)
+			# Värdet på en egen liten svart platta, så att det syns mot ljusa golv.
+			UiKit.draw_slant(_meters, Rect2(244, y, 40, 28), UiKit.INK)
+			_meters.draw_string(body, Vector2(246, y + UiKit.baseline(body, 16, 28)), str(value), HORIZONTAL_ALIGNMENT_CENTER, 36, 16, color)
 			y += 34)
 	add_child(_meters)
 
@@ -107,17 +114,22 @@ func _build_text_box() -> void:
 ## omdömet, och knappen som startar nästa dag.
 func _build_day_end() -> void:
 	# Täcker hela skärmen så att man inte kan klicka på planen bakom.
+	# Ligger i ett eget lager över telefonens och kartans knappar (lager 5), men under
+	# dagsövergången (lager 7).
+	var day_end_layer := CanvasLayer.new()
+	day_end_layer.layer = DAY_END_LAYER
+	add_child(day_end_layer)
 	_day_end_overlay = Control.new()
 	_day_end_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_day_end_overlay.theme = UiKit.theme()
 	_day_end_overlay.visible = false
-	add_child(_day_end_overlay)
+	day_end_layer.add_child(_day_end_overlay)
 	_day_end_backdrop = KitBackdrop.new(false, 0.04, 180.0)
 	_day_end_overlay.add_child(_day_end_backdrop)
 	_summary = VBoxContainer.new()
 	_summary.add_theme_constant_override("separation", 10)
-	_summary.position = Vector2(380, 90)
-	_summary.size = Vector2(600, 0)
+	_summary.position = Vector2(DAY_END_LEFT, 0)
+	_summary.size = Vector2(DAY_END_WIDTH, 0)
 	_day_end_overlay.add_child(_summary)
 
 
@@ -166,6 +178,9 @@ func _show_day_end() -> void:
 	button.pressed.connect(_on_next_day_pressed)
 	_summary.add_child(button)
 	_day_end_overlay.visible = true
+	# Sammanfattningen står mitt på skärmen i höjdled.
+	_summary.reset_size()
+	_summary.position.y = roundf((720 - _summary.get_combined_minimum_size().y) / 2.0)
 	_day_end_backdrop.sweep_in()
 	UiKit.enter(_summary, 0.1, Vector2(80, 0), UiKit.SLOW)
 	button.grab_focus.call_deferred()

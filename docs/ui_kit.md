@@ -38,3 +38,12 @@ Allt spel-UI utanför telefonen bygger på kitet i `scripts/ui/`. Telefonen beh�
 - `hud.gd` innehåller dagsplattorna, mätarna, textrutan och dagens slut.
 - `house.gd` innehåller rummets meny, våningsknapparna och tidszonens skylt.
 - `tools/ui_preview.tscn` sparar skärmbilder av allt detta för granskning.
+
+## Grafikpass 2026-10-27
+Det som låg utanför kitet följer det nu:
+- **HUD-mätarna** har streck som i pausmenyn, och värdet står på en egen svart platta.
+- **Rummets meny:** tidszonen står på en gul platta ovanför rummets namn i versaler. Rummens skyltar tonas bort medan menyn är öppen.
+- **Dagens slut** ligger i ett eget lager (6) över telefonens och kartans knappar och står mitt på skärmen.
+- **Kartan:** rubriken står i kartans hörn, kartan har en svart ram med röd skugga och "Stay here" är en action-knapp.
+- **Storyns dialogruta** (`scenes/balloon/balloon.gd`) har samma ljusa platta som HUD:ens textruta, talarens namn på en gul platta och svarsval i kitets stil. StoryStage har ett platskort i kitets stil, ett rank-upp-kort och en inramad platshållare för figurer.
+- **Granskning:** `tools/gfx_tour.tscn` tar bilder av det som `ui_preview` inte visar, alltså våningarna, kvällen, natten, gymmet, kartan, telefonen, dialogen och rank-kortet.

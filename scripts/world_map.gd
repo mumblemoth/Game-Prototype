@@ -20,7 +20,6 @@ const ROAD := Color(0.86, 0.83, 0.78)
 const BLOCK := Color(0.93, 0.88, 0.8)
 const HOME_COLOR := Color(0.92, 0.45, 0.5)
 const LOCKED := Color(0.62, 0.62, 0.64)
-const BORDER := Color(0.62, 0.78, 0.84)
 
 var is_open := false
 var _map: Control
@@ -47,6 +46,13 @@ func _ready() -> void:
 	shade.color = Color(0.05, 0.05, 0.08, 0.65)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
+	var frame := Control.new()
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame.draw.connect(func() -> void:
+		frame.draw_rect(Rect2(MAP_RECT.position + UiKit.SHADOW, MAP_RECT.size), UiKit.RED)
+		frame.draw_rect(MAP_RECT.grow(3), UiKit.INK))
+	add_child(frame)
 	_map = Control.new()
 	_map.position = MAP_RECT.position
 	_map.size = MAP_RECT.size
@@ -56,19 +62,15 @@ func _ready() -> void:
 	_map.gui_input.connect(_on_map_input)
 	_map.mouse_exited.connect(func() -> void: _set_hover(""))
 	add_child(_map)
-	var title := Label.new()
-	title.text = "Neighborhood"
-	title.position = Vector2(0, 18)
-	title.size = Vector2(1280, 44)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", Color.WHITE)
-	title.add_theme_color_override("font_outline_color", Color(0.15, 0.15, 0.2))
-	title.add_theme_constant_override("outline_size", 8)
+	# Rubriken står i kartans övre vänstra hörn, så att den inte krockar med HUD:en.
+	var title := UiKit.header("Neighborhood", "", UiKit.HEADING + 8)
+	title.position = MAP_RECT.position + Vector2(14, 8)
+	title.size = Vector2(MAP_RECT.size.x / 2.0, UiKit.HEADING + 30)
 	add_child(title)
-	var close := _button("Stay here", Color(0.33, 0.44, 0.5, 0.95))
-	close.position = Vector2(MAP_RECT.end.x - 180, 640)
-	close.size = Vector2(180, 44)
+	var close := KitButton.new("Stay here", "Esc", "action")
+	close.focus_mode = Control.FOCUS_NONE
+	close.reset_size()
+	close.position = Vector2(MAP_RECT.get_center().x - close.get_combined_minimum_size().x / 2.0, MAP_RECT.end.y + 14)
 	close.pressed.connect(close_map)
 	add_child(close)
 	_build_card()
@@ -418,20 +420,3 @@ func _draw_lock(c: Vector2) -> void:
 	_map.draw_circle(c, 11, INK)
 	_map.draw_arc(c + Vector2(0, -2), 4.5, PI, TAU, 10, Color.WHITE, 2.0)
 	_map.draw_rect(Rect2(c + Vector2(-5, -2), Vector2(10, 7)), Color.WHITE)
-
-
-func _button(text: String, color: Color) -> Button:
-	var button := Button.new()
-	button.text = text
-	button.focus_mode = Control.FOCUS_NONE
-	button.add_theme_font_size_override("font_size", 19)
-	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
-		button.add_theme_color_override(state, Color.WHITE)
-	for state in ["normal", "hover", "pressed"]:
-		var style := StyleBoxFlat.new()
-		style.bg_color = color.lightened(0.15) if state == "hover" else (color.darkened(0.15) if state == "pressed" else color)
-		style.border_color = BORDER
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(10)
-		button.add_theme_stylebox_override(state, style)
-	return button

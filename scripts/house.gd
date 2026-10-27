@@ -9,6 +9,8 @@ var _view: HouseView3D
 var _floor_buttons := {}
 var _menu_layer: CanvasLayer
 var _menu_title: Label
+## Tidszonen på en liten gul platta ovanför rummets namn.
+var _menu_period: Label
 var _menu_list: VBoxContainer
 var _dialog: CanvasLayer
 var _phone: CanvasLayer
@@ -238,7 +240,14 @@ func _build_menu() -> void:
 	column.add_theme_constant_override("separation", 10)
 	center.add_child(column)
 	_menu_title = UiKit.display("", UiKit.TITLE)
+	_menu_title.uppercase = true
 	column.add_child(_menu_title)
+	_menu_period = UiKit.label("", UiKit.SMALL, UiKit.INK, true)
+	_menu_period.uppercase = true
+	_menu_period.add_theme_stylebox_override("normal", UiKit.plate(UiKit.YELLOW, UiKit.SLANT, Color(0, 0, 0, 0), 0, Color(0, 0, 0, 0), Vector2(14, 3)))
+	_menu_period.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	column.add_child(_menu_period)
+	column.move_child(_menu_period, 0)
 	_menu_list = VBoxContainer.new()
 	_menu_list.add_theme_constant_override("separation", 10)
 	column.add_child(_menu_list)
@@ -250,7 +259,8 @@ func _open_menu(room_id: String) -> void:
 	for child in _menu_list.get_children():
 		child.queue_free()
 	_menu_room = room_id
-	_menu_title.text = "%s (%s)" % [GameState.ROOMS[room_id]["name"], GameState.PERIOD_NAMES[GameState.get_time_of_day()].to_lower()]
+	_menu_title.text = GameState.ROOMS[room_id]["name"]
+	_menu_period.text = GameState.PERIOD_NAMES[GameState.get_time_of_day()]
 	for action in RoomActions.for_room(room_id):
 		_add_action(action, room_id)
 	# Samtal med dem som är i rummet; det stärker relationen en gång per dag.

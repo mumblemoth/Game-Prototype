@@ -49,6 +49,7 @@ var _windows := {}
 var _overlays := {}
 var _people: Node3D
 var _labels: Control
+var _labels_tween: Tween
 ## Skyltar i 2D som följer punkter i 3D: [{node: Control, at: Vector3}].
 var _tags: Array[Dictionary] = []
 var _target := Vector3.ZERO
@@ -242,11 +243,21 @@ func focus_room(room_id: String) -> void:
 		return
 	var plan: Rect2 = _plans[room_id]
 	_glide_to(Vector3(plan.get_center().x, 0.4, plan.get_center().y + 0.2), maxf(_fit_distance(plan.size, 1.4) * 0.9, 6.0))
+	# Skyltarna tonas bort medan rummets meny ligger över planen.
+	_fade_labels(0.0)
 
 
 ## Kameran glider tillbaka till hela våningen.
 func focus_overview() -> void:
 	_glide_to(_overview_target, _overview_distance)
+	_fade_labels(1.0)
+
+
+func _fade_labels(alpha: float) -> void:
+	if _labels_tween:
+		_labels_tween.kill()
+	_labels_tween = create_tween()
+	_labels_tween.tween_property(_labels, "modulate:a", alpha, GLIDE_SECONDS * 0.5)
 
 
 func _glide_to(target: Vector3, distance: float) -> void:

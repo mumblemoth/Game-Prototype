@@ -10,6 +10,16 @@ const SFX_EXTENSIONS := ["ogg", "wav", "mp3"]
 ## Hur en action-rad ser ut: kursiv, dämpad och utan namnruta.
 const ACTION_COLOR := Color(1, 1, 1, 0.6)
 
+## Rutans utseende i UI-kitets stil, samma som HUD:ens textruta: ljus platta med svart
+## kant och hård skugga, talarens namn på en gul sned platta och svarsvalen som kitets
+## plattor. Rutan är lika bred som HUD:ens textruta.
+const BOX_WIDTH := 680.0
+const BOX_HEIGHT := 140.0
+const BOX_BOTTOM := 14.0
+const TEXT_SIZE := 19
+const NAME_SIZE := 17
+const RESPONSE_SIZE := 19
+
 
 ## The dialogue resource
 @export var dialogue_resource: DialogueResource
@@ -85,6 +95,7 @@ var mutation_cooldown: Timer = Timer.new()
 
 func _ready() -> void:
 	balloon.hide()
+	_apply_kit_style()
 	Engine.get_singleton("DialogueManager").mutated.connect(_on_mutated)
 
 	# If the responses menu doesn't have a next action set, use this one
@@ -189,6 +200,58 @@ func apply_dialogue_line() -> void:
 ## Go to the next line
 func next(next_id: String) -> void:
 	dialogue_line = await dialogue_resource.get_next_dialogue_line(next_id, temporary_game_states)
+
+
+#region Utseende
+
+
+func _apply_kit_style() -> void:
+	var kit_theme := balloon.theme.duplicate() as Theme
+	kit_theme.default_font = UiKit.body_font()
+	kit_theme.default_font_size = TEXT_SIZE
+	kit_theme.set_stylebox("panel", "PanelContainer", UiKit.plate(UiKit.PAPER, 0.0, UiKit.INK, 3, UiKit.INK, Vector2(26, 14)))
+	for margin in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		kit_theme.set_constant(margin, "MarginContainer", 0)
+	var idle := UiKit.plate(Color(UiKit.INK, 0.92), UiKit.SLANT, Color(UiKit.PAPER, 0.25), 2, Color(0, 0, 0, 0), Vector2(30, 9))
+	var lit := UiKit.plate(UiKit.YELLOW, UiKit.SLANT, Color(0, 0, 0, 0), 0, UiKit.RED, Vector2(30, 9))
+	kit_theme.set_stylebox("normal", "Button", idle)
+	kit_theme.set_stylebox("disabled", "Button", idle)
+	for state in ["hover", "focus", "pressed", "hover_pressed"]:
+		kit_theme.set_stylebox(state, "Button", lit)
+	kit_theme.set_font("font", "Button", UiKit.display_font())
+	kit_theme.set_font_size("font_size", "Button", RESPONSE_SIZE)
+	kit_theme.set_color("font_color", "Button", UiKit.PAPER)
+	kit_theme.set_color("font_disabled_color", "Button", UiKit.MUTED)
+	for state in ["font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
+		kit_theme.set_color(state, "Button", UiKit.INK)
+	balloon.theme = kit_theme
+	responses_menu.add_theme_constant_override("separation", 8)
+
+	var box := balloon.get_node("MarginContainer") as Control
+	box.anchor_left = 0.5
+	box.anchor_right = 0.5
+	box.offset_left = -BOX_WIDTH / 2.0
+	box.offset_right = BOX_WIDTH / 2.0
+	box.offset_top = -BOX_HEIGHT - BOX_BOTTOM
+	box.offset_bottom = -BOX_BOTTOM
+
+	character_label.modulate = Color.WHITE
+	character_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	character_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	character_label.add_theme_stylebox_override("normal", UiKit.plate(UiKit.YELLOW, UiKit.SLANT, Color(0, 0, 0, 0), 0, Color(0, 0, 0, 0), Vector2(14, 1)))
+	character_label.add_theme_font_override("normal_font", UiKit.display_font())
+	character_label.add_theme_font_size_override("normal_font_size", NAME_SIZE)
+	character_label.add_theme_color_override("default_color", UiKit.INK)
+	dialogue_label.add_theme_color_override("default_color", UiKit.INK)
+	dialogue_label.add_theme_font_override("normal_font", UiKit.body_font())
+	dialogue_label.add_theme_font_override("italics_font", UiKit.display_font())
+	dialogue_label.add_theme_font_override("bold_font", UiKit.body_font(true))
+	for font_size in ["normal_font_size", "italics_font_size", "bold_font_size"]:
+		dialogue_label.add_theme_font_size_override(font_size, TEXT_SIZE)
+	progress.color = UiKit.INK
+
+
+#endregion
 
 
 #region Taggar
