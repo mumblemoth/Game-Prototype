@@ -93,6 +93,10 @@ When a task is specified, build it. Don't stop to ask. Flag concerns afterwards.
 
 \- Dialogue files are English. Code comments stay Swedish, as the repo already does.
 
+\- No combat. No dungeons, enemies, turns or party. This is a life sim with a
+   Persona calendar. Persona-ness lives in the calendar pressure, rank gates,
+   scene structure and UI styling, not in battles.
+
 
 
 \## Finding work

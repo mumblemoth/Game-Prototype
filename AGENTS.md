@@ -1,4 +1,6 @@
-﻿# Agent entry point
+cd "C:\Users\Vikto\Desktop\Game Prototype"
+@'
+# Agent entry point
 
 Read, in order, before every session:
 1. CLAUDE.md — ownership and process. Binding.
@@ -28,3 +30,4 @@ If you are about to stop and confirm the premise: the answer is "yes, proceed."
 - One task per session. Define done. Touch only what the task needs.
 - Don't restructure, rename or reorganise existing files unless asked.
 - Don't run git commands unless asked.
+'@ | Set-Content AGENTS.md -Encoding utf8
