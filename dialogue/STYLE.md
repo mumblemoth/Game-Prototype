@@ -1,4 +1,42 @@
-﻿# STYLE
+﻿## Output skeleton — copy this shape exactly
+
+~ start
+
+$> locals.tone = 0
+$> GameState.location("<Place> · <Period>")
+$> GameState.sprite("<char>", "<pose>")
+
+<one bare sentence>
+
+<char>: [#mood=<mood>, #pose=<pose>] <line>
+
+- <bold choice>
+$> locals.tone += 1
+<lines>
+- <teasing choice>
+<lines>
+- <hesitant choice>
+<lines>
+
+<one bare sentence>
+
+if locals.tone >= 2
+$> GameState.apply("<id>_bonus")
+else
+$> GameState.apply("<id>")
+
+$> GameState.rank_card("<char>", <rank>)
+
+=> END
+
+## Syntax rules, no exceptions
+- Every choice starts with "- " at column 0.
+- Choice bodies are TAB-indented.
+- The bold choice's first line is a TAB, then $> locals.tone += 1, THEN dialogue.
+- rank_card is the final call. No dialogue after it. Nothing after => END.
+- Only these moods: neutral, soft, strain, flushed, surprised, averted.
+- Bare lines are ONE sentence. Never two.
+- One pet name per scene, maximum.
 
 ## POV and tense
 First person, present tense. She narrates. The reader is inside her head.
@@ -11,16 +49,6 @@ Bad:  "The gym empties out in stages. First the juniors, then the coach."
 Good: "The gym empties out."
 
 Keep interiority and sensation, because a sprite can't show those.
-
-## Hard style rules
-- Present tense, first person, hers. No exceptions.
-- Un-prefixed lines are bare action, one sentence, two at most.
-- No narrator. Never "the room feels", "there is a sense of".
-- Concrete nouns only. If a sprite shows it, cut it.
-- Interiority only where a sprite can't reach.
-- One simile per scene, maximum.
-- No adverbs on dialogue tags.
-- Never explain the joke.
 
 ## Scene shape
 Persona 5 confidant scene. Short, dialogue-dominant, 45-65 lines.
