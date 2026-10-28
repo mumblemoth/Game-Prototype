@@ -1,7 +1,7 @@
-# CONTRACT
+﻿# CONTRACT
 
 Shared surface between writer and engineer. Append only.
-Section 1 is FROZEN — it already exists and must not change.
+Section 1 is FROZEN â€” it already exists and must not change.
 
 ## 1. Frozen state (in scripts/game_state.gd)
 
@@ -27,7 +27,7 @@ Speaker name used for the mother in dialogue files: `Mom`.
 | var | type | notes |
 |---|---|---|
 | lust | float | per character, 0-100, stored as `links[char]["lust"]` |
-| tone | int | per-scene. Dispatcher resets to 0 before every rank scene. |
+| tone | int | per-scene. Reset to 0 by the scene. Doubles lust at 1 or more. |
 
 ### Functions the writer calls
 | signature | purpose |
@@ -50,7 +50,7 @@ Speaker name used for the mother in dialogue files: `Mom`.
 
 ## 3. Scene ids
 
-Format `<char>_r<rank>` — e.g. `son_2_r4`.
+Format `<char>_r<rank>` â€” e.g. `son_2_r4`.
 Every rank scene has a `_bonus` twin. `tone >= 2` fires the `_bonus` variant instead.
 
 ## 4. Registry
@@ -68,9 +68,10 @@ Two separate numbers. Do not use one in place of the other.
   from her. Drives requests. For the sons this is the `wants` track only.
 - `links[char]["lust"]` = how physically charged the relationship is. Drives scene gates.
 
-## Change note — Romance meter removed (2026-10-26)
+## Change note â€” Romance meter removed (2026-10-26)
 
 `stats` keeps its name but now holds only `{home, work}`, 0-100. The `romance` key and
 its HUD meter are gone. Anything that used to give Romance now carries `"relief": N`,
 which lowers Mom's own desire meter. Scene EFFECTS in `scripts/balance.gd` use the same
 `relief` key instead of `stats.romance`. No dialogue file referenced `stats.romance`.
+

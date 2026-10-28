@@ -1304,7 +1304,7 @@ const STAGE_NAME := "StoryStage"
 
 ## Slutet pÃ¥ en rankscen: lÃ¤gger pÃ¥ Balance.EFFECTS[scene_id], sÃ¤tter scenens flaggor
 ## och markerar scenen som spelad. En _bonus-scen utan egen rad fÃ¥r grundscenens effekter.
-func apply(scene_id: String) -> void:
+func apply(scene_id: String, tone := 0) -> void:
 	var base := Dispatcher.base_id(scene_id)
 	if not Balance.GATES.has(base):
 		push_error("apply(): %s saknas i Balance.GATES" % scene_id)
@@ -1315,7 +1315,8 @@ func apply(scene_id: String) -> void:
 	if effects.has("link_points"):
 		notes.append(add_link_points(char_id, effects["link_points"]))
 	if effects.has("lust"):
-		links[char_id]["lust"] = clampf(links[char_id]["lust"] + effects["lust"], 0.0, Balance.LUST_MAX)
+		var mult := 2.0 if tone >= 1 else 1.0
+		links[char_id]["lust"] = clampf(links[char_id]["lust"] + effects["lust"] * mult, 0.0, Balance.LUST_MAX)
 		link_changed.emit(char_id)
 	for key in effects.get("stats", {}):
 		var delta: int = effects["stats"][key]
@@ -1368,4 +1369,5 @@ func mood(char_id: String, mood_id: String) -> void:
 		push_error("mood(): okÃ¤nd person %s" % char_id)
 		return
 	_stage().show_mood(char_id, mood_id)
+
 

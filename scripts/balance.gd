@@ -35,3 +35,4 @@ const EFFECTS := {
 	"miles_r1": {"link_points": 2, "lust": 2.0, "relief": 5, "flags": []},
 	"miles_r1_bonus": {"link_points": 3, "lust": 4.0, "relief": 8, "flags": []},
 }
+

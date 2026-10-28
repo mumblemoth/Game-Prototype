@@ -1,4 +1,4 @@
-# =========================================================
+﻿# =========================================================
 # RANK 1 - "The good mug"
 # GATE: char husband, rank 1, period evening, room living_room
 # =========================================================
@@ -6,7 +6,7 @@
 ~ start
 
 $> locals.tone = 0
-$> GameState.location("Living room · Evening")
+$> GameState.location("Living room Â· Evening")
 $> GameState.sprite("husband", "couch")
 
 The film's been on for forty minutes. He hasn't looked at it once.
@@ -52,10 +52,7 @@ He takes both mugs through to the kitchen. She listens to him rinsing them.
 
 Sixteen years. She has never once thought about what he does with the good mug.
 
-if locals.tone >= 2
-	$> GameState.apply("eric_r1_bonus")
-else
-	$> GameState.apply("eric_r1")
+$> GameState.apply("eric_r1", locals.tone)
 
 $> GameState.rank_card("husband", 1)
 

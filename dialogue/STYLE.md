@@ -11,19 +11,16 @@ $> GameState.sprite("<char>", "<pose>")
 <char>: [#mood=<mood>, #pose=<pose>] <line>
 
 - <bold choice>
-$> locals.tone += 1
-<lines>
+	$> locals.tone += 1
+	<lines>
 - <teasing choice>
-<lines>
+	<lines>
 - <hesitant choice>
-<lines>
+	<lines>
 
 <one bare sentence>
 
-if locals.tone >= 2
-$> GameState.apply("<id>_bonus")
-else
-$> GameState.apply("<id>")
+$> GameState.apply("<id>", locals.tone)
 
 $> GameState.rank_card("<char>", <rank>)
 
@@ -68,8 +65,8 @@ nothing sexual happens in it and it still lands.
 
 ## Tone choices
 Always three, always the same three flavours: bold / teasing / hesitant.
-Choosing bold adds to `tone`. At the end: if tone >= 2 apply "<id>_bonus", else "<id>".
-Never gate anything on tone. It only changes how much lust she earns.
+Choosing bold adds to `tone`. The scene ends with GameState.apply("<id>", locals.tone)
+and tone 1 or more doubles the lust it pays. Never gate anything on tone.
 
 ## Vocabulary - DIAL: standard
 Anatomy: cock, pussy, tits, ass. Blunt, not clinical, not purple.
@@ -99,3 +96,4 @@ Un-prefixed lines render as action automatically. No tag needed.
 - Never write prose that needs a tag to make sense.
 - Never branch a rank scene except at the choice points.
 - Never explain the joke.
+
