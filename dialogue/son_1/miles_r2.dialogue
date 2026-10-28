@@ -1,0 +1,83 @@
+﻿# =========================================================
+# RANK 2 - "Stuck"
+# GATE: char son_1, rank 2, period evening, room son_room_1
+# =========================================================
+
+~ start
+
+$> locals.tone = 0
+$> GameState.location("Miles' room · Evening")
+$> GameState.sprite("son_1", "desk")
+
+The same screen he was on an hour ago. Same boss.
+
+Mom: [#mood=neutral, #pose=standing] Still at it.
+
+Miles: [#mood=strain, #pose=desk] It's got a second phase.
+
+Mom: [#mood=neutral] A second phase.
+
+Miles: [#mood=strain] Everyone says it's easy. It's not easy, they're just — the dodge window is one frame.
+
+Mom: [#mood=neutral] One frame.
+
+Miles: [#mood=strain] You can't see it. It's a timing thing. It's muscle memory.
+
+He dies. Same place. He doesn't react.
+
+Miles: [#mood=averted] I know. I know.
+
+Mom: [#mood=neutral] I didn't say anything.
+
+Miles: [#mood=averted] You were going to.
+
+She comes further in. The bed's right there.
+
+Miles: [#mood=strain] It's the third one. The meteor one. You have to be already moving.
+
+Mom: [#mood=neutral] Show me the meteor one.
+
+- Sit on the floor by the chair.
+$> locals.tone += 1
+She lowers herself down, back against the desk leg, close enough that her shoulder is at his elbow.
+Miles: [#mood=surprised] Oh — okay.
+Miles: [#mood=strain] It's — you won't see it from down there.
+Mom: [#mood=neutral] Then tell me when it's coming.
+Miles: [#mood=flushed] ...Right. Okay.
+- Sit on the edge of the bed.
+She sits on the mattress, facing the screen.
+Miles: [#mood=strain] It's fine. You can sit.
+She can see the screen from there. Barely.
+- Stay in the doorway.
+Mom: [#mood=neutral] Go on. I've got time.
+He turns back. He's not going to start while she's watching.
+
+He restarts. His shoulders are up around his ears.
+
+Miles: [#mood=strain] Meteor. Meteor — now.
+
+She watches him dodge badly. The bar empties.
+
+Miles: [#mood=strain] That was the one. That was it.
+
+Mom: [#mood=neutral] You were early.
+
+Miles: [#mood=surprised] How do you know that.
+
+Mom: [#mood=neutral] You flinched before it moved.
+
+He stares at her. Then turns back and restarts without a word.
+
+The second time he waits. He gets through.
+
+Miles: [#mood=surprised] Oh my god.
+
+Mom: [#mood=soft] There.
+
+He doesn't say anything. He's still playing. His knee is against her shoulder now and neither of them moves it.
+
+$> GameState.apply("miles_r2", locals.tone)
+
+$> GameState.rank_card("son_1", 2)
+
+=> END
