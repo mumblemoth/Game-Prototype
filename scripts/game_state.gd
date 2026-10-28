@@ -1,52 +1,52 @@
 ﻿extends Node
-## Globalt speltillstÃ¥nd (autoload "GameState"): livsomrÃ¥denas mÃ¤tare, dygnets
+## Globalt speltillstÃƒÂ¥nd (autoload "GameState"): livsomrÃƒÂ¥denas mÃƒÂ¤tare, dygnets
 ## tidszoner med morgon- och nattscener, och vilket rum spelaren befinner sig i.
 
 signal stats_changed
 signal message_posted(text: String)
-## En handling har gjorts: texten och mÃ¤tarnas Ã¤ndringar ("Hemmet +15").
+## En handling har gjorts: texten och mÃƒÂ¤tarnas ÃƒÂ¤ndringar ("Hemmet +15").
 signal action_performed(text: String, changes: String)
 signal hint_changed(text: String)
 signal day_ended
 signal room_changed(room_id: String)
 signal time_of_day_changed(period: String)
 signal map_toggled(is_open: bool)
-## En scen ska spelas (morgon- eller nattscen). Spelaren har inte kontroll fÃ¶rrÃ¤n
+## En scen ska spelas (morgon- eller nattscen). Spelaren har inte kontroll fÃƒÂ¶rrÃƒÂ¤n
 ## finish_scene() anropas.
 signal scene_requested(scene_id: String)
 signal scene_finished
-## NÃ¥got i telefonen har Ã¤ndrats (ny kontakt, sms, minne eller quest).
+## NÃƒÂ¥got i telefonen har ÃƒÂ¤ndrats (ny kontakt, sms, minne eller quest).
 signal phone_changed
-## Ett scenminne ska spelas igen, och nÃ¤r det Ã¤r slut.
+## Ett scenminne ska spelas igen, och nÃƒÂ¤r det ÃƒÂ¤r slut.
 signal memory_replay_requested(memory_id: String)
 signal memory_replay_finished(memory_id: String)
-## Mammans utseende har Ã¤ndrats (klÃ¤der, smink, hÃ¥r ...).
+## Mammans utseende har ÃƒÂ¤ndrats (klÃƒÂ¤der, smink, hÃƒÂ¥r ...).
 signal appearance_changed
-## NÃ¥got som kan lÃ¥sa upp platser har Ã¤ndrats (en hÃ¤ndelse i storyn).
+## NÃƒÂ¥got som kan lÃƒÂ¥sa upp platser har ÃƒÂ¤ndrats (en hÃƒÂ¤ndelse i storyn).
 signal locations_changed
-## En relation har fÃ¥tt poÃ¤ng eller gÃ¥tt upp i rank.
+## En relation har fÃƒÂ¥tt poÃƒÂ¤ng eller gÃƒÂ¥tt upp i rank.
 signal link_changed(character_id: String)
-## Mammans egenskaper (Charm, Knowledge, Fitness) har Ã¤ndrats.
+## Mammans egenskaper (Charm, Knowledge, Fitness) har ÃƒÂ¤ndrats.
 signal social_changed
-## NÃ¥gon har bytt rum eller aktivitet (ny tidszon, ny dag eller en hÃ¤ndelse i storyn).
-## VÃ¤rlden ritar om personerna pÃ¥ den hÃ¤r signalen.
+## NÃƒÂ¥gon har bytt rum eller aktivitet (ny tidszon, ny dag eller en hÃƒÂ¤ndelse i storyn).
+## VÃƒÂ¤rlden ritar om personerna pÃƒÂ¥ den hÃƒÂ¤r signalen.
 signal schedules_changed
-## En person har flyttat; tom strÃ¤ng betyder borta frÃ¥n kartan.
+## En person har flyttat; tom strÃƒÂ¤ng betyder borta frÃƒÂ¥n kartan.
 signal character_moved(character_id: String, from_room: String, to_room: String)
-## En framtida NPC har fÃ¶rts in i vÃ¤rlden (har fÃ¥tt rutin, social link och kontakt).
+## En framtida NPC har fÃƒÂ¶rts in i vÃƒÂ¤rlden (har fÃƒÂ¥tt rutin, social link och kontakt).
 signal character_introduced(character_id: String)
-## Saldot har Ã¤ndrats (lÃ¶n, rÃ¤kning, kÃ¶p eller sidoinkomst).
+## Saldot har ÃƒÂ¤ndrats (lÃƒÂ¶n, rÃƒÂ¤kning, kÃƒÂ¶p eller sidoinkomst).
 signal money_changed
-## En mÃ¤tare, en fÃ¶rfrÃ¥gan eller en skuld i Requests har Ã¤ndrats.
+## En mÃƒÂ¤tare, en fÃƒÂ¶rfrÃƒÂ¥gan eller en skuld i Requests har ÃƒÂ¤ndrats.
 signal requests_changed
-## En dialogruta har Ã¶ppnats eller stÃ¤ngts. Telefonen gÃ¶ms och spÃ¤rras medan active Ã¤r sant.
+## En dialogruta har ÃƒÂ¶ppnats eller stÃƒÂ¤ngts. Telefonen gÃƒÂ¶ms och spÃƒÂ¤rras medan active ÃƒÂ¤r sant.
 signal dialogue_changed(active: bool)
 
-## Dygnets fasta tidszoner, som i Persona. Bara eftermiddagen och kvÃ¤llen Ã¤r spelbara:
-##   Morgon      â€“ dagen bÃ¶rjar hÃ¤r; en scen visas om dagen har en, annars hoppas den Ã¶ver.
-##   Eftermiddag â€“ efter jobbet pÃ¥ skolan; en aktivitet som tar tid leder till kvÃ¤llen.
-##   KvÃ¤ll       â€“ en aktivitet till, sedan Ã¤r den spelbara delen av dagen slut.
-##   Natt        â€“ en scen visas om dagen har en; sedan Ã¤r dagen slut.
+## Dygnets fasta tidszoner, som i Persona. Bara eftermiddagen och kvÃƒÂ¤llen ÃƒÂ¤r spelbara:
+##   Morgon      Ã¢â‚¬â€œ dagen bÃƒÂ¶rjar hÃƒÂ¤r; en scen visas om dagen har en, annars hoppas den ÃƒÂ¶ver.
+##   Eftermiddag Ã¢â‚¬â€œ efter jobbet pÃƒÂ¥ skolan; en aktivitet som tar tid leder till kvÃƒÂ¤llen.
+##   KvÃƒÂ¤ll       Ã¢â‚¬â€œ en aktivitet till, sedan ÃƒÂ¤r den spelbara delen av dagen slut.
+##   Natt        Ã¢â‚¬â€œ en scen visas om dagen har en; sedan ÃƒÂ¤r dagen slut.
 const TIME_PERIODS := ["morning", "afternoon", "evening", "night"]
 const PLAYABLE_PERIODS := ["afternoon", "evening"]
 const PERIOD_NAMES := {
@@ -57,7 +57,7 @@ const PERIOD_NAMES := {
 }
 const WEEKDAYS := ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-## Alla rum. Nyckeln Ã¤r rummets id; scenen ligger i res://scenes/rooms/<id>.tscn.
+## Alla rum. Nyckeln ÃƒÂ¤r rummets id; scenen ligger i res://scenes/rooms/<id>.tscn.
 const ROOMS := {
 	"attic": {"name": "Attic", "floor": "Attic"},
 	"upstairs_hall": {"name": "Upstairs Hall", "floor": "Upstairs"},
@@ -76,7 +76,7 @@ const ROOMS := {
 	"storage": {"name": "Storage", "floor": "Basement"},
 	"outside": {"name": "Front Yard", "floor": "Outside"},
 	"backyard": {"name": "Backyard", "floor": "Outside"},
-	# Platserna i grannskapet (Locations); "floor" Ã¤r platsens namn.
+	# Platserna i grannskapet (Locations); "floor" ÃƒÂ¤r platsens namn.
 	"classroom": {"name": "Classroom", "floor": "School"},
 	"teachers_lounge": {"name": "Teachers' Lounge", "floor": "School"},
 	"neighbor_living": {"name": "Neighbor's Living Room", "floor": "Neighbor's House"},
@@ -91,18 +91,18 @@ const ROOMS := {
 	"boutique": {"name": "Clothing Boutique", "floor": "Shopping Center"},
 	"restaurant": {"name": "Restaurant", "floor": "Shopping Center"},
 	"salon": {"name": "Hair Salon", "floor": "Shopping Center"},
-	"cafe": {"name": "CafÃ©", "floor": "Shopping Center"},
+	"cafe": {"name": "CafÃƒÂ©", "floor": "Shopping Center"},
 	"bookstore": {"name": "Bookstore", "floor": "Shopping Center"},
 	"park": {"name": "Park", "floor": "Park"},
 }
-## DÃ¶rrar mellan rum som saknar gamla rumsscener (rummen i platserna).
+## DÃƒÂ¶rrar mellan rum som saknar gamla rumsscener (rummen i platserna).
 const ROOM_LINKS := {
 	"neighbor_living": [],
 	"gym": ["yoga_studio", "locker_room"],
 	"yoga_studio": ["gym", "locker_room"],
 	"locker_room": ["gym", "yoga_studio"],
-	# KÃ¶pcentret: ingÃ¥ngen leder till ljusgÃ¥rden med fontÃ¤nen, och promenaderna Ã¥t
-	# vÃ¤ster och Ã¶ster gÃ¥r till ankarbutikerna i Ã¤ndarna (livsmedel och klÃ¤der).
+	# KÃƒÂ¶pcentret: ingÃƒÂ¥ngen leder till ljusgÃƒÂ¥rden med fontÃƒÂ¤nen, och promenaderna ÃƒÂ¥t
+	# vÃƒÂ¤ster och ÃƒÂ¶ster gÃƒÂ¥r till ankarbutikerna i ÃƒÂ¤ndarna (livsmedel och klÃƒÂ¤der).
 	"entrance": ["center_court"],
 	"center_court": ["entrance", "west_promenade", "east_promenade", "cafe", "bookstore"],
 	"west_promenade": ["center_court", "grocery", "restaurant"],
@@ -115,13 +115,13 @@ const ROOM_LINKS := {
 	"bookstore": ["center_court"],
 	"park": [],
 }
-## VÃ¥ningarna som rÃ¤knas som hemma.
+## VÃƒÂ¥ningarna som rÃƒÂ¤knas som hemma.
 const HOME_FLOORS := ["Attic", "Upstairs", "Ground Floor", "Basement", "Outside"]
 const START_ROOM := "kitchen"
 
-## Familjen och huvud-NPC:erna. Familjens namn Ã¤r satta, NPC:ernas Ã¤r platshÃ¥llare. Var de Ã¤r stÃ¥r i
-## Schedules. Framtida NPC:er har introduced_by: hÃ¤ndelsen (flags) som fÃ¶r in dem i
-## vÃ¤rlden. Innan dess heter de stranger_name om de syns, och dÃ¥ har de ingen social link.
+## Familjen och huvud-NPC:erna. Familjens namn ÃƒÂ¤r satta, NPC:ernas ÃƒÂ¤r platshÃƒÂ¥llare. Var de ÃƒÂ¤r stÃƒÂ¥r i
+## Schedules. Framtida NPC:er har introduced_by: hÃƒÂ¤ndelsen (flags) som fÃƒÂ¶r in dem i
+## vÃƒÂ¤rlden. Innan dess heter de stranger_name om de syns, och dÃƒÂ¥ har de ingen social link.
 const CHARACTERS := {
 	"mom": {"name": "Mom", "initials": "Ma", "color": Color(0.78, 0.3, 0.2)},
 	"husband": {"name": "Eric", "initials": "Er", "color": Color(0.25, 0.4, 0.7)},
@@ -134,7 +134,7 @@ const CHARACTERS := {
 }
 
 const STAT_MAX := 100
-## Hur mycket varje mÃ¤tare sjunker Ã¶ver natten.
+## Hur mycket varje mÃƒÂ¤tare sjunker ÃƒÂ¶ver natten.
 const NIGHTLY_DECAY := 10
 
 const STAT_NAMES := {
@@ -143,37 +143,37 @@ const STAT_NAMES := {
 }
 
 var day := 1
-## Index i TIME_PERIODS. Lika med TIME_PERIODS.size() nÃ¤r dagen Ã¤r slut.
+## Index i TIME_PERIODS. Lika med TIME_PERIODS.size() nÃƒÂ¤r dagen ÃƒÂ¤r slut.
 var period := 0
 var stats := {"home": 50, "work": 50}
 var current_room := START_ROOM
 var map_open := false
-## Scenen som spelas just nu, eller tom strÃ¤ng.
+## Scenen som spelas just nu, eller tom strÃƒÂ¤ng.
 var playing_scene := ""
-## En rankscen startades av talk_to(); tiden går vidare när dialogen är slut.
+## En rankscen startades av talk_to(); tiden gÃ¥r vidare nÃ¤r dialogen Ã¤r slut.
 var _rank_scene_started := false
 
-# Telefonen (innehÃ¥llet finns i PhoneData).
+# Telefonen (innehÃƒÂ¥llet finns i PhoneData).
 ## Kontakter mamman har i telefonen.
 var known_contacts: Array[String] = ["husband", "son_1", "son_2"]
-## Sms-trÃ¥dar: kontakt -> [[avsÃ¤ndare, text]], avsÃ¤ndaren Ã¤r "me" eller "them".
+## Sms-trÃƒÂ¥dar: kontakt -> [[avsÃƒÂ¤ndare, text]], avsÃƒÂ¤ndaren ÃƒÂ¤r "me" eller "them".
 var messages := {}
-## Kontakter med olÃ¤sta sms.
+## Kontakter med olÃƒÂ¤sta sms.
 var unread: Array[String] = []
-## Minnen spelaren har fÃ¥tt (vad de Ã¤r stÃ¥r i PhoneData.MEMORIES). Bara vanliga vÃ¤rden,
-## sÃ¥ att det kan sparas som det Ã¤r:
+## Minnen spelaren har fÃƒÂ¥tt (vad de ÃƒÂ¤r stÃƒÂ¥r i PhoneData.MEMORIES). Bara vanliga vÃƒÂ¤rden,
+## sÃƒÂ¥ att det kan sparas som det ÃƒÂ¤r:
 ##   memory_id -> {
-##     "day": int, "period": String  â€“ nÃ¤r minnet kom
-##     "room": String                â€“ var mamman var (id i ROOMS)
-##     "source": String              â€“ varifrÃ¥n, om det skiljer sig frÃ¥n PhoneData ("" annars)
-##     "seen": bool                  â€“ false tills spelaren har Ã¶ppnat det i telefonen
-##     "replay": {                   â€“ bara scener: hur scenen spelas igen
-##       "scene": String,            â€“   id i StoryScenes
-##       "flags": Dictionary,        â€“   hÃ¤ndelserna nÃ¤r scenen bÃ¶rjade (styr vilka repliker som visas)
+##     "day": int, "period": String  Ã¢â‚¬â€œ nÃƒÂ¤r minnet kom
+##     "room": String                Ã¢â‚¬â€œ var mamman var (id i ROOMS)
+##     "source": String              Ã¢â‚¬â€œ varifrÃƒÂ¥n, om det skiljer sig frÃƒÂ¥n PhoneData ("" annars)
+##     "seen": bool                  Ã¢â‚¬â€œ false tills spelaren har ÃƒÂ¶ppnat det i telefonen
+##     "replay": {                   Ã¢â‚¬â€œ bara scener: hur scenen spelas igen
+##       "scene": String,            Ã¢â‚¬â€œ   id i StoryScenes
+##       "flags": Dictionary,        Ã¢â‚¬â€œ   hÃƒÂ¤ndelserna nÃƒÂ¤r scenen bÃƒÂ¶rjade (styr vilka repliker som visas)
 ##     }
 ##   }
 var memories := {}
-## Minnet som spelas upp igen just nu, eller tom strÃ¤ng.
+## Minnet som spelas upp igen just nu, eller tom strÃƒÂ¤ng.
 var replaying_memory := ""
 ## Startade quests: quest -> "active" eller "completed".
 var quests := {"first_week": "active", "coffee": "active"}
@@ -184,66 +184,66 @@ var phone_wallpapers := PhoneData.DEFAULT_WALLPAPERS.duplicate()
 ## Hur mamman ser ut: kategori -> val (se AppearanceData).
 var appearance := AppearanceData.DEFAULTS.duplicate()
 ## Relationer (social links) i Persona-anda: person -> {rank, points, lust}.
-## lust Ã¤r 0â€“100 (se CONTRACT.md, avsnitt 2).
+## lust ÃƒÂ¤r 0Ã¢â‚¬â€œ100 (se CONTRACT.md, avsnitt 2).
 var links := {"son_1": {"rank": 1, "points": 0, "lust": 0.0}, "son_2": {"rank": 1, "points": 0, "lust": 0.0}, "husband": {"rank": 1, "points": 0, "lust": 0.0}}
-## Mammans egenskaper: egenskap -> XP (nivÃ¥er och namn finns i SocialStats).
+## Mammans egenskaper: egenskap -> XP (nivÃƒÂ¥er och namn finns i SocialStats).
 var social := {"charm": 0, "knowledge": 0, "fitness": 0}
-## Dagen dÃ¥ en egenskap som kan tappas (SocialStats.DECAY) senast trÃ¤nades.
+## Dagen dÃƒÂ¥ en egenskap som kan tappas (SocialStats.DECAY) senast trÃƒÂ¤nades.
 var last_trained := {"fitness": 1}
-## Snabba handlingar som redan gjorts i dag (de ger bara effekt en gÃ¥ng per dag).
+## Snabba handlingar som redan gjorts i dag (de ger bara effekt en gÃƒÂ¥ng per dag).
 var used_today: Array[String] = []
-## HÃ¤ndelser i storyn som har hÃ¤nt (lÃ¥ser upp platser och annat), t.ex. "met_neighbor".
+## HÃƒÂ¤ndelser i storyn som har hÃƒÂ¤nt (lÃƒÂ¥ser upp platser och annat), t.ex. "met_neighbor".
 var flags := {}
-## Scheman som storyn har Ã¤ndrat (gÃ¥r fÃ¶re Schedules regler och rutiner). Sparas med spelet:
+## Scheman som storyn har ÃƒÂ¤ndrat (gÃƒÂ¥r fÃƒÂ¶re Schedules regler och rutiner). Sparas med spelet:
 ##   override_id -> {"character", "room", "activity", "from_day", "to_day" (-1 = tills
 ##   vidare), "periods" ([] = hela dygnet)}
 var schedule_overrides := {}
-## Var alla Ã¤r just nu (Schedules.resolve fÃ¶r dagen och tidszonen). RÃ¤knas om av
-## refresh_schedules(), sÃ¥ att frÃ¥gor under tidszonen inte behÃ¶ver rÃ¤kna.
+## Var alla ÃƒÂ¤r just nu (Schedules.resolve fÃƒÂ¶r dagen och tidszonen). RÃƒÂ¤knas om av
+## refresh_schedules(), sÃƒÂ¥ att frÃƒÂ¥gor under tidszonen inte behÃƒÂ¶ver rÃƒÂ¤kna.
 var whereabouts := {}
 
-# Ekonomin (priser, lÃ¶n och rÃ¤kningar finns i Economy).
-## Pengarna pÃ¥ kontot. Kan gÃ¥ minus av rÃ¤kningar, men inte av kÃ¶p.
+# Ekonomin (priser, lÃƒÂ¶n och rÃƒÂ¤kningar finns i Economy).
+## Pengarna pÃƒÂ¥ kontot. Kan gÃƒÂ¥ minus av rÃƒÂ¤kningar, men inte av kÃƒÂ¶p.
 var money := Economy.START_MONEY
 ## Kontoutdraget, nyast sist: [{"day", "label", "amount"}]. Bara de senaste LEDGER_MAX.
 var ledger: Array[Dictionary] = []
-## Saker hon har kÃ¶pt: id i Economy.PURCHASES och "kategori:val" i Economy.LOOKS.
+## Saker hon har kÃƒÂ¶pt: id i Economy.PURCHASES och "kategori:val" i Economy.LOOKS.
 var owned: Array[String] = []
-## Saker i huset som Ã¤r sÃ¥lda (Economy.SELLABLES).
+## Saker i huset som ÃƒÂ¤r sÃƒÂ¥lda (Economy.SELLABLES).
 var sold: Array[String] = []
-## Abonnemang som lÃ¶per (Economy.SUBSCRIPTIONS).
+## Abonnemang som lÃƒÂ¶per (Economy.SUBSCRIPTIONS).
 var subscriptions: Array[String] = []
 ## Saker hon har flera av: sak -> antal (Economy.ITEMS).
 var inventory := {}
 ## Vad varje sidoinkomst har gett hittills: income_id -> summa.
 var income_earned := {}
-## Work varje kvÃ¤ll sedan fÃ¶rra lÃ¶nen: summan och antalet kvÃ¤llar (ger bonusen).
+## Work varje kvÃƒÂ¤ll sedan fÃƒÂ¶rra lÃƒÂ¶nen: summan och antalet kvÃƒÂ¤llar (ger bonusen).
 var work_log := {"sum": 0, "days": 0}
-## Dagen dÃ¥ veckohandlingen senast gjordes (annars blir det hÃ¤mtmat).
+## Dagen dÃƒÂ¥ veckohandlingen senast gjordes (annars blir det hÃƒÂ¤mtmat).
 var last_groceries := 1
-## Dagen dÃ¥ trÃ¤dgÃ¥rdens rabatter senast vattnades (se Backyard).
+## Dagen dÃƒÂ¥ trÃƒÂ¤dgÃƒÂ¥rdens rabatter senast vattnades (se Backyard).
 var last_watered := 1
 
-# FÃ¶rfrÃ¥gningar (mÃ¤tare, typer och sysslor finns i Requests).
-## MÃ¤tarna 0â€“100: person -> vÃ¤rde. Desire fÃ¶r vuxna och mamman, wants fÃ¶r sÃ¶nerna.
+# FÃƒÂ¶rfrÃƒÂ¥gningar (mÃƒÂ¤tare, typer och sysslor finns i Requests).
+## MÃƒÂ¤tarna 0Ã¢â‚¬â€œ100: person -> vÃƒÂ¤rde. Desire fÃƒÂ¶r vuxna och mamman, wants fÃƒÂ¶r sÃƒÂ¶nerna.
 var meters := {}
-## Ã–ppna fÃ¶rfrÃ¥gningar: person -> {"type": id i Requests.TYPES, "day": dagen den kom}.
+## Ãƒâ€“ppna fÃƒÂ¶rfrÃƒÂ¥gningar: person -> {"type": id i Requests.TYPES, "day": dagen den kom}.
 var requests := {}
-## Sysslor personer Ã¤r skyldiga mamman: person -> antal.
+## Sysslor personer ÃƒÂ¤r skyldiga mamman: person -> antal.
 var owed := {}
-## Dagen dÃ¥ personens fÃ¶rra fÃ¶rfrÃ¥gan avslutades (fÃ¶r cooldown).
+## Dagen dÃƒÂ¥ personens fÃƒÂ¶rra fÃƒÂ¶rfrÃƒÂ¥gan avslutades (fÃƒÂ¶r cooldown).
 var last_request := {}
 
-## DÃ¶rrarna mellan rummen: room_id -> {mÃ¥lrum: restid}. LÃ¤ses frÃ¥n rumsscenerna.
+## DÃƒÂ¶rrarna mellan rummen: room_id -> {mÃƒÂ¥lrum: restid}. LÃƒÂ¤ses frÃƒÂ¥n rumsscenerna.
 var _exits := {}
-## HÃ¤ndelserna nÃ¤r den pÃ¥gÃ¥ende scenen bÃ¶rjade (sparas i scenens minne).
+## HÃƒÂ¤ndelserna nÃƒÂ¤r den pÃƒÂ¥gÃƒÂ¥ende scenen bÃƒÂ¶rjade (sparas i scenens minne).
 var _scene_flags := {}
 
 
 func _ready() -> void:
 	for room_id in ROOMS:
 		var links := {}
-		# Husets rum har gamla rumsscener med dÃ¶rrarna; nya platser anger dem i ROOM_LINKS.
+		# Husets rum har gamla rumsscener med dÃƒÂ¶rrarna; nya platser anger dem i ROOM_LINKS.
 		if ResourceLoader.exists(get_room_scene_path(room_id)):
 			var room: Node = load(get_room_scene_path(room_id)).instantiate()
 			for child in room.get_children():
@@ -265,8 +265,8 @@ func _ready() -> void:
 	refresh_schedules()
 
 
-## BÃ¶rjar om frÃ¥n bÃ¶rjan (New Game pÃ¥ titelskÃ¤rmen): alla variabler fÃ¥r sina startvÃ¤rden
-## frÃ¥n en ny, tillfÃ¤llig GameState, och mammans egna gardinval glÃ¶ms.
+## BÃƒÂ¶rjar om frÃƒÂ¥n bÃƒÂ¶rjan (New Game pÃƒÂ¥ titelskÃƒÂ¤rmen): alla variabler fÃƒÂ¥r sina startvÃƒÂ¤rden
+## frÃƒÂ¥n en ny, tillfÃƒÂ¤llig GameState, och mammans egna gardinval glÃƒÂ¶ms.
 func reset() -> void:
 	var fresh: Node = get_script().new()
 	fresh._ready()
@@ -280,14 +280,14 @@ func reset() -> void:
 
 # --- Rummens handlingar, utseende och relationer ---------------------------------
 
-## PoÃ¤ng som krÃ¤vs fÃ¶r att nÃ¥ varje rank (index = rank). Rank 10 Ã¤r max.
+## PoÃƒÂ¤ng som krÃƒÂ¤vs fÃƒÂ¶r att nÃƒÂ¥ varje rank (index = rank). Rank 10 ÃƒÂ¤r max.
 const LINK_THRESHOLDS := [0, 0, 3, 7, 12, 18, 25, 33, 42, 52, 63]
 const LINK_MAX_RANK := 10
 
 
-## VarfÃ¶r en handling i ett rum inte gÃ¥r att gÃ¶ra just nu, eller tom strÃ¤ng om den gÃ¥r.
+## VarfÃƒÂ¶r en handling i ett rum inte gÃƒÂ¥r att gÃƒÂ¶ra just nu, eller tom strÃƒÂ¤ng om den gÃƒÂ¥r.
 func action_block_reason(action: Dictionary, room_id: String) -> String:
-	# "needs": personen mÃ¥ste vara i rummet; "needs_home": nÃ¥gonstans i huset.
+	# "needs": personen mÃƒÂ¥ste vara i rummet; "needs_home": nÃƒÂ¥gonstans i huset.
 	for key in ["needs", "needs_home"]:
 		var who: String = action.get(key, "")
 		if who == "":
@@ -295,7 +295,7 @@ func action_block_reason(action: Dictionary, room_id: String) -> String:
 		var where := get_character_room(who)
 		var home: bool = where != "" and ROOMS.has(where) and ROOMS[where]["floor"] in HOME_FLOORS
 		var person := character_name(who)
-		# Den som Ã¤r i rummet Ã¤r "hemma" Ã¤ven i en plats (t.ex. grannen i sitt hus).
+		# Den som ÃƒÂ¤r i rummet ÃƒÂ¤r "hemma" ÃƒÂ¤ven i en plats (t.ex. grannen i sitt hus).
 		if not home and where != room_id:
 			return "%s isn't home" % person
 		if key == "needs" and where != room_id:
@@ -317,16 +317,16 @@ func action_block_reason(action: Dictionary, room_id: String) -> String:
 		return "You don't have a %s" % Economy.ITEMS[item]["name"].to_lower()
 	var cost := action_cost(action)
 	if cost > money:
-		return "Costs %s â€“ you have %s" % [Economy.format(cost), Economy.format(money)]
+		return "Costs %s Ã¢â‚¬â€œ you have %s" % [Economy.format(cost), Economy.format(money)]
 	return ""
 
 
-## Snabba handlingar som ger nÃ¥got (mÃ¤tare, egenskap eller relation) gÃ¥r bara en gÃ¥ng per dag.
+## Snabba handlingar som ger nÃƒÂ¥got (mÃƒÂ¤tare, egenskap eller relation) gÃƒÂ¥r bara en gÃƒÂ¥ng per dag.
 func _once_per_day(action: Dictionary) -> bool:
 	return not action.get("time", false) and (not action.get("effects", {}).is_empty() or action.get("relief", 0) > 0 or not action.get("social", {}).is_empty() or action.get("link", "") != "")
 
 
-## UtfÃ¶r en handling frÃ¥n ett rums meny: mÃ¤tare, relation, dagens anvÃ¤ndning och tid.
+## UtfÃƒÂ¶r en handling frÃƒÂ¥n ett rums meny: mÃƒÂ¤tare, relation, dagens anvÃƒÂ¤ndning och tid.
 func do_room_action(action: Dictionary) -> void:
 	if not is_playable():
 		return
@@ -358,11 +358,11 @@ func do_room_action(action: Dictionary) -> void:
 		changes.append(link_note)
 	changes.append_array(_apply_request_action(action))
 	changes.append_array(Backyard.apply_action(action))
-	# Handlingar kan fÃ¶ra storyn framÃ¥t: sÃ¤tta en hÃ¤ndelse eller avsluta en quest.
+	# Handlingar kan fÃƒÂ¶ra storyn framÃƒÂ¥t: sÃƒÂ¤tta en hÃƒÂ¤ndelse eller avsluta en quest.
 	if action.get("sets_flag", "") != "":
 		var income_id := Economy.income_for_flag(action["sets_flag"])
 		if income_id != "" and not has_flag(action["sets_flag"]):
-			changes.append("â˜… New way to earn: %s" % Economy.SIDE_INCOME[income_id]["name"])
+			changes.append("Ã¢Ëœâ€¦ New way to earn: %s" % Economy.SIDE_INCOME[income_id]["name"])
 		set_flag(action["sets_flag"])
 	if action.get("completes", "") != "":
 		complete_quest(action["completes"])
@@ -372,30 +372,30 @@ func do_room_action(action: Dictionary) -> void:
 		advance_period()
 
 
-## Ger poÃ¤ng i en relation. Returnerar en kort text fÃ¶r Ã¥terkopplingen, t.ex.
-## "Son 1 â™¥ +2" eller "Son 1 â™¥ Rank 3!" nÃ¤r relationen gÃ¥r upp en rank. MinuspoÃ¤ng
-## (t.ex. nÃ¤r man sÃ¤ljer nÃ¥gons saker) tar aldrig bort en rank, bara vÃ¤gen mot nÃ¤sta.
+## Ger poÃƒÂ¤ng i en relation. Returnerar en kort text fÃƒÂ¶r ÃƒÂ¥terkopplingen, t.ex.
+## "Son 1 Ã¢â„¢Â¥ +2" eller "Son 1 Ã¢â„¢Â¥ Rank 3!" nÃƒÂ¤r relationen gÃƒÂ¥r upp en rank. MinuspoÃƒÂ¤ng
+## (t.ex. nÃƒÂ¤r man sÃƒÂ¤ljer nÃƒÂ¥gons saker) tar aldrig bort en rank, bara vÃƒÂ¤gen mot nÃƒÂ¤sta.
 func add_link_points(character_id: String, points: int) -> String:
 	var link: Dictionary = links[character_id]
 	var person: String = CHARACTERS[character_id]["name"]
 	if link["rank"] >= LINK_MAX_RANK:
-		return "%s â™¥ max" % person
+		return "%s Ã¢â„¢Â¥ max" % person
 	link["points"] = maxi(link["points"] + points, LINK_THRESHOLDS[link["rank"]])
-	var note := "%s â™¥ %+d" % [person, points]
+	var note := "%s Ã¢â„¢Â¥ %+d" % [person, points]
 	var old_rank: int = link["rank"]
 	while link["rank"] < LINK_MAX_RANK and link["points"] >= LINK_THRESHOLDS[link["rank"] + 1]:
 		link["rank"] += 1
-		note = "%s â™¥ Rank %d!" % [person, link["rank"]]
+		note = "%s Ã¢â„¢Â¥ Rank %d!" % [person, link["rank"]]
 	link_changed.emit(character_id)
-	# Scheman kan bero pÃ¥ rank (link_rank i Schedules.RULES).
+	# Scheman kan bero pÃƒÂ¥ rank (link_rank i Schedules.RULES).
 	if link["rank"] != old_rank:
 		refresh_schedules()
 	return note
 
 
-## Ger XP i en egenskap. Returnerar en kort text fÃ¶r Ã¥terkopplingen, t.ex. "Charm +4"
-## eller "Charm â†‘ Charismatic!" nÃ¤r den gÃ¥r upp en nivÃ¥. Meddelar ocksÃ¥ om
-## Attractiveness nÃ¥r en ny nivÃ¥.
+## Ger XP i en egenskap. Returnerar en kort text fÃƒÂ¶r ÃƒÂ¥terkopplingen, t.ex. "Charm +4"
+## eller "Charm Ã¢â€ â€˜ Charismatic!" nÃƒÂ¤r den gÃƒÂ¥r upp en nivÃƒÂ¥. Meddelar ocksÃƒÂ¥ om
+## Attractiveness nÃƒÂ¥r en ny nivÃƒÂ¥.
 func add_social_xp(stat: String, xp: int) -> String:
 	var old_level := social_level(stat)
 	var old_tier := attractiveness_tier()
@@ -406,12 +406,12 @@ func add_social_xp(stat: String, xp: int) -> String:
 	var note := "%s +%d" % [stat_name, xp]
 	var level := social_level(stat)
 	if level > old_level:
-		note = "%s â†‘ %s!" % [stat_name, SocialStats.level_name(stat, level)]
+		note = "%s Ã¢â€ â€˜ %s!" % [stat_name, SocialStats.level_name(stat, level)]
 		message_posted.emit("%s rose to level %d: %s." % [stat_name, level, SocialStats.level_name(stat, level)])
 	var tier := attractiveness_tier()
 	if tier > old_tier:
 		var unlock: String = SocialStats.ATTRACTIVENESS_UNLOCKS.get(tier, "")
-		message_posted.emit("Attractiveness %.1f â€“ %s!%s" % [attractiveness(), SocialStats.attractiveness_title(attractiveness()), " " + unlock + "." if unlock != "" else ""])
+		message_posted.emit("Attractiveness %.1f Ã¢â‚¬â€œ %s!%s" % [attractiveness(), SocialStats.attractiveness_title(attractiveness()), " " + unlock + "." if unlock != "" else ""])
 	social_changed.emit()
 	return note
 
@@ -420,7 +420,7 @@ func social_level(stat: String) -> int:
 	return SocialStats.level_for_xp(social[stat])
 
 
-## Hur lÃ¥ngt en egenskap har kommit mot nÃ¤sta nivÃ¥, 0â€“1.
+## Hur lÃƒÂ¥ngt en egenskap har kommit mot nÃƒÂ¤sta nivÃƒÂ¥, 0Ã¢â‚¬â€œ1.
 func social_progress(stat: String) -> float:
 	var level := social_level(stat)
 	if level >= SocialStats.MAX_LEVEL:
@@ -430,18 +430,18 @@ func social_progress(stat: String) -> float:
 	return clampf(float(social[stat] - low) / float(high - low), 0.0, 1.0)
 
 
-## MedelvÃ¤rdet av de tre nivÃ¥erna, 1.0â€“5.0.
+## MedelvÃƒÂ¤rdet av de tre nivÃƒÂ¥erna, 1.0Ã¢â‚¬â€œ5.0.
 func attractiveness() -> float:
 	return (social_level("charm") + social_level("knowledge") + social_level("fitness")) / 3.0
 
 
-## Attractiveness avrundat nedÃ¥t, 1â€“5 (bestÃ¤mmer namnet och vad som Ã¤r upplÃ¥st).
+## Attractiveness avrundat nedÃƒÂ¥t, 1Ã¢â‚¬â€œ5 (bestÃƒÂ¤mmer namnet och vad som ÃƒÂ¤r upplÃƒÂ¥st).
 func attractiveness_tier() -> int:
 	return floori(attractiveness())
 
 
-## VarfÃ¶r krav pÃ¥ egenskaper inte uppfylls, eller tom strÃ¤ng. Kraven Ã¤r t.ex.
-## {"charm": 3} eller {"attractiveness": 4}. AnvÃ¤nds av rummens val och senare av
+## VarfÃƒÂ¶r krav pÃƒÂ¥ egenskaper inte uppfylls, eller tom strÃƒÂ¤ng. Kraven ÃƒÂ¤r t.ex.
+## {"charm": 3} eller {"attractiveness": 4}. AnvÃƒÂ¤nds av rummens val och senare av
 ## dialogval.
 func requirement_block_reason(requires: Dictionary) -> String:
 	for key in requires:
@@ -454,7 +454,7 @@ func requirement_block_reason(requires: Dictionary) -> String:
 	return ""
 
 
-## Egenskaper som inte har trÃ¤nats pÃ¥ ett tag tappar lite XP, men aldrig en nivÃ¥.
+## Egenskaper som inte har trÃƒÂ¤nats pÃƒÂ¥ ett tag tappar lite XP, men aldrig en nivÃƒÂ¥.
 func _decay_social() -> void:
 	for stat in SocialStats.DECAY:
 		var rule: Dictionary = SocialStats.DECAY[stat]
@@ -467,7 +467,7 @@ func _decay_social() -> void:
 			social_changed.emit()
 
 
-## Hur lÃ¥ngt en relation har kommit mot nÃ¤sta rank, 0â€“1.
+## Hur lÃƒÂ¥ngt en relation har kommit mot nÃƒÂ¤sta rank, 0Ã¢â‚¬â€œ1.
 func link_progress(character_id: String) -> float:
 	var link: Dictionary = links[character_id]
 	if link["rank"] >= LINK_MAX_RANK:
@@ -482,7 +482,7 @@ func link_progress(character_id: String) -> float:
 const LEDGER_MAX := 60
 
 
-## Vad en handling kostar just nu (0 om ett abonnemang gÃ¶r den gratis).
+## Vad en handling kostar just nu (0 om ett abonnemang gÃƒÂ¶r den gratis).
 func action_cost(action: Dictionary) -> int:
 	var waived: String = action.get("waived_by", "")
 	if waived != "":
@@ -492,7 +492,7 @@ func action_cost(action: Dictionary) -> int:
 	return action.get("cost", 0)
 
 
-## Vad en handling ger, med earn_scale utrÃ¤knat efter mammans nivÃ¥er.
+## Vad en handling ger, med earn_scale utrÃƒÂ¤knat efter mammans nivÃƒÂ¥er.
 func action_earnings(action: Dictionary) -> int:
 	var levels := {}
 	for stat in social:
@@ -503,14 +503,14 @@ func action_earnings(action: Dictionary) -> int:
 	return amount
 
 
-## Pengar in. income Ã¤r sidoinkomsten de rÃ¤knas till ("" fÃ¶r lÃ¶n och annat).
+## Pengar in. income ÃƒÂ¤r sidoinkomsten de rÃƒÂ¤knas till ("" fÃƒÂ¶r lÃƒÂ¶n och annat).
 func earn(amount: int, label: String, income := "") -> void:
 	if income != "":
 		income_earned[income] = income_earned.get(income, 0) + amount
 	_book(amount, label)
 
 
-## Ett kÃ¶p spelaren sjÃ¤lv vÃ¤ljer. Blir inget om pengarna inte rÃ¤cker.
+## Ett kÃƒÂ¶p spelaren sjÃƒÂ¤lv vÃƒÂ¤ljer. Blir inget om pengarna inte rÃƒÂ¤cker.
 func spend(amount: int, label: String) -> bool:
 	if amount > money:
 		return false
@@ -518,7 +518,7 @@ func spend(amount: int, label: String) -> bool:
 	return true
 
 
-## En rÃ¤kning dras alltid, Ã¤ven om kontot hamnar pÃ¥ minus.
+## En rÃƒÂ¤kning dras alltid, ÃƒÂ¤ven om kontot hamnar pÃƒÂ¥ minus.
 func pay_bill(amount: int, label: String) -> void:
 	_book(-amount, label)
 
@@ -531,13 +531,13 @@ func _book(amount: int, label: String) -> void:
 	money_changed.emit()
 
 
-## Om ett utseende gÃ¥r att vÃ¤lja: det Ã¤r inte till salu, eller hon har kÃ¶pt det.
+## Om ett utseende gÃƒÂ¥r att vÃƒÂ¤lja: det ÃƒÂ¤r inte till salu, eller hon har kÃƒÂ¶pt det.
 func owns_look(category: String, option_id: String) -> bool:
 	var key := "%s:%s" % [category, option_id]
 	return not Economy.LOOKS.has(key) or key in owned
 
 
-## Hur mycket mindre en mÃ¤tare sjunker varje natt tack vare saker hon har kÃ¶pt.
+## Hur mycket mindre en mÃƒÂ¤tare sjunker varje natt tack vare saker hon har kÃƒÂ¶pt.
 func decay_reduction(stat: String) -> int:
 	var total := 0
 	for id in owned:
@@ -549,14 +549,14 @@ func days_until_payday() -> int:
 	return posmod(Economy.PAYDAY - Economy.day_of_month(day), Economy.MONTH_DAYS)
 
 
-## Dagar tills rÃ¤kningarna dras. Den allra fÃ¶rsta dagen dras inga, sÃ¥ dÃ¥ Ã¤r det en mÃ¥nad.
+## Dagar tills rÃƒÂ¤kningarna dras. Den allra fÃƒÂ¶rsta dagen dras inga, sÃƒÂ¥ dÃƒÂ¥ ÃƒÂ¤r det en mÃƒÂ¥nad.
 func days_until_bills() -> int:
 	var days := posmod(Economy.BILL_DAY - Economy.day_of_month(day), Economy.MONTH_DAYS)
 	return Economy.MONTH_DAYS if days == 0 and day == 1 else days
 
 
-## Pengadelen av en handling: inkomst, saker, kÃ¶p, fÃ¶rsÃ¤ljningar och abonnemang.
-## Returnerar texterna fÃ¶r Ã¥terkopplingen.
+## Pengadelen av en handling: inkomst, saker, kÃƒÂ¶p, fÃƒÂ¶rsÃƒÂ¤ljningar och abonnemang.
+## Returnerar texterna fÃƒÂ¶r ÃƒÂ¥terkopplingen.
 func _apply_money_action(action: Dictionary) -> Array[String]:
 	var changes: Array[String] = []
 	if action.has("earn"):
@@ -587,9 +587,9 @@ func _apply_money_action(action: Dictionary) -> Array[String]:
 	return changes
 
 
-## Allt som hÃ¤nder med pengarna nÃ¤r en ny dag bÃ¶rjar: lÃ¶n, rÃ¤kningar, hÃ¤mtmat,
-## ovÃ¤ntade rÃ¤kningar och oro om kontot Ã¤r pÃ¥ minus. Returnerar texter till dagens
-## meddelande; detaljerna kommer som sms frÃ¥n banken.
+## Allt som hÃƒÂ¤nder med pengarna nÃƒÂ¤r en ny dag bÃƒÂ¶rjar: lÃƒÂ¶n, rÃƒÂ¤kningar, hÃƒÂ¤mtmat,
+## ovÃƒÂ¤ntade rÃƒÂ¤kningar och oro om kontot ÃƒÂ¤r pÃƒÂ¥ minus. Returnerar texter till dagens
+## meddelande; detaljerna kommer som sms frÃƒÂ¥n banken.
 func _money_new_day() -> Array[String]:
 	var notes: Array[String] = []
 	var day_of_month := Economy.day_of_month(day)
@@ -623,7 +623,7 @@ func _money_new_day() -> Array[String]:
 		pay_bill(Economy.TAKEOUT["amount"], "Takeout")
 		for key in Economy.TAKEOUT["effects"]:
 			stats[key] = clampi(stats[key] + Economy.TAKEOUT["effects"][key], 0, STAT_MAX)
-		# NÃ¤sta hÃ¤mtmat om tre dagar, om ingen handlar innan dess.
+		# NÃƒÂ¤sta hÃƒÂ¤mtmat om tre dagar, om ingen handlar innan dess.
 		last_groceries = day - Economy.GROCERY_GRACE_DAYS + 2
 		notes.append(Economy.TAKEOUT["text"])
 	if billed and money < 0:
@@ -635,10 +635,10 @@ func _money_new_day() -> Array[String]:
 	return notes
 
 
-## LÃ¶nen: grundlÃ¶n och lÃ¶neÃ¶kningar, plus bonus efter hur Work har skÃ¶tts.
+## LÃƒÂ¶nen: grundlÃƒÂ¶n och lÃƒÂ¶neÃƒÂ¶kningar, plus bonus efter hur Work har skÃƒÂ¶tts.
 func _payday() -> String:
 	var salary := Economy.salary(flags)
-	earn(salary, "Salary â€“ %s" % Economy.SALARY["employer"])
+	earn(salary, "Salary Ã¢â‚¬â€œ %s" % Economy.SALARY["employer"])
 	var average := float(work_log["sum"]) / maxi(work_log["days"], 1)
 	var bonus := Economy.merit_bonus(average)
 	var bonus_text := ""
@@ -650,7 +650,7 @@ func _payday() -> String:
 	return "Payday! %s%s landed in your account." % [Economy.format(salary), bonus_text]
 
 
-# --- FÃ¶rfrÃ¥gningar ------------------------------------------------------------------
+# --- FÃƒÂ¶rfrÃƒÂ¥gningar ------------------------------------------------------------------
 
 func _change_meter(character_id: String, delta: float) -> void:
 	if not meters.has(character_id) or delta == 0:
@@ -659,20 +659,20 @@ func _change_meter(character_id: String, delta: float) -> void:
 	requests_changed.emit()
 
 
-## Det som fÃ¥r mamman att varva ner (relief i handlingar och scener) sÃ¤nker hennes egen
-## mÃ¤tare med amount Ã— Requests.MOM_EFFECTS["relief_scale"]. Kan anropas frÃ¥n dialog:
+## Det som fÃƒÂ¥r mamman att varva ner (relief i handlingar och scener) sÃƒÂ¤nker hennes egen
+## mÃƒÂ¤tare med amount Ãƒâ€” Requests.MOM_EFFECTS["relief_scale"]. Kan anropas frÃƒÂ¥n dialog:
 ## $> GameState.relieve_mom(10)
 func relieve_mom(amount: float) -> void:
 	if amount > 0:
 		_change_meter("mom", -amount * Requests.MOM_EFFECTS["relief_scale"])
 
 
-## Det apply() och do_room_action() anropar; rÃ¤knar via relieve_mom().
+## Det apply() och do_room_action() anropar; rÃƒÂ¤knar via relieve_mom().
 func _relieve_mom(relief: int) -> void:
 	relieve_mom(relief)
 
 
-## Hur fort en persons mÃ¤tare vÃ¤xer just nu, utÃ¶ver kurvan (se Requests).
+## Hur fort en persons mÃƒÂ¤tare vÃƒÂ¤xer just nu, utÃƒÂ¶ver kurvan (se Requests).
 func _meter_multiplier(character_id: String) -> float:
 	if character_id == "mom":
 		return 1.0
@@ -687,7 +687,7 @@ func _meter_multiplier(character_id: String) -> float:
 	return mult
 
 
-## Varje ny tidszon: mÃ¤tarna vÃ¤xer, och under de spelbara kan en fÃ¶rfrÃ¥gan komma.
+## Varje ny tidszon: mÃƒÂ¤tarna vÃƒÂ¤xer, och under de spelbara kan en fÃƒÂ¶rfrÃƒÂ¥gan komma.
 func _tick_requests() -> void:
 	for character_id in meters:
 		if not is_introduced(character_id):
@@ -718,8 +718,8 @@ func _maybe_request(character_id: String) -> void:
 		receive_message(character_id, t["ask"])
 
 
-## FÃ¶rfrÃ¥gningsdelen av en handling: gjord, nej tack eller en delegerad syssla.
-## Returnerar texterna fÃ¶r Ã¥terkopplingen.
+## FÃƒÂ¶rfrÃƒÂ¥gningsdelen av en handling: gjord, nej tack eller en delegerad syssla.
+## Returnerar texterna fÃƒÂ¶r ÃƒÂ¥terkopplingen.
 func _apply_request_action(action: Dictionary) -> Array[String]:
 	var changes: Array[String] = []
 	var who: String = action.get("fulfills", "")
@@ -737,7 +737,7 @@ func _apply_request_action(action: Dictionary) -> Array[String]:
 	who = action.get("delegates", "")
 	if who != "" and owed.get(who, 0) > 0:
 		owed[who] -= 1
-		changes.append("free time Â· %s owes %d" % [character_name(who), owed[who]])
+		changes.append("free time Ã‚Â· %s owes %d" % [character_name(who), owed[who]])
 		requests_changed.emit()
 	return changes
 
@@ -749,7 +749,7 @@ func _close_request(character_id: String, meter_value: float) -> void:
 	requests_changed.emit()
 
 
-## En ny dag: fÃ¶rfrÃ¥gningar som har vÃ¤ntat fÃ¶r lÃ¤nge fÃ¶rsvinner.
+## En ny dag: fÃƒÂ¶rfrÃƒÂ¥gningar som har vÃƒÂ¤ntat fÃƒÂ¶r lÃƒÂ¤nge fÃƒÂ¶rsvinner.
 func _expire_requests() -> void:
 	for character_id in requests.keys():
 		var t := Requests.find_type(requests[character_id]["type"])
@@ -781,12 +781,12 @@ func has_flag(flag: String) -> bool:
 	return flags.get(flag, false)
 
 
-## Platsen mamman Ã¤r pÃ¥, eller tom strÃ¤ng om hon Ã¤r hemma.
+## Platsen mamman ÃƒÂ¤r pÃƒÂ¥, eller tom strÃƒÂ¤ng om hon ÃƒÂ¤r hemma.
 func current_location() -> String:
 	return Locations.location_of_room(current_room)
 
 
-## VarfÃ¶r en plats Ã¤r stÃ¤ngd just nu, eller tom strÃ¤ng om man kan Ã¥ka dit.
+## VarfÃƒÂ¶r en plats ÃƒÂ¤r stÃƒÂ¤ngd just nu, eller tom strÃƒÂ¤ng om man kan ÃƒÂ¥ka dit.
 func location_block_reason(location_id: String) -> String:
 	var location: Dictionary = Locations.LOCATIONS[location_id]
 	var flag: String = location.get("flag", "")
@@ -810,7 +810,7 @@ func location_block_reason(location_id: String) -> String:
 	return ""
 
 
-## Reser till en plats i grannskapet. Att resa tar ingen tid, som att gÃ¥ mellan rum.
+## Reser till en plats i grannskapet. Att resa tar ingen tid, som att gÃƒÂ¥ mellan rum.
 func travel_to_location(location_id: String) -> bool:
 	if not is_playable() or location_block_reason(location_id) != "":
 		return false
@@ -820,7 +820,7 @@ func travel_to_location(location_id: String) -> bool:
 	return true
 
 
-## Ã…ker hem igen (till hallen, innanfÃ¶r ytterdÃ¶rren).
+## Ãƒâ€¦ker hem igen (till hallen, innanfÃƒÂ¶r ytterdÃƒÂ¶rren).
 func return_home(text := "You head back home.") -> void:
 	if current_location() == "":
 		return
@@ -828,7 +828,7 @@ func return_home(text := "You head back home.") -> void:
 	go_to_room(Locations.HOME["room"])
 
 
-## Om platsen mamman Ã¤r pÃ¥ har stÃ¤ngt (t.ex. skolan pÃ¥ kvÃ¤llen) Ã¥ker hon hem.
+## Om platsen mamman ÃƒÂ¤r pÃƒÂ¥ har stÃƒÂ¤ngt (t.ex. skolan pÃƒÂ¥ kvÃƒÂ¤llen) ÃƒÂ¥ker hon hem.
 func _leave_closed_location() -> void:
 	var location_id := current_location()
 	if location_id == "" or not is_playable() or location_block_reason(location_id) == "":
@@ -847,7 +847,7 @@ func set_appearance(category: String, option_id: String) -> void:
 
 # --- Telefonen ----------------------------------------------------------------
 
-## LÃ¤gger till en kontakt man har hittat.
+## LÃƒÂ¤gger till en kontakt man har hittat.
 func add_contact(contact_id: String) -> void:
 	if contact_id in known_contacts or not PhoneData.CONTACTS.has(contact_id):
 		return
@@ -861,7 +861,7 @@ func send_message(contact_id: String, text: String) -> void:
 	phone_changed.emit()
 
 
-## Ett sms kommer in (markeras som olÃ¤st).
+## Ett sms kommer in (markeras som olÃƒÂ¤st).
 func receive_message(contact_id: String, text: String) -> void:
 	add_contact(contact_id)
 	messages.get_or_add(contact_id, []).append(["them", text])
@@ -876,8 +876,8 @@ func mark_read(contact_id: String) -> void:
 		phone_changed.emit()
 
 
-## LÃ¤gger till ett minne. source skriver Ã¶ver PhoneData:s text om varifrÃ¥n det kom,
-## t.ex. "Sent by Best Friend". Scenminnen lÃ¤ggs till av sig sjÃ¤lva nÃ¤r scenen Ã¤r slut.
+## LÃƒÂ¤gger till ett minne. source skriver ÃƒÂ¶ver PhoneData:s text om varifrÃƒÂ¥n det kom,
+## t.ex. "Sent by Best Friend". Scenminnen lÃƒÂ¤ggs till av sig sjÃƒÂ¤lva nÃƒÂ¤r scenen ÃƒÂ¤r slut.
 func add_memory(memory_id: String, source := "") -> void:
 	if memories.has(memory_id) or not PhoneData.MEMORIES.has(memory_id):
 		return
@@ -901,7 +901,7 @@ func mark_memory_seen(memory_id: String) -> void:
 		phone_changed.emit()
 
 
-## Byter telefonens bakgrund pÃ¥ en plats (se PhoneData.WALLPAPER_SLOTS).
+## Byter telefonens bakgrund pÃƒÂ¥ en plats (se PhoneData.WALLPAPER_SLOTS).
 func set_wallpaper(slot: String, value: String) -> void:
 	if PhoneData.WALLPAPER_SLOTS.has(slot) and phone_wallpapers.get(slot) != value:
 		phone_wallpapers[slot] = value
@@ -912,7 +912,7 @@ func unseen_memory_count() -> int:
 	return memories.values().filter(func(record: Dictionary) -> bool: return not record["seen"]).size()
 
 
-## Spelar ett scenminne igen. Inget i spelet Ã¤ndras av att se det.
+## Spelar ett scenminne igen. Inget i spelet ÃƒÂ¤ndras av att se det.
 func replay_memory(memory_id: String) -> void:
 	if replaying_memory != "" or playing_scene != "" or not memories.get(memory_id, {}).has("replay"):
 		return
@@ -948,13 +948,13 @@ func is_day_over() -> bool:
 	return period >= TIME_PERIODS.size()
 
 
-## Om spelaren har kontroll: eftermiddag eller kvÃ¤ll, och ingen scen spelas.
+## Om spelaren har kontroll: eftermiddag eller kvÃƒÂ¤ll, och ingen scen spelas.
 func is_playable() -> bool:
 	return not is_day_over() and playing_scene == "" and replaying_memory == "" and get_time_of_day() in PLAYABLE_PERIODS
 
 
-## UtfÃ¶r en handling: Ã¤ndrar mÃ¤tarna och meddelar HUD:en. Aktiviteter som tar tid
-## (advances) flyttar dygnet till nÃ¤sta tidszon.
+## UtfÃƒÂ¶r en handling: ÃƒÂ¤ndrar mÃƒÂ¤tarna och meddelar HUD:en. Aktiviteter som tar tid
+## (advances) flyttar dygnet till nÃƒÂ¤sta tidszon.
 func perform_action(action_text: String, effects: Dictionary, advances: Variant = true) -> void:
 	if not is_playable():
 		return
@@ -973,35 +973,35 @@ func perform_action(action_text: String, effects: Dictionary, advances: Variant 
 		advance_period()
 
 
-## Flyttar spelaren till ett annat rum (gamla rumsvyn). Att gÃ¥ tar ingen tid.
+## Flyttar spelaren till ett annat rum (gamla rumsvyn). Att gÃƒÂ¥ tar ingen tid.
 func go_to_room(room_id: String, _travel_minutes: int = 0) -> void:
 	if is_day_over():
 		return
 	if not ROOMS.has(room_id):
-		push_error("OkÃ¤nt rum: %s" % room_id)
+		push_error("OkÃƒÂ¤nt rum: %s" % room_id)
 		return
 	current_room = room_id
 	room_changed.emit(room_id)
 
 
-## GÃ¥r till ett rum via kartan. Restiden Ã¤r den kortaste vÃ¤gen genom husets dÃ¶rrar.
+## GÃƒÂ¥r till ett rum via kartan. Restiden ÃƒÂ¤r den kortaste vÃƒÂ¤gen genom husets dÃƒÂ¶rrar.
 func travel_to(room_id: String) -> void:
 	set_map_open(false)
 	if room_id == current_room:
 		return
 	var travel := get_travel_minutes(current_room, room_id)
 	if travel < 0:
-		push_error("Ingen vÃ¤g frÃ¥n %s till %s" % [current_room, room_id])
+		push_error("Ingen vÃƒÂ¤g frÃƒÂ¥n %s till %s" % [current_room, room_id])
 		return
 	go_to_room(room_id, travel)
 
 
-## Rummets dÃ¶rrar: {mÃ¥lrum: restid}.
+## Rummets dÃƒÂ¶rrar: {mÃƒÂ¥lrum: restid}.
 func get_exits(room_id: String) -> Dictionary:
 	return _exits.get(room_id, {})
 
 
-## Kortaste restiden mellan tvÃ¥ rum lÃ¤ngs dÃ¶rrarna, eller -1 om det inte finns nÃ¥gon vÃ¤g.
+## Kortaste restiden mellan tvÃƒÂ¥ rum lÃƒÂ¤ngs dÃƒÂ¶rrarna, eller -1 om det inte finns nÃƒÂ¥gon vÃƒÂ¤g.
 func get_travel_minutes(from_room: String, to_room: String) -> int:
 	var best := {from_room: 0}
 	var unvisited := [from_room]
@@ -1022,7 +1022,7 @@ func get_travel_minutes(from_room: String, to_room: String) -> int:
 	return -1
 
 
-## SÃ¤tter vilket rum spelaren stÃ¥r i utan att nÃ¥gon restid rÃ¤knas (spelaren gÃ¥r sjÃ¤lv).
+## SÃƒÂ¤tter vilket rum spelaren stÃƒÂ¥r i utan att nÃƒÂ¥gon restid rÃƒÂ¤knas (spelaren gÃƒÂ¥r sjÃƒÂ¤lv).
 func set_current_room(room_id: String) -> void:
 	if room_id == current_room or not ROOMS.has(room_id):
 		return
@@ -1037,11 +1037,11 @@ func set_map_open(is_open: bool) -> void:
 	map_toggled.emit(is_open)
 
 
-# --- Scheman: var alla Ã¤r ------------------------------------------------------
+# --- Scheman: var alla ÃƒÂ¤r ------------------------------------------------------
 
-## RÃ¤knar om var alla Ã¤r fÃ¶r dagens tidszon och meddelar vÃ¤rlden om nÃ¥got har Ã¤ndrats.
-## Anropas nÃ¤r tidszonen byts och nÃ¤r storyn Ã¤ndras (hÃ¤ndelser, quests, rank,
-## storyÃ¶verstyrningar), sÃ¥ att svaren alltid stÃ¤mmer mitt i en tidszon.
+## RÃƒÂ¤knar om var alla ÃƒÂ¤r fÃƒÂ¶r dagens tidszon och meddelar vÃƒÂ¤rlden om nÃƒÂ¥got har ÃƒÂ¤ndrats.
+## Anropas nÃƒÂ¤r tidszonen byts och nÃƒÂ¤r storyn ÃƒÂ¤ndras (hÃƒÂ¤ndelser, quests, rank,
+## storyÃƒÂ¶verstyrningar), sÃƒÂ¥ att svaren alltid stÃƒÂ¤mmer mitt i en tidszon.
 func refresh_schedules() -> void:
 	var changed := false
 	for character_id in CHARACTERS:
@@ -1058,23 +1058,23 @@ func refresh_schedules() -> void:
 		schedules_changed.emit()
 
 
-## Var en person Ã¤r och vad den gÃ¶r just nu: {"room", "activity", "source", "stranger"}
-## (se Schedules.resolve). room Ã¤r "" om personen Ã¤r borta.
+## Var en person ÃƒÂ¤r och vad den gÃƒÂ¶r just nu: {"room", "activity", "source", "stranger"}
+## (se Schedules.resolve). room ÃƒÂ¤r "" om personen ÃƒÂ¤r borta.
 func where_is(character_id: String) -> Dictionary:
 	if character_id == "mom":
 		return {"room": current_room, "activity": "", "source": "", "stranger": false}
 	return whereabouts.get(character_id, {"room": "", "activity": "", "source": "", "stranger": false})
 
 
-## Svaret pÃ¥ "var Ã¤r X?" fÃ¶r spelaren, t.ex. "Kitchen Â· Having breakfast" eller
-## "At football practice". Personer man inte har trÃ¤ffat Ã¤r okÃ¤nda.
+## Svaret pÃƒÂ¥ "var ÃƒÂ¤r X?" fÃƒÂ¶r spelaren, t.ex. "Kitchen Ã‚Â· Having breakfast" eller
+## "At football practice". Personer man inte har trÃƒÂ¤ffat ÃƒÂ¤r okÃƒÂ¤nda.
 func where_text(character_id: String) -> String:
 	if not is_introduced(character_id):
 		return "Unknown"
 	return Schedules.describe(where_is(character_id))
 
 
-## Rummet dÃ¤r en person Ã¤r just nu, eller tom strÃ¤ng om personen Ã¤r borta.
+## Rummet dÃƒÂ¤r en person ÃƒÂ¤r just nu, eller tom strÃƒÂ¤ng om personen ÃƒÂ¤r borta.
 func get_character_room(character_id: String) -> String:
 	return where_is(character_id)["room"]
 
@@ -1087,18 +1087,18 @@ func get_characters_in(room_id: String) -> Array[String]:
 	return present
 
 
-## Om personen gÃ¶r nÃ¥got som inte gÃ¥r att avbryta (t.ex. sover).
+## Om personen gÃƒÂ¶r nÃƒÂ¥got som inte gÃƒÂ¥r att avbryta (t.ex. sover).
 func is_busy(character_id: String) -> bool:
 	return Schedules.is_busy(where_is(character_id))
 
 
-## Om en framtida NPC har fÃ¶rts in i vÃ¤rlden. Familjen Ã¤r alltid introducerad.
+## Om en framtida NPC har fÃƒÂ¶rts in i vÃƒÂ¤rlden. Familjen ÃƒÂ¤r alltid introducerad.
 func is_introduced(character_id: String) -> bool:
 	var flag: String = CHARACTERS[character_id].get("introduced_by", "")
 	return flag == "" or has_flag(flag)
 
 
-## Namnet spelaren ser: stranger_name tills en framtida NPC Ã¤r introducerad.
+## Namnet spelaren ser: stranger_name tills en framtida NPC ÃƒÂ¤r introducerad.
 func character_name(character_id: String) -> String:
 	var info: Dictionary = CHARACTERS[character_id]
 	return info["name"] if is_introduced(character_id) else info.get("stranger_name", "???")
@@ -1108,9 +1108,9 @@ func character_initials(character_id: String) -> String:
 	return CHARACTERS[character_id]["initials"] if is_introduced(character_id) else "?"
 
 
-## Storyn Ã¤ndrar en persons schema, t.ex. en tjÃ¤nsteresa eller att nÃ¥gon flyttar in hos
-## grannen. GÃ¥r fÃ¶re regler och rutiner. to_day -1 betyder tills vidare; periods []
-## betyder hela dygnet. Samma id ersÃ¤tter en tidigare Ã¶verstyrning.
+## Storyn ÃƒÂ¤ndrar en persons schema, t.ex. en tjÃƒÂ¤nsteresa eller att nÃƒÂ¥gon flyttar in hos
+## grannen. GÃƒÂ¥r fÃƒÂ¶re regler och rutiner. to_day -1 betyder tills vidare; periods []
+## betyder hela dygnet. Samma id ersÃƒÂ¤tter en tidigare ÃƒÂ¶verstyrning.
 func set_schedule_override(override_id: String, character_id: String, room: String, activity: String,
 		from_day: int, to_day := -1, periods: Array = []) -> void:
 	schedule_overrides[override_id] = {"character": character_id, "room": room, "activity": activity,
@@ -1123,7 +1123,7 @@ func clear_schedule_override(override_id: String) -> void:
 		refresh_schedules()
 
 
-## En framtida NPC kliver in i vÃ¤rlden: fÃ¥r en social link och hamnar i telefonen.
+## En framtida NPC kliver in i vÃƒÂ¤rlden: fÃƒÂ¥r en social link och hamnar i telefonen.
 func _introduce(character_id: String) -> void:
 	if not links.has(character_id):
 		links[character_id] = {"rank": 1, "points": 0, "lust": 0.0}
@@ -1132,8 +1132,8 @@ func _introduce(character_id: String) -> void:
 	character_introduced.emit(character_id)
 
 
-## FrÃ¥gar Dispatcher om personen har en rankscen klar just nu och startar den i sÃ¥ fall
-## genom Dialogue Manager. Annars platshÃ¥llartexten. Returnerar true om en scen startade.
+## FrÃƒÂ¥gar Dispatcher om personen har en rankscen klar just nu och startar den i sÃƒÂ¥ fall
+## genom Dialogue Manager. Annars platshÃƒÂ¥llartexten. Returnerar true om en scen startade.
 func talk_to(character_id: String) -> bool:
 	var scene_id := Dispatcher.resolve_slot(period, character_id)
 	if scene_id == "":
@@ -1141,7 +1141,7 @@ func talk_to(character_id: String) -> bool:
 		return false
 	var path := Dispatcher.dialogue_path(scene_id)
 	if not ResourceLoader.exists(path):
-		push_error("Dialogfilen fÃ¶r %s saknas: %s" % [scene_id, path])
+		push_error("Dialogfilen fÃƒÂ¶r %s saknas: %s" % [scene_id, path])
 		return false
 	var manager: Node = Engine.get_singleton("DialogueManager")
 	if not manager.dialogue_ended.is_connected(_on_dialogue_ended):
@@ -1160,8 +1160,8 @@ func _on_dialogue_ended(_resource: Resource) -> void:
 		advance_period()
 
 
-## Dialogrutorna som Ã¤r Ã¶ppna just nu (nodens instans-id). BÃ¥de husets dialogruta och
-## storyns balloon anmÃ¤ler sig hÃ¤r, sÃ¥ att telefonen vet nÃ¤r den ska hÃ¥lla sig undan.
+## Dialogrutorna som ÃƒÂ¤r ÃƒÂ¶ppna just nu (nodens instans-id). BÃƒÂ¥de husets dialogruta och
+## storyns balloon anmÃƒÂ¤ler sig hÃƒÂ¤r, sÃƒÂ¥ att telefonen vet nÃƒÂ¤r den ska hÃƒÂ¥lla sig undan.
 var _open_dialogues := {}
 
 
@@ -1180,13 +1180,17 @@ func in_dialogue() -> bool:
 
 
 func start_next_day() -> void:
-	# KvÃ¤llens Work rÃ¤knas till lÃ¶nebonusen innan natten tÃ¤r pÃ¥ mÃ¤tarna.
+	# KvÃƒÂ¤llens Work rÃƒÂ¤knas till lÃƒÂ¶nebonusen innan natten tÃƒÂ¤r pÃƒÂ¥ mÃƒÂ¤tarna.
 	work_log["sum"] += stats["work"]
 	work_log["days"] += 1
 	day += 1
 	used_today.clear()
 	for key in stats:
 		stats[key] = clampi(stats[key] - maxi(NIGHTLY_DECAY - decay_reduction(key), 0), 0, STAT_MAX)
+	for character_id in links:
+		var l: Dictionary = links[character_id]
+		l["lust"] = maxf(l["lust"] * (1.0 - Balance.LUST_DECAY), 0.0)
+		link_changed.emit(character_id)
 	_expire_requests()
 	var notes := _money_new_day()
 	notes.push_front("A new day begins. Things slipped a little overnight.")
@@ -1197,14 +1201,14 @@ func start_next_day() -> void:
 	begin_day()
 
 
-## Startar dagen pÃ¥ morgonen: spelar dagens morgonscen om det finns en, annars gÃ¥r
-## dygnet direkt till eftermiddagen. Anropas nÃ¤r spelet startar och varje ny dag.
+## Startar dagen pÃƒÂ¥ morgonen: spelar dagens morgonscen om det finns en, annars gÃƒÂ¥r
+## dygnet direkt till eftermiddagen. Anropas nÃƒÂ¤r spelet startar och varje ny dag.
 func begin_day() -> void:
 	_set_period(0)
 	_play_scene_or_continue()
 
 
-## Den pÃ¥gÃ¥ende scenen Ã¤r slut; dygnet fortsÃ¤tter.
+## Den pÃƒÂ¥gÃƒÂ¥ende scenen ÃƒÂ¤r slut; dygnet fortsÃƒÂ¤tter.
 func finish_scene() -> void:
 	add_memory(PhoneData.memory_for_scene(playing_scene))
 	playing_scene = ""
@@ -1222,7 +1226,7 @@ func _play_scene_or_continue() -> void:
 		_continue_after_scene()
 
 
-## Efter morgonen kommer eftermiddagen; efter natten Ã¤r dagen slut.
+## Efter morgonen kommer eftermiddagen; efter natten ÃƒÂ¤r dagen slut.
 func _continue_after_scene() -> void:
 	match get_time_of_day():
 		"morning":
@@ -1233,7 +1237,7 @@ func _continue_after_scene() -> void:
 
 func _set_period(index: int) -> void:
 	period = index
-	# FÃ¶re signalerna, sÃ¥ att den som lyssnar ser vem som Ã¤r var i den nya tidszonen.
+	# FÃƒÂ¶re signalerna, sÃƒÂ¥ att den som lyssnar ser vem som ÃƒÂ¤r var i den nya tidszonen.
 	refresh_schedules()
 	_tick_requests()
 	stats_changed.emit()
@@ -1255,7 +1259,7 @@ func get_time_of_day() -> String:
 	return TIME_PERIODS[mini(period, TIME_PERIODS.size() - 1)]
 
 
-## GÃ¥r vidare efter en aktivitet: frÃ¥n eftermiddagen till kvÃ¤llen, och frÃ¥n kvÃ¤llen
+## GÃƒÂ¥r vidare efter en aktivitet: frÃƒÂ¥n eftermiddagen till kvÃƒÂ¤llen, och frÃƒÂ¥n kvÃƒÂ¤llen
 ## till natten (med nattscen om dagen har en) och sedan dagens slut.
 func advance_period() -> void:
 	if not is_playable():
@@ -1294,16 +1298,16 @@ static func format_duration(total_minutes: int) -> String:
 
 
 # --- Dialogfunktioner (CONTRACT.md, avsnitt 2) ------------------------------------
-# Anropas frÃ¥n dialogfilerna.
+# Anropas frÃƒÂ¥n dialogfilerna.
 
 ## Dialogrutan rankscenerna spelas i.
 const STORY_BALLOON := "res://scenes/balloon/balloon.tscn"
-## Namnet pÃ¥ StoryStage-noden (figurer och rank-kort) under GameState.
+## Namnet pÃƒÂ¥ StoryStage-noden (figurer och rank-kort) under GameState.
 const STAGE_NAME := "StoryStage"
 
 
-## Slutet pÃ¥ en rankscen: lÃ¤gger pÃ¥ Balance.EFFECTS[scene_id], sÃ¤tter scenens flaggor
-## och markerar scenen som spelad. En _bonus-scen utan egen rad fÃ¥r grundscenens effekter.
+## Slutet pÃƒÂ¥ en rankscen: lÃƒÂ¤gger pÃƒÂ¥ Balance.EFFECTS[scene_id], sÃƒÂ¤tter scenens flaggor
+## och markerar scenen som spelad. En _bonus-scen utan egen rad fÃƒÂ¥r grundscenens effekter.
 func apply(scene_id: String, tone := 0) -> void:
 	var base := Dispatcher.base_id(scene_id)
 	if not Balance.GATES.has(base):
@@ -1328,10 +1332,10 @@ func apply(scene_id: String, tone := 0) -> void:
 	set_flag(Dispatcher.DONE_FLAG + base)
 	stats_changed.emit()
 	if not notes.is_empty():
-		message_posted.emit(" Â· ".join(notes))
+		message_posted.emit(" Ã‚Â· ".join(notes))
 
 
-## Platskort nÃ¤r en scen byter plats.
+## Platskort nÃƒÂ¤r en scen byter plats.
 func location(text: String) -> void:
 	_stage().show_location(text)
 
@@ -1339,20 +1343,20 @@ func location(text: String) -> void:
 ## Rank-upp-kort. Kommer sist i scenen.
 func rank_card(char_id: String, rank: int) -> void:
 	if not CHARACTERS.has(char_id):
-		push_error("rank_card(): okÃ¤nd person %s" % char_id)
+		push_error("rank_card(): okÃƒÂ¤nd person %s" % char_id)
 		return
 	_stage().show_rank_card(char_id, rank)
 
 
-## Visar en figur eller byter dess pose. Saknas bilden blir det en platshÃ¥llare.
+## Visar en figur eller byter dess pose. Saknas bilden blir det en platshÃƒÂ¥llare.
 func sprite(char_id: String, pose: String) -> void:
 	if not CHARACTERS.has(char_id):
-		push_error("sprite(): okÃ¤nd person %s" % char_id)
+		push_error("sprite(): okÃƒÂ¤nd person %s" % char_id)
 		return
 	_stage().show_sprite(char_id, pose)
 
 
-## StoryStage skapas fÃ¶rsta gÃ¥ngen den behÃ¶vs.
+## StoryStage skapas fÃƒÂ¶rsta gÃƒÂ¥ngen den behÃƒÂ¶vs.
 func _stage() -> StoryStage:
 	var stage := get_node_or_null(STAGE_NAME) as StoryStage
 	if stage == null:
@@ -1362,12 +1366,11 @@ func _stage() -> StoryStage:
 	return stage
 
 
-## Byter ansiktsuttryck pÃ¥ en figur. StÃ¥r figuren inte pÃ¥ scenen Ã¤n sparas uttrycket
-## tills sprite() stÃ¤ller fram den.
+## Byter ansiktsuttryck pÃƒÂ¥ en figur. StÃƒÂ¥r figuren inte pÃƒÂ¥ scenen ÃƒÂ¤n sparas uttrycket
+## tills sprite() stÃƒÂ¤ller fram den.
 func mood(char_id: String, mood_id: String) -> void:
 	if not CHARACTERS.has(char_id):
-		push_error("mood(): okÃ¤nd person %s" % char_id)
+		push_error("mood(): okÃƒÂ¤nd person %s" % char_id)
 		return
 	_stage().show_mood(char_id, mood_id)
-
 

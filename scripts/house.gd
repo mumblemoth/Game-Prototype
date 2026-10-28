@@ -344,8 +344,10 @@ func _open_menu(room_id: String) -> void:
 		if character_id == "mom":
 			continue
 		var character_name := GameState.character_name(character_id)
-		var talk := {"id": "talk_" + character_id, "object": "", "label": ("Spend time with %s" if Dispatcher.resolve_slot(GameState.period, character_id) != "" else "Talk to %s") % character_name,
-				"text": "You chat with %s." % character_name}
+		var reason := Dispatcher.block_reason(character_id)
+		var ready := Dispatcher.resolve_slot(GameState.period, character_id) != ""
+		var talk := {"id": "talk_" + character_id, "object": "", "label": ("Spend time with %s" if ready else "Talk to %s") % character_name,
+				"text": ("You chat with %s." % character_name) if ready or reason == "" else reason}
 		if character_id == "dog":
 			var bed := "dog_bed" if FloorPlanArt.furniture_rect(room_id, "dog_bed").size != Vector2.ZERO else "dog_house"
 			talk = {"id": "pet_dog", "object": bed, "label": "Pet the dog", "text": "You scratch the dog behind the ears. Its tail thumps happily."}
@@ -460,4 +462,5 @@ func _on_time_of_day_changed(period: String) -> void:
 		if GameState.get_time_of_day() != period:
 			return
 	UiTransition.banner(self, GameState.PERIOD_NAMES[period], GameState.get_weekday())
+
 

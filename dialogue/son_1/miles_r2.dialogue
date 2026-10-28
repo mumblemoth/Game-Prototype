@@ -38,19 +38,19 @@ Miles: [#mood=strain] It's the third one. The meteor one. You have to be already
 Mom: [#mood=neutral] Show me the meteor one.
 
 - Sit on the floor by the chair.
-$> locals.tone += 1
-She lowers herself down, back against the desk leg, close enough that her shoulder is at his elbow.
-Miles: [#mood=surprised] Oh — okay.
-Miles: [#mood=strain] It's — you won't see it from down there.
-Mom: [#mood=neutral] Then tell me when it's coming.
-Miles: [#mood=flushed] ...Right. Okay.
+	$> locals.tone += 1
+	She lowers herself down, back against the desk leg, close enough that her shoulder is at his elbow.
+	Miles: [#mood=surprised] Oh — okay.
+	Miles: [#mood=strain] It's — you won't see it from down there.
+	Mom: [#mood=neutral] Then tell me when it's coming.
+	Miles: [#mood=flushed] ...Right. Okay.
 - Sit on the edge of the bed.
-She sits on the mattress, facing the screen.
-Miles: [#mood=strain] It's fine. You can sit.
-She can see the screen from there. Barely.
+	She sits on the mattress, facing the screen.
+	Miles: [#mood=strain] It's fine. You can sit.
+	She can see the screen from there. Barely.
 - Stay in the doorway.
-Mom: [#mood=neutral] Go on. I've got time.
-He turns back. He's not going to start while she's watching.
+	Mom: [#mood=neutral] Go on. I've got time.
+	He turns back. He's not going to start while she's watching.
 
 He restarts. His shoulders are up around his ears.
 
@@ -81,3 +81,4 @@ $> GameState.apply("miles_r2", locals.tone)
 $> GameState.rank_card("son_1", 2)
 
 => END
+

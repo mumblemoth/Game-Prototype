@@ -8,6 +8,8 @@
 
 ## Taket fÃ¶r links[char]["lust"] (CONTRACT.md, avsnitt 2).
 const LUST_MAX := 100.0
+## Andel av lust som tappas varje natt (0.05 = 5 %).
+const LUST_DECAY := 0.05
 
 ## scen_id -> villkor fÃ¶r att scenen ska kunna spelas:
 ##   char   â€“ id i GameState.CHARACTERS (och nyckel i links)
@@ -37,6 +39,7 @@ const EFFECTS := {
 	"miles_r2": {"link_points": 3, "lust": 4.0, "relief": 6, "flags": []},
 	"miles_r1_bonus": {"link_points": 3, "lust": 4.0, "relief": 8, "flags": []},
 }
+
 
 
 

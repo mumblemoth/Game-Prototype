@@ -82,4 +82,24 @@ static func dialogue_path(scene_id: String) -> String:
 static func cue(scene_id: String) -> String:
 	return SCENES.get(scene_id, {}).get("cue", DEFAULT_CUE)
 
+## Varför personens nästa scen inte kan spelas nu, eller tom sträng.
+static func block_reason(char_id: String) -> String:
+	for rank in range(1, GameState.LINK_MAX_RANK + 1):
+		var scene_id := scene_for(char_id, rank)
+		if scene_id == "" or is_done(scene_id):
+			continue
+		var gate: Dictionary = Balance.GATES[scene_id]
+		if gate["period"] != GameState.TIME_PERIODS[GameState.period]:
+			return "only in the " + gate["period"]
+		if gate.has("room") and GameState.current_room != gate["room"]:
+			return "in the " + GameState.ROOMS[gate["room"]]["name"]
+		var link: Dictionary = GameState.links.get(char_id, {})
+		if link.get("points", 0) < GameState.LINK_THRESHOLDS[rank]:
+			return "needs more time together"
+		if link.get("lust", 0.0) < gate["lust"]:
+			return "needs more charge"
+		if GameState.attractiveness_tier() < gate["attr"]:
+			return "needs more Attractiveness"
+		return ""
+	return ""
 
