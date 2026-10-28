@@ -1,4 +1,4 @@
-# STYLE
+﻿# STYLE
 
 ## POV and tense
 First person, present tense. She narrates. The reader is inside her head.
@@ -11,6 +11,16 @@ Bad:  "The gym empties out in stages. First the juniors, then the coach."
 Good: "The gym empties out."
 
 Keep interiority and sensation, because a sprite can't show those.
+
+## Hard style rules
+- Present tense, first person, hers. No exceptions.
+- Un-prefixed lines are bare action, one sentence, two at most.
+- No narrator. Never "the room feels", "there is a sense of".
+- Concrete nouns only. If a sprite shows it, cut it.
+- Interiority only where a sprite can't reach.
+- One simile per scene, maximum.
+- No adverbs on dialogue tags.
+- Never explain the joke.
 
 ## Scene shape
 Persona 5 confidant scene. Short, dialogue-dominant, 45-65 lines.
