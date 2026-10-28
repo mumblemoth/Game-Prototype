@@ -1,49 +1,49 @@
-class_name RoomActions
-## Vad man kan göra i varje rum, kopplat till en sak i rummet. Varje handling är en
+﻿class_name RoomActions
+## Vad man kan gÃ¶ra i varje rum, kopplat till en sak i rummet. Varje handling Ã¤r en
 ## dictionary med:
-##   id          – unikt namn (används för "en gång per dag")
-##   object      – möbeltypen i FloorPlanArt.FURNITURE som handlingen hör till; den
-##                 markeras i planen när man håller musen över valet ("" = ingen)
-##   label       – knapptexten
-##   text        – vad som händer (visas i textrutan)
-##   time        – true: en aktivitet som flyttar dygnet till nästa tidszon
-##   effects     – ändringar i mätarna, t.ex. {"home": 10}
-##   relief      – sänker mammans egen mätare (se GameState._relieve_mom)
-##   social      – XP i mammans egenskaper, t.ex. {"fitness": 5} (se SocialStats)
-##   requires    – krav på egenskaper eller Attractiveness, t.ex. {"charm": 3} eller
-##                 {"attractiveness": 4}; valet syns men är låst tills de uppfylls
-##   link        – relation som får poäng (social link), och link_points hur många
-##   needs       – personen måste vara i rummet; needs_home – någonstans hemma
-##   periods     – bara under dessa tidszoner
-##   panel       – öppnar en panel i stället ("wardrobe", "vanity", "salon" eller "map");
-##                 salongens panel tar betalt och tid själv när besöket bokas
-##   sets_flag   – en händelse i storyn som handlingen sätter (låser upp platser m.m.)
-##   hidden_flag – valet döljs när den här händelsen redan har hänt
-##   completes   – en quest som handlingen avslutar
-##   weekdays    – bara dessa veckodagar (index 0 = måndag)
-##   reveal_flag – valet syns först när den här händelsen har hänt (t.ex. en hittad
+##   id          â€“ unikt namn (anvÃ¤nds fÃ¶r "en gÃ¥ng per dag")
+##   object      â€“ mÃ¶beltypen i FloorPlanArt.FURNITURE som handlingen hÃ¶r till; den
+##                 markeras i planen nÃ¤r man hÃ¥ller musen Ã¶ver valet ("" = ingen)
+##   label       â€“ knapptexten
+##   text        â€“ vad som hÃ¤nder (visas i textrutan)
+##   time        â€“ true: en aktivitet som flyttar dygnet till nÃ¤sta tidszon
+##   effects     â€“ Ã¤ndringar i mÃ¤tarna, t.ex. {"home": 10}
+##   relief      â€“ sÃ¤nker mammans egen mÃ¤tare (se GameState._relieve_mom)
+##   social      â€“ XP i mammans egenskaper, t.ex. {"fitness": 5} (se SocialStats)
+##   requires    â€“ krav pÃ¥ egenskaper eller Attractiveness, t.ex. {"charm": 3} eller
+##                 {"attractiveness": 4}; valet syns men Ã¤r lÃ¥st tills de uppfylls
+##   link        â€“ relation som fÃ¥r poÃ¤ng (social link), och link_points hur mÃ¥nga
+##   needs       â€“ personen mÃ¥ste vara i rummet; needs_home â€“ nÃ¥gonstans hemma
+##   periods     â€“ bara under dessa tidszoner
+##   panel       â€“ Ã¶ppnar en panel i stÃ¤llet ("wardrobe", "vanity", "salon" eller "map");
+##                 salongens panel tar betalt och tid sjÃ¤lv nÃ¤r besÃ¶ket bokas
+##   sets_flag   â€“ en hÃ¤ndelse i storyn som handlingen sÃ¤tter (lÃ¥ser upp platser m.m.)
+##   hidden_flag â€“ valet dÃ¶ljs nÃ¤r den hÃ¤r hÃ¤ndelsen redan har hÃ¤nt
+##   completes   â€“ en quest som handlingen avslutar
+##   weekdays    â€“ bara dessa veckodagar (index 0 = mÃ¥ndag)
+##   reveal_flag â€“ valet syns fÃ¶rst nÃ¤r den hÃ¤r hÃ¤ndelsen har hÃ¤nt (t.ex. en hittad
 ##                 sidoinkomst, se Economy.SIDE_INCOME)
 ## Pengar (se Economy):
-##   cost        – vad det kostar; går inte att välja om pengarna inte räcker
-##   waived_by   – gratis med ett abonnemang som har den här "waives" (t.ex. gym_visit)
-##   earn        – vad det ger; earn_scale höjer det per nivå, t.ex. {"knowledge": 10}
-##   income      – vilken sidoinkomst pengarna räknas till (Economy.SIDE_INCOME)
-##   groceries   – räknas som veckohandlingen (annars blir det hämtmat, se Economy.TAKEOUT)
-##   gives_item  – ger en sak (Economy.ITEMS); needs_item kräver och förbrukar en
-##   buys/sells/subscribe/unsubscribe – sätts av Economy.actions_for_room()
-##   ledger_label – namnet i kontoutdraget, om det ska skilja sig från label
-## Trädgården (se Backyard):
-##   fx            – en kort animation i 3D-vyn innan handlingen genomförs ("swim", "sun",
+##   cost        â€“ vad det kostar; gÃ¥r inte att vÃ¤lja om pengarna inte rÃ¤cker
+##   waived_by   â€“ gratis med ett abonnemang som har den hÃ¤r "waives" (t.ex. gym_visit)
+##   earn        â€“ vad det ger; earn_scale hÃ¶jer det per nivÃ¥, t.ex. {"knowledge": 10}
+##   income      â€“ vilken sidoinkomst pengarna rÃ¤knas till (Economy.SIDE_INCOME)
+##   groceries   â€“ rÃ¤knas som veckohandlingen (annars blir det hÃ¤mtmat, se Economy.TAKEOUT)
+##   gives_item  â€“ ger en sak (Economy.ITEMS); needs_item krÃ¤ver och fÃ¶rbrukar en
+##   buys/sells/subscribe/unsubscribe â€“ sÃ¤tts av Economy.actions_for_room()
+##   ledger_label â€“ namnet i kontoutdraget, om det ska skilja sig frÃ¥n label
+## TrÃ¤dgÃ¥rden (se Backyard):
+##   fx            â€“ en kort animation i 3D-vyn innan handlingen genomfÃ¶rs ("swim", "sun",
 ##                   "water" eller "fetch", se HouseView3D.play_activity)
-##   waters_plants – vattnar rabatterna, så att de inte vissnar
-##   calls_dog     – Rex kommer ut i trädgården och stannar där resten av tidszonen
-## Gardiner (sätts av Curtains.actions_for_room()):
-##   curtains    – läget som gardinerna dras till ("open" eller "closed")
-## Förfrågningar (sätts av Requests.actions_for_room()):
-##   fulfills/declines – personen vars öppna förfrågan görs eller avböjs
-##   delegates         – personen som gör sysslan i stället (betalar av en skuld)
-## Snabba handlingar som ger något går bara en gång per dag (GameState). Texterna är
-## platshållare tills riktig story skrivs. All text spelaren ser är på engelska.
+##   waters_plants â€“ vattnar rabatterna, sÃ¥ att de inte vissnar
+##   calls_dog     â€“ Rex kommer ut i trÃ¤dgÃ¥rden och stannar dÃ¤r resten av tidszonen
+## Gardiner (sÃ¤tts av Curtains.actions_for_room()):
+##   curtains    â€“ lÃ¤get som gardinerna dras till ("open" eller "closed")
+## FÃ¶rfrÃ¥gningar (sÃ¤tts av Requests.actions_for_room()):
+##   fulfills/declines â€“ personen vars Ã¶ppna fÃ¶rfrÃ¥gan gÃ¶rs eller avbÃ¶js
+##   delegates         â€“ personen som gÃ¶r sysslan i stÃ¤llet (betalar av en skuld)
+## Snabba handlingar som ger nÃ¥got gÃ¥r bara en gÃ¥ng per dag (GameState). Texterna Ã¤r
+## platshÃ¥llare tills riktig story skrivs. All text spelaren ser Ã¤r pÃ¥ engelska.
 
 const ACTIONS := {
 	"kitchen": [
@@ -105,7 +105,7 @@ const ACTIONS := {
 		{"id": "yard_football", "object": "", "label": "Throw the football with Son 2", "text": "He runs routes across the lawn and you throw him passes until the sun gets low.", "time": true, "link": "son_2", "link_points": 3, "needs": "son_2", "social": {"fitness": 3}},
 		{"id": "yard_plants", "object": "plant", "label": "Water the plants", "text": "You water the flower beds by the path.", "effects": {"home": 3}},
 	],
-	# Trädgården: poolen, solstolarna, rabatterna och Rex, plus små sysslor (se Backyard).
+	# TrÃ¤dgÃ¥rden: poolen, solstolarna, rabatterna och Rex, plus smÃ¥ sysslor (se Backyard).
 	"backyard": [
 		{"id": "garden_swim", "object": "pool", "label": "Swim laps in the pool", "text": "You swim lap after lap until your shoulders burn and your head is finally quiet.", "time": true, "relief": 3, "social": {"fitness": 4}, "fx": "swim"},
 		{"id": "garden_dip", "object": "pool", "label": "Cool off with a quick dip", "text": "You slip into the water, float on your back for a minute and climb out dripping.", "relief": 2, "fx": "swim"},
@@ -133,7 +133,7 @@ const ACTIONS := {
 	"storage": [
 		{"id": "storage_dig", "object": "boxes", "label": "Dig through storage", "text": "You find the holiday decorations and a tent nobody has used in years.", "sets_flag": "found_marketplace"},
 	],
-	# --- Platserna i grannskapet (Locations). Texterna är platshållare. ---
+	# --- Platserna i grannskapet (Locations). Texterna Ã¤r platshÃ¥llare. ---
 	"classroom": [
 		{"id": "class_prepare", "object": "whiteboard", "label": "Prepare tomorrow's lesson", "text": "You write tomorrow's lesson on the board.", "time": true, "effects": {"work": 10}, "social": {"knowledge": 3}},
 		{"id": "class_grade", "object": "desk", "label": "Grade papers at your desk", "text": "You grade a stack of papers in the quiet classroom.", "time": true, "effects": {"work": 15}},
@@ -161,14 +161,14 @@ const ACTIONS := {
 	"yoga_studio": [
 		{"id": "yoga_class", "object": "gym_mat", "label": "Join a yoga class", "text": "An hour of slow breathing. You leave feeling lighter than you have in weeks.", "time": true, "relief": 8, "social": {"fitness": 4, "charm": 1}, "cost": 18},
 	],
-	# Köpcentret: gångarna och butikerna.
+	# KÃ¶pcentret: gÃ¥ngarna och butikerna.
 	"center_court": [
-		{"id": "court_directory", "object": "directory", "label": "Read the mall directory", "text": "West: the grocery store, the restaurant and the café. East: the clothing boutique, the hair salon and the bookstore. You are here, by the fountain."},
+		{"id": "court_directory", "object": "directory", "label": "Read the mall directory", "text": "West: the grocery store, the restaurant and the cafÃ©. East: the clothing boutique, the hair salon and the bookstore. You are here, by the fountain."},
 		{"id": "court_fountain", "object": "fountain", "label": "Toss a coin in the fountain", "text": "You close your eyes and make a wish. You're not telling anyone what it was.", "relief": 2, "cost": 1},
 		{"id": "court_people", "object": "bench", "label": "Sit and people-watch", "text": "Teenagers on a first date, a toddler negotiating for a pretzel, a couple holding hands at sixty. You smile.", "social": {"charm": 1}},
 	],
 	"grocery": [
-		{"id": "grocery_shop", "object": "store_shelf", "label": "Do the weekly shopping", "text": "You fill the cart with everything on the list – and remember the coffee.", "time": true, "effects": {"home": 15}, "completes": "coffee", "cost": 150, "groceries": true},
+		{"id": "grocery_shop", "object": "store_shelf", "label": "Do the weekly shopping", "text": "You fill the cart with everything on the list â€“ and remember the coffee.", "time": true, "effects": {"home": 15}, "completes": "coffee", "cost": 150, "groceries": true},
 		{"id": "grocery_snack", "object": "checkout", "label": "Buy snacks for the boys", "text": "You grab chips and energy drinks. The boys will be thrilled.", "effects": {"home": 3}, "cost": 15},
 	],
 	"boutique": [
@@ -176,7 +176,7 @@ const ACTIONS := {
 		{"id": "boutique_model", "object": "mirror_wall", "label": "Model the new collection", "text": "The owner asks if you would model the new collection for the shop window. People stop on the sidewalk to look. (Placeholder scene.)", "time": true, "relief": 10, "social": {"charm": 3}, "requires": {"attractiveness": 4}, "earn": 120, "income": "modeling", "sets_flag": "found_modeling"},
 		{"id": "boutique_mirror","object": "mirror_wall", "label": "Check yourself in the mirror", "text": "Not bad for a mom of two teenagers.", "social": {"charm": 1}},
 	],
-	# Frisörsalongen är stället för frisyr och hårfärg (panelen "salon", se Economy.SALON).
+	# FrisÃ¶rsalongen Ã¤r stÃ¤llet fÃ¶r frisyr och hÃ¥rfÃ¤rg (panelen "salon", se Economy.SALON).
 	"salon": [
 		{"id": "salon_book", "object": "salon_station", "label": "Book a hair appointment", "text": "", "panel": "salon", "time": true},
 		{"id": "salon_magazines", "object": "coffee_table", "label": "Flip through the style magazines", "text": "You dog-ear a few looks you would never dare to try. Or would you?", "social": {"charm": 1}},
@@ -197,14 +197,14 @@ const ACTIONS := {
 		{"id": "park_walk", "object": "path", "label": "Go for a walk", "text": "You walk the loop around the park and watch the ducks.", "time": true, "relief": 3, "social": {"fitness": 3}},
 		{"id": "park_read", "object": "bench", "label": "Read on a bench", "text": "You read a few chapters in the sun.", "time": true, "social": {"knowledge": 4}},
 		{"id": "park_ducks", "object": "pond", "label": "Feed the ducks", "text": "The ducks are very enthusiastic about your leftover bread."},
-		{"id": "park_market_browse", "object": "path", "label": "Look at the market stalls", "text": "Local artists sell paintings by the pond. Some of them are… not better than yours. A woman tells you anyone can rent a table on weekends.", "weekdays": [5, 6], "sets_flag": "found_art_market", "hidden_flag": "found_art_market"},
+		{"id": "park_market_browse", "object": "path", "label": "Look at the market stalls", "text": "Local artists sell paintings by the pond. Some of them areâ€¦ not better than yours. A woman tells you anyone can rent a table on weekends.", "weekdays": [5, 6], "sets_flag": "found_art_market", "hidden_flag": "found_art_market"},
 		{"id": "park_sell_painting", "object": "bench", "label": "Sell a painting at the art market", "text": "You set up a little easel by the path. Someone stops, looks for a long time, and buys it.", "time": true, "weekdays": [5, 6], "needs_item": "painting", "earn": 30, "earn_scale": {"charm": 15, "knowledge": 5}, "income": "art_market", "social": {"charm": 1}, "reveal_flag": "found_art_market"},
 	],
 }
 
 
-## Rummets val: de fasta handlingarna plus köp och försäljningar från Economy, utan
-## dem som är dolda just nu (redan gjort, köpt, sålt eller inte hittat ännu).
+## Rummets val: de fasta handlingarna plus kÃ¶p och fÃ¶rsÃ¤ljningar frÃ¥n Economy, utan
+## dem som Ã¤r dolda just nu (redan gjort, kÃ¶pt, sÃ¥lt eller inte hittat Ã¤nnu).
 static func for_room(room_id: String) -> Array:
 	var actions: Array = Requests.actions_for_room(room_id) + ACTIONS.get(room_id, []) + Economy.actions_for_room(room_id) + Curtains.actions_for_room(room_id)
 	return actions.filter(func(action: Dictionary) -> bool:
@@ -221,8 +221,8 @@ static func for_room(room_id: String) -> Array:
 		return true)
 
 
-## Korta taggar för ett val: tid, mätare, egenskaper och relation, t.ex.
-## "takes time · +Home · +Fitness · ♥ Son 1".
+## Korta taggar fÃ¶r ett val: tid, mÃ¤tare, egenskaper och relation, t.ex.
+## "takes time Â· +Home Â· +Fitness Â· â™¥ Son 1".
 static func tags(action: Dictionary) -> String:
 	var parts: Array[String] = []
 	if action.get("panel", "") == "map":
@@ -231,11 +231,11 @@ static func tags(action: Dictionary) -> String:
 		parts.append("from " + Economy.format(Economy.salon_min_price()))
 	if action.get("fulfills", "") != "":
 		var owes: int = Requests.find_type(GameState.requests.get(action["fulfills"], {}).get("type", "")).get("owes", 0)
-		parts.append("★ Request" + (" · owes you %d" % owes if owes > 0 else ""))
+		parts.append("â˜… Request" + (" Â· owes you %d" % owes if owes > 0 else ""))
 	if action.get("delegates", "") != "":
 		parts.append("no time for you")
 	if action.get("completes", "") != "" and GameState.quests.get(action["completes"], "") == "active":
-		parts.append("✓ " + PhoneData.QUESTS[action["completes"]]["title"])
+		parts.append("âœ“ " + PhoneData.QUESTS[action["completes"]]["title"])
 	parts.append_array(Backyard.tags(action))
 	if action.get("time", false):
 		parts.append("takes time")
@@ -252,5 +252,10 @@ static func tags(action: Dictionary) -> String:
 	for key in action.get("social", {}):
 		parts.append("+" + SocialStats.STATS[key]["name"])
 	if action.get("link", "") != "":
-		parts.append("♥ " + GameState.CHARACTERS[action["link"]]["name"])
-	return "  ·  ".join(parts)
+		parts.append("â™¥ " + GameState.CHARACTERS[action["link"]]["name"])
+	return "  Â·  ".join(parts)
+
+
+
+
+

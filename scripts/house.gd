@@ -1,24 +1,24 @@
-extends Node
-## Spelets huvudscen: huset i 3D (HouseView3D), en våning i taget, där man navigerar
-## genom att klicka på rummen (ingen styrning av figuren). Klick på ett rum flyttar
-## mamman dit, kameran glider in och rummets meny öppnas i Harem Heaven-stil: rummets
-## aktiviteter, samtal med familjemedlemmarna som är där och att vänta till nästa
-## tidszon. Familjen står i rummen enligt sina scheman.
+﻿extends Node
+## Spelets huvudscen: huset i 3D (HouseView3D), en vÃ¥ning i taget, dÃ¤r man navigerar
+## genom att klicka pÃ¥ rummen (ingen styrning av figuren). Klick pÃ¥ ett rum flyttar
+## mamman dit, kameran glider in och rummets meny Ã¶ppnas i Harem Heaven-stil: rummets
+## aktiviteter, samtal med familjemedlemmarna som Ã¤r dÃ¤r och att vÃ¤nta till nÃ¤sta
+## tidszon. Familjen stÃ¥r i rummen enligt sina scheman.
 
-## Våningspanelen till vänster, under HUD:ens plattor: läge och bredd på namnplattan.
+## VÃ¥ningspanelen till vÃ¤nster, under HUD:ens plattor: lÃ¤ge och bredd pÃ¥ namnplattan.
 const FLOOR_PANEL_POS := Vector2(16, 118)
 const FLOOR_PLATE_SIZE := Vector2(250, 36)
 
 var _view: HouseView3D
-## Namnplattan visar våningen som syns (hemma) eller platsen (ute).
+## Namnplattan visar vÃ¥ningen som syns (hemma) eller platsen (ute).
 var _floor_plate: Control
 var _floor_name := ""
-## Q och E byter våning; knapparna gör samma sak med musen.
+## Q och E byter vÃ¥ning; knapparna gÃ¶r samma sak med musen.
 var _floor_up_hint: KitButton
 var _floor_down_hint: KitButton
 var _menu_layer: CanvasLayer
 var _menu_title: Label
-## Tidszonen på en liten gul platta ovanför rummets namn.
+## Tidszonen pÃ¥ en liten gul platta ovanfÃ¶r rummets namn.
 var _menu_period: Label
 var _menu_list: VBoxContainer
 var _dialog: CanvasLayer
@@ -26,19 +26,19 @@ var _phone: CanvasLayer
 var _appearance: CanvasLayer
 var _map: CanvasLayer
 var _pause: CanvasLayer
-## Våningsknapparna (hemma) och kartan och hemresan (ute), under namnplattan.
+## VÃ¥ningsknapparna (hemma) och kartan och hemresan (ute), under namnplattan.
 var _floor_column: HBoxContainer
 var _location_panel: HBoxContainer
 var _menu_room := ""
-## Saken i planen som valet under musen hör till (skärmkoordinater), och lagret som
-## ritar markeringen ovanpå den nedtonade planen.
+## Saken i planen som valet under musen hÃ¶r till (skÃ¤rmkoordinater), och lagret som
+## ritar markeringen ovanpÃ¥ den nedtonade planen.
 var _highlight_rect := Rect2()
 var _highlight: Control
-## Täcker planen en kort stund när man byter våning, så att bytet tonar in.
+## TÃ¤cker planen en kort stund nÃ¤r man byter vÃ¥ning, sÃ¥ att bytet tonar in.
 var _floor_fade: ColorRect
 ## Tonar mellan dagarna och mjukar upp bytet av tidszon.
 var _transition: TimeTransition
-## En aktivitet spelas upp i 3D-vyn; klick på rum väntar tills den är klar.
+## En aktivitet spelas upp i 3D-vyn; klick pÃ¥ rum vÃ¤ntar tills den Ã¤r klar.
 var _playing_fx := false
 
 
@@ -85,13 +85,13 @@ func _ready() -> void:
 		_map.close_map())
 	_show_floor(PlanDrawer.floor_of(GameState.current_room))
 	_view.set_current(GameState.current_room)
-	# Dagen börjar på morgonen (med scen om dagen har en) när allt är uppbyggt.
+	# Dagen bÃ¶rjar pÃ¥ morgonen (med scen om dagen har en) nÃ¤r allt Ã¤r uppbyggt.
 	GameState.begin_day.call_deferred()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Esc stänger rummets meny; annars öppnar den pausmenyn (telefonen, kartan och de
-	# andra panelerna tar Esc själva när de är öppna). M öppnar och stänger kartan.
+	# Esc stÃ¤nger rummets meny; annars Ã¶ppnar den pausmenyn (telefonen, kartan och de
+	# andra panelerna tar Esc sjÃ¤lva nÃ¤r de Ã¤r Ã¶ppna). M Ã¶ppnar och stÃ¤nger kartan.
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if _menu_layer.visible:
 			_close_menu()
@@ -106,7 +106,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## WASD panorerar bara när ingen meny, panel eller scen har spelarens uppmärksamhet.
+## WASD panorerar bara nÃ¤r ingen meny, panel eller scen har spelarens uppmÃ¤rksamhet.
 func _can_pan() -> bool:
 	if _menu_layer.visible or _dialog.visible or _appearance.visible or _transition.is_playing():
 		return false
@@ -115,7 +115,7 @@ func _can_pan() -> bool:
 	return GameState.is_playable()
 
 
-## MENU uppe till höger öppnar pausmenyn med musen.
+## MENU uppe till hÃ¶ger Ã¶ppnar pausmenyn med musen.
 func _build_pause_button() -> void:
 	var button := KitButton.new("Menu", "Esc", "tab")
 	button.focus_mode = Control.FOCUS_NONE
@@ -130,8 +130,8 @@ func _open_pause() -> void:
 	_pause.open()
 
 
-## Kartknappen nere till höger, under telefonens knapp och i samma stil, med kartans
-## symbol. Den göms under en dialog, som telefonens.
+## Kartknappen nere till hÃ¶ger, under telefonens knapp och i samma stil, med kartans
+## symbol. Den gÃ¶ms under en dialog, som telefonens.
 func _build_map_button() -> void:
 	var button := PhoneTheme.hud_button("      Map  (M)", 0)
 	button.draw.connect(func() -> void: PhoneIcons.draw(button, "map", Rect2(14, 10, 24, 24), Color.WHITE))
@@ -141,8 +141,8 @@ func _build_map_button() -> void:
 	add_child(button)
 
 
-## M och kartknappen: stänger kartan om den är öppen, annars öppnas den (och rummets
-## meny och telefonen stängs) när inget annat har spelarens uppmärksamhet.
+## M och kartknappen: stÃ¤nger kartan om den Ã¤r Ã¶ppen, annars Ã¶ppnas den (och rummets
+## meny och telefonen stÃ¤ngs) nÃ¤r inget annat har spelarens uppmÃ¤rksamhet.
 func _toggle_map() -> void:
 	if _map.is_open:
 		_map.close_map()
@@ -158,9 +158,9 @@ func _toggle_map() -> void:
 
 # --- Planen -------------------------------------------------------------------
 
-## Våningspanelen: en svart sned platta med namnet på det som syns, och under den
-## knappar i kitets stil. Hemma byter de våning (som Q och E, och den som inte leder
-## någonstans är avstängd); ute öppnar de kartan eller går hem.
+## VÃ¥ningspanelen: en svart sned platta med namnet pÃ¥ det som syns, och under den
+## knappar i kitets stil. Hemma byter de vÃ¥ning (som Q och E, och den som inte leder
+## nÃ¥gonstans Ã¤r avstÃ¤ngd); ute Ã¶ppnar de kartan eller gÃ¥r hem.
 func _build_floor_label() -> void:
 	var panel := VBoxContainer.new()
 	panel.position = FLOOR_PANEL_POS
@@ -194,8 +194,8 @@ func _floor_button(text: String, key: String, on_pressed: Callable, row: HBoxCon
 	return button
 
 
-## Q går uppåt (mot vinden), E nedåt (mot utanför) i GameState.HOME_FLOORS; stannar
-## vid ändarna. Bara när huset syns och ingen dialog eller panel har uppmärksamheten.
+## Q gÃ¥r uppÃ¥t (mot vinden), E nedÃ¥t (mot utanfÃ¶r) i GameState.HOME_FLOORS; stannar
+## vid Ã¤ndarna. Bara nÃ¤r huset syns och ingen dialog eller panel har uppmÃ¤rksamheten.
 func _step_floor(step: int) -> void:
 	if not _can_pan() or GameState.in_dialogue() or _playing_fx:
 		return
@@ -208,7 +208,7 @@ func _step_floor(step: int) -> void:
 	_show_floor(PlanDrawer.FLOOR_LABELS.find_key(GameState.HOME_FLOORS[target]))
 
 
-## Ute på en plats ersätts våningsknapparna av kartan och vägen hem.
+## Ute pÃ¥ en plats ersÃ¤tts vÃ¥ningsknapparna av kartan och vÃ¤gen hem.
 func _build_location_panel(panel: VBoxContainer) -> void:
 	_location_panel = HBoxContainer.new()
 	_location_panel.add_theme_constant_override("separation", 8)
@@ -223,7 +223,7 @@ func _build_location_panel(panel: VBoxContainer) -> void:
 
 func _show_floor(floor_name: String) -> void:
 	if floor_name == "":
-		floor_name = "Entréplan"
+		floor_name = "EntrÃ©plan"
 	var away := not floor_name in PlanDrawer.FLOORS
 	_floor_column.visible = not away
 	_location_panel.visible = away
@@ -231,7 +231,7 @@ func _show_floor(floor_name: String) -> void:
 	_floor_plate.queue_redraw()
 	if floor_name != _view.floor_name:
 		if is_inside_tree():
-			# Den nya våningen tonar fram.
+			# Den nya vÃ¥ningen tonar fram.
 			_floor_fade.modulate.a = 1.0
 			create_tween().tween_property(_floor_fade, "modulate:a", 0.0, 0.35)
 		_view.show_floor(floor_name)
@@ -242,7 +242,7 @@ func _show_floor(floor_name: String) -> void:
 	_set_hover("")
 
 
-## Klick på ett rum i 3D-vyn: mamman går dit, kameran glider in och rummets meny öppnas.
+## Klick pÃ¥ ett rum i 3D-vyn: mamman gÃ¥r dit, kameran glider in och rummets meny Ã¶ppnas.
 func _on_room_clicked(room_id: String) -> void:
 	if not GameState.is_playable() or _playing_fx:
 		return
@@ -256,11 +256,11 @@ func _on_room_clicked(room_id: String) -> void:
 	_open_menu(room_id)
 
 
-## "You head upstairs to the Bedroom." och liknande när man byter våning.
+## "You head upstairs to the Bedroom." och liknande nÃ¤r man byter vÃ¥ning.
 func _floor_change_text(from_floor: String, to_floor: String, room_id: String) -> String:
 	var room_name: String = GameState.ROOMS[room_id]["name"]
-	if "Utanför" in [from_floor, to_floor]:
-		return "You step %s to the %s." % ["outside" if to_floor == "Utanför" else "back inside", room_name]
+	if "UtanfÃ¶r" in [from_floor, to_floor]:
+		return "You step %s to the %s." % ["outside" if to_floor == "UtanfÃ¶r" else "back inside", room_name]
 	var up := PlanDrawer.FLOORS.find(to_floor) < PlanDrawer.FLOORS.find(from_floor)
 	return "You head %s to the %s." % ["upstairs" if up else "downstairs", room_name]
 
@@ -272,14 +272,14 @@ func _set_hover(room_id: String) -> void:
 	var hint := ""
 	if room_id != "":
 		var room_name: String = GameState.ROOMS[room_id]["name"]
-		hint = "%s  –  you are here" % room_name if room_id == GameState.current_room else "Go to %s" % room_name
+		hint = "%s  â€“  you are here" % room_name if room_id == GameState.current_room else "Go to %s" % room_name
 	GameState.show_hint(hint)
 
 
 # --- Rummets meny -------------------------------------------------------------
 
-## Menyn i Harem Heaven-stil: rummets namn och en kolumn av breda knappar mitt på
-## skärmen, över en nedtonad plan.
+## Menyn i Harem Heaven-stil: rummets namn och en kolumn av breda knappar mitt pÃ¥
+## skÃ¤rmen, Ã¶ver en nedtonad plan.
 func _build_menu() -> void:
 	_menu_layer = CanvasLayer.new()
 	_menu_layer.layer = 3
@@ -339,12 +339,12 @@ func _open_menu(room_id: String) -> void:
 	_menu_period.text = GameState.PERIOD_NAMES[GameState.get_time_of_day()]
 	for action in RoomActions.for_room(room_id):
 		_add_action(action, room_id)
-	# Samtal med dem som är i rummet; det stärker relationen en gång per dag.
+	# Samtal med dem som Ã¤r i rummet; det stÃ¤rker relationen en gÃ¥ng per dag.
 	for character_id in GameState.get_characters_in(room_id):
 		if character_id == "mom":
 			continue
 		var character_name := GameState.character_name(character_id)
-		var talk := {"id": "talk_" + character_id, "object": "", "label": "Talk to %s" % character_name,
+		var talk := {"id": "talk_" + character_id, "object": "", "label": ("Spend time with %s" if Dispatcher.resolve_slot(GameState.period, character_id) != "" else "Talk to %s") % character_name,
 				"text": "You chat with %s." % character_name}
 		if character_id == "dog":
 			var bed := "dog_bed" if FloorPlanArt.furniture_rect(room_id, "dog_bed").size != Vector2.ZERO else "dog_house"
@@ -360,7 +360,7 @@ func _open_menu(room_id: String) -> void:
 				return
 			_dialog.play([
 				{"speaker": "mom", "text": "Hey, %s. Got a minute?" % character_name},
-				{"speaker": character_id, "text": "Hi! (Placeholder – the real dialogue comes later.)"},
+				{"speaker": character_id, "text": "Hi! (Placeholder â€“ the real dialogue comes later.)"},
 			]))
 	_add_choice("Wait here", "takes time", func() -> void:
 		_close_menu()
@@ -376,8 +376,8 @@ func _open_menu(room_id: String) -> void:
 			index += 1
 
 
-## Ett val för en handling i rummet. Går den inte att göra just nu visas varför, i
-## stället för taggarna. `after` körs efter handlingen (t.ex. öppna en dialog).
+## Ett val fÃ¶r en handling i rummet. GÃ¥r den inte att gÃ¶ra just nu visas varfÃ¶r, i
+## stÃ¤llet fÃ¶r taggarna. `after` kÃ¶rs efter handlingen (t.ex. Ã¶ppna en dialog).
 func _add_action(action: Dictionary, room_id: String, after := Callable()) -> void:
 	var reason := GameState.action_block_reason(action, room_id)
 	var run := func() -> void:
@@ -393,7 +393,7 @@ func _add_action(action: Dictionary, room_id: String, after := Callable()) -> vo
 			GameState.message_posted.emit(action["text"])
 			return
 		if panel == "wardrobe" and Curtains.state_for(room_id) != "closed" and not Curtains.curtained_windows(room_id).is_empty():
-			# Hon drar för innan hon byter om.
+			# Hon drar fÃ¶r innan hon byter om.
 			Curtains.set_for_now(room_id, "closed")
 			_view.refresh_curtains()
 			GameState.message_posted.emit("You draw the curtains before you change.")
@@ -401,7 +401,7 @@ func _add_action(action: Dictionary, room_id: String, after := Callable()) -> vo
 			_appearance.open(panel)
 			return
 		if action.get("fx", "") != "":
-			# Trädgårdens aktiviteter spelas upp i 3D-vyn först (simma, sola, vattna, apport).
+			# TrÃ¤dgÃ¥rdens aktiviteter spelas upp i 3D-vyn fÃ¶rst (simma, sola, vattna, apport).
 			_playing_fx = true
 			await _view.play_activity(room_id, action.get("object", ""), action["fx"])
 			_playing_fx = false
@@ -420,8 +420,8 @@ func _add_action(action: Dictionary, room_id: String, after := Callable()) -> vo
 		GameState.show_hint(""))
 
 
-## En knapp i menyn (KitButton): texten till vänster och taggarna (eller varför det inte
-## går) mindre till höger.
+## En knapp i menyn (KitButton): texten till vÃ¤nster och taggarna (eller varfÃ¶r det inte
+## gÃ¥r) mindre till hÃ¶ger.
 func _add_choice(text: String, tags: String, on_pressed: Callable, disabled := false) -> Button:
 	var button := KitButton.new(text, tags, "menu", UiKit.HEADING - 2)
 	button.custom_minimum_size.x = 600
@@ -431,7 +431,7 @@ func _add_choice(text: String, tags: String, on_pressed: Callable, disabled := f
 	return button
 
 
-## Markerar saken i planen som ett val hör till (eller tar bort markeringen).
+## Markerar saken i planen som ett val hÃ¶r till (eller tar bort markeringen).
 func _highlight_object(room_id: String, object: String) -> void:
 	_highlight_rect = Rect2()
 	if room_id != "" and object != "":
@@ -451,12 +451,13 @@ func _close_menu() -> void:
 
 func _on_time_of_day_changed(period: String) -> void:
 	_close_menu()
-	# Skylten visas bara när spelaren får kontroll (morgon och natt har egna scener).
+	# Skylten visas bara nÃ¤r spelaren fÃ¥r kontroll (morgon och natt har egna scener).
 	if not period in GameState.PLAYABLE_PERIODS:
 		return
-	# En ny dag visar dagens namn i övergången; skylten kommer när den är klar.
+	# En ny dag visar dagens namn i Ã¶vergÃ¥ngen; skylten kommer nÃ¤r den Ã¤r klar.
 	if _transition.is_playing():
 		await _transition.finished
 		if GameState.get_time_of_day() != period:
 			return
 	UiTransition.banner(self, GameState.PERIOD_NAMES[period], GameState.get_weekday())
+
