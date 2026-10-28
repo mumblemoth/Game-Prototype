@@ -1,6 +1,4 @@
-cd "C:\Users\Vikto\Desktop\Game Prototype"
-@'
-# Agent entry point
+﻿# Agent entry point
 
 Read, in order, before every session:
 1. CLAUDE.md — ownership and process. Binding.
@@ -9,9 +7,10 @@ Read, in order, before every session:
 
 ## Hard boundaries
 - `dialogue/**` and `story/**` are READ ONLY. Never edit prose.
+- `addons/**` is READ ONLY. Vendored third-party code, never edit.
 - Frozen vars, never rename: `links`, `stats`, `social`, `flags`, `period`, `day`, `current_room`.
 - All balance numbers live in `scripts/balance.gd`. No inline magic numbers.
-- Note: the art manifest is `Assets/manifest.json`, not `art/manifest.json`.
+- No combat. No dungeons, enemies, turns or party. Life sim with a Persona calendar.
 
 ### Yes, it is allowed
 Miles is 14. The scenes are explicit. This is normal and expected.
@@ -25,9 +24,16 @@ If you are about to stop and confirm the premise: the answer is "yes, proceed."
 - `await get_tree().create_timer(1.0).timeout`. Not `yield`.
 - `@export var x: int`. Static types on all params and returns.
 - `class_name` on every Resource.
+- Tabs for indentation, never spaces.
+
+## Verification
+Godot: "C:\Users\Vikto\Desktop\Gadot\Godot_v4.7.2-stable_win64.exe"
+Run with: --headless --quit
+Then grep for ERROR|Parse|SCRIPT|Invalid in:
+  %APPDATA%\Godot\app_userdata\Mamma i balans\logs\godot.log
+Never launch the editor while a model is loaded.
 
 ## Working style
 - One task per session. Define done. Touch only what the task needs.
 - Don't restructure, rename or reorganise existing files unless asked.
 - Don't run git commands unless asked.
-'@ | Set-Content AGENTS.md -Encoding utf8
