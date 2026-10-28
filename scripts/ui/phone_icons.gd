@@ -7,8 +7,8 @@ class_name PhoneIcons
 ## Alla id:n och vad de används till står i docs/phone_ui_spec.md.
 
 const OVERRIDE_DIR := "res://Assets/ui/phone/icons/"
-const APP_ICONS := ["phone", "messages", "memories", "journal", "profile", "wallet", "settings"]
-const SYSTEM_ICONS := ["signal", "wifi", "battery", "back", "chevron", "play", "lock", "heart", "check", "end_call", "image"]
+const APP_ICONS := ["phone", "messages", "memories", "calendar", "journal", "profile", "wallet", "settings"]
+const SYSTEM_ICONS := ["signal", "wifi", "battery", "back", "chevron", "play", "lock", "heart", "check", "end_call", "image", "map"]
 
 static var _overrides := {}
 
@@ -93,6 +93,18 @@ static func draw(c: CanvasItem, id: String, rect: Rect2, color: Color, width := 
 			_stroke(c, PackedVector2Array([p.call(8.5, 3.5), p.call(8.5, 20.5)]), color, w)
 			_stroke(c, PackedVector2Array([p.call(11.8, 8.5), p.call(15.5, 8.5)]), color, w)
 			_stroke(c, PackedVector2Array([p.call(11.8, 12.5), p.call(15.5, 12.5)]), color, w)
+		"calendar":
+			# Blad med ringar överst, en linje under rubriken och dagens prick.
+			_stroke(c, rounded_points(Rect2(p.call(3, 5), Vector2(18, 16) * s), 3 * s, 4), color, w, true)
+			_stroke(c, PackedVector2Array([p.call(3.5, 10), p.call(20.5, 10)]), color, w)
+			for x in [8.0, 16.0]:
+				_stroke(c, PackedVector2Array([p.call(x, 2.5), p.call(x, 6.5)]), color, w)
+			c.draw_circle(p.call(15.5, 15.5), 1.8 * s, color, true, -1.0, true)
+		"map":
+			# Hopvikt karta i tre fält.
+			_stroke(c, PackedVector2Array([p.call(3, 6), p.call(9, 3.5), p.call(15, 6), p.call(21, 3.5), p.call(21, 18), p.call(15, 20.5), p.call(9, 18), p.call(3, 20.5)]), color, w, true)
+			_stroke(c, PackedVector2Array([p.call(9, 3.5), p.call(9, 18)]), color, w)
+			_stroke(c, PackedVector2Array([p.call(15, 6), p.call(15, 20.5)]), color, w)
 		"settings":
 			var gear := PackedVector2Array()
 			for i in 8:

@@ -23,7 +23,6 @@ furniture_kind = "stove"
 action_text = "Du lagar middag."
 time_cost_minutes = 90
 home_effect = 20
-romance_effect = 5
 
 [node name="Fridge" type="Area2D" parent="."]
 script = ExtResource("1_hotspot")

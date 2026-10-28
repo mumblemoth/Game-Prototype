@@ -349,8 +349,10 @@ const FURNITURE := {
 	],
 	# Trädgården (20 × 7,6, söder om huset): uteplatsen utanför vardagsrummets fönster-
 	# dörrar med bord, grill och en kruka, en stig av stenplattor längs huset från sido-
-	# grinden, klädstrecket utanför kontoret, mammans pallkrage, förrådet vid stigen,
-	# solstolar på gräsmattan och ett äppelträd i hörnet.
+	# grinden, klädstrecket utanför kontoret, mammans pallkrage, förrådet vid stigen och
+	# ett äppelträd i hörnet. Mitt på gräsmattan poolen på ett stenlagt däck med solstolarna
+	# vid kortsidan, krukor i däckets hörn, rabatter längs staketet (de mamman vattnar,
+	# stil "garden") och Rex hundkoja under äppelträdet.
 	"backyard": [
 		["patio", Rect2(11.6, 0, 5.4, 3.4)],
 		["picnic_table", Rect2(13.2, 1.0, 1.8, 1.2)],
@@ -360,8 +362,15 @@ const FURNITURE := {
 		["clothesline", Rect2(4.3, 1.4, 2.6, 0.9)],
 		["veg_bed", Rect2(0.6, 3.4, 1.2, 2.8)],
 		["shed", Rect2(0.2, 0.5, 2.0, 1.8), "east"],
-		["sun_lounger", Rect2(7.6, 3.8, 0.7, 1.9), "south", "stripe_blue"],
-		["sun_lounger", Rect2(8.7, 3.8, 0.7, 1.9), "south", "stripe_coral"],
+		["patio", Rect2(2.4, 2.75, 8.7, 3.7)],
+		["pool", Rect2(2.9, 3.15, 5.6, 2.9)],
+		["sun_lounger", Rect2(9.0, 3.35, 0.7, 1.9), "south", "stripe_blue"],
+		["sun_lounger", Rect2(10.1, 3.35, 0.7, 1.9), "south", "stripe_coral"],
+		["plant", Rect2(2.5, 5.85, 0.5, 0.5), "", "planter"],
+		["plant", Rect2(10.5, 5.85, 0.5, 0.5), "", "planter"],
+		["flower_bed", Rect2(11.8, 6.85, 4.4, 0.6), "", "garden"],
+		["flower_bed", Rect2(2.4, 6.85, 8.7, 0.6), "", "garden"],
+		["dog_house", Rect2(16.3, 4.3, 1.1, 1.0), "south"],
 		["tree", Rect2(18.0, 5.2, 1.8, 1.8)],
 	],
 	# --- Platserna i grannskapet (platshållare tills riktiga miljöer finns) ---

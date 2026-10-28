@@ -20,13 +20,18 @@ const LUST_MAX := 100.0
 const GATES := {
 	"eric_r1": {"char": "husband", "rank": 1, "period": "evening", "room": "living_room", "lust": 0.0, "attr": 1},
 }
+#	"miles_r1": {"char": "son_1", "rank": 1, "period": "afternoon", "room": "classroom", "lust": 0.0, "attr": 1},
 
 ## scen_id -> effekter som GameState.apply() lägger på (alla nycklar valfria):
 ##   link_points – poäng i relationen till GATES[scen_id].char
 ##   lust        – läggs på links[char].lust, hålls inom 0–LUST_MAX
-##   stats       – {home/work/romance: förändring}
+##   stats       – {home/work: förändring}
+##   relief      – sänker mammans egen mätare (se GameState._relieve_mom)
 ##   flags       – händelser som sätts i GameState.flags
 ## En _bonus-scen utan egen rad får grundscenens effekter.
 const EFFECTS := {
-	"eric_r1": {"link_points": 2, "lust": 2.0, "stats": {"romance": 5}, "flags": []},
+	"eric_r1": {"link_points": 2, "lust": 2.0, "relief": 5, "flags": []},
+	"eric_r1_bonus": {"link_points": 3, "lust": 4.0, "relief": 8, "flags": []},
+	"miles_r1": {"link_points": 2, "lust": 2.0, "relief": 5, "flags": []},
+	"miles_r1_bonus": {"link_points": 3, "lust": 4.0, "relief": 8, "flags": []},
 }

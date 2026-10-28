@@ -158,10 +158,7 @@ static var _painted := {}
 func _init(target: CanvasItem) -> void:
 	canvas = target
 	if _label_font == null:
-		var font := SystemFont.new()
-		font.font_names = PackedStringArray(["Nunito", "Quicksand", "Segoe UI Semibold", "Segoe UI"])
-		font.font_weight = 600
-		_label_font = font
+		_label_font = UiKit.body_font(true)
 		# Diskret papperstextur av brus.
 		var noise := FastNoiseLite.new()
 		noise.frequency = 0.06
@@ -495,7 +492,7 @@ func _draw_room_name(room_id: String) -> void:
 
 
 func _draw_room_markers(room_id: String) -> void:
-	var font := ThemeDB.fallback_font
+	var font := UiKit.body_font(true)
 	var present := GameState.get_characters_in(room_id)
 	var rect := screen_rect(plans()[room_id])
 	var start := rect.get_center() + Vector2(-(present.size() - 1) * 15.0, 34)

@@ -72,8 +72,8 @@ func _build_title() -> void:
 	title.rotation = deg_to_rad(-4.0)
 	add_child(title)
 	UiKit.enter(title, 0.15, Vector2(-80, 0), UiKit.SLOW)
-	# Spelets tre mätare är vad det handlar om.
-	var kicker := UiKit.label("HOME  ·  WORK  ·  ROMANCE", UiKit.SMALL + 1, UiKit.INK, true)
+	# Spelets mätare är vad det handlar om.
+	var kicker := UiKit.label("HOME  ·  WORK", UiKit.SMALL + 1, UiKit.INK, true)
 	kicker.add_theme_stylebox_override("normal", UiKit.plate(UiKit.PAPER, UiKit.SLANT, Color(0, 0, 0, 0), 0, UiKit.RED, Vector2(18, 5)))
 	kicker.position = Vector2(84, 300)
 	add_child(kicker)
@@ -103,7 +103,7 @@ func _new_game() -> void:
 	_busy = true
 	UiTransition.wipe(self, func() -> void:
 		GameState.reset()
-		get_tree().change_scene_to_file("res://scenes/main.tscn"), "Day 1 · %s" % GameState.weekday_of(1))
+		get_tree().change_scene_to_file("res://scenes/main.tscn"), GameState.weekday_of(1))
 
 
 func _open_settings() -> void:

@@ -169,8 +169,21 @@ static func add(parent: Node3D, mesh: Mesh, center: Vector3, material: Material,
 	instance.material_override = material
 	instance.position = center
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if material is ShaderMaterial and (material as ShaderMaterial).shader == TOON:
+		instance.set_instance_shader_parameter("depth_rank", depth_rank(mesh))
 	parent.add_child(instance)
 	return instance
+
+
+## Rangen mot z-fighting (se toon.gdshader): ju mindre volym, desto högre rang, så att
+## en tavla vinner över väggen, en mattkant över golvet och ett armstöd över soffan.
+## Ett steg per halvering av volymen; tunna skivor räknas som minst 1 cm tjocka.
+const DEPTH_RANK_MAX := 40.0
+const DEPTH_RANK_ZERO_VOLUME := 1024.0
+
+static func depth_rank(mesh: Mesh) -> float:
+	var s := mesh.get_aabb().size.max(Vector3.ONE * 0.01)
+	return clampf(log(DEPTH_RANK_ZERO_VOLUME / (s.x * s.y * s.z)) / log(2.0), 0.0, DEPTH_RANK_MAX)
 
 
 static var _bevel_cache := {}

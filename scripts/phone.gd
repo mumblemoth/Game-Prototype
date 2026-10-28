@@ -5,24 +5,34 @@ extends CanvasLayer
 ## hemskärm med datumwidget, appar och docka. Apparna: Phone (ring kontakter),
 ## Messages (sms-trådar där man väljer vad man skriver), Memories (scener man kan
 ## uppleva igen och bilder man har hittat), Profile (mammans egenskaper och
-## Attractiveness), Wallet (saldo, vad som väntar, sätt att tjäna och kontoutdrag), Journal (startade och avklarade quests) och Settings (bakgrunder,
+## Attractiveness), Wallet (saldo, vad som väntar, sätt att tjäna och kontoutdrag),
+## Calendar (månaden och vad som händer, ur Calendar), Journal (startade och avklarade quests) och Settings (bakgrunder,
 ## stäng, avsluta). Lås- och hemskärmen har var sin bakgrund: en färdig toning eller
 ## en bild bland minnena.
 ## Utseendet (färger, typsnitt, mått) kommer från PhoneTheme och ikonerna från
 ## PhoneIcons; måtten står i docs/phone_ui_spec.md. Innehållet kommer från PhoneData
 ## och vad spelaren har hittat från GameState. Öppnas med P eller telefonknappen; Esc
-## eller klick utanför stänger.
+## eller klick utanför stänger. Under en dialog stängs telefonen, knappen göms och P
+## gör ingenting, tills dialogen är slut.
 
 const OPEN_POSITION := Vector2(930, 40)
 const CLOSED_Y := 760.0
-const APP_NAMES := {"phone": "Phone", "messages": "Messages", "memories": "Memories", "journal": "Journal", "profile": "Profile", "wallet": "Wallet", "settings": "Settings"}
+const APP_NAMES := {"phone": "Phone", "messages": "Messages", "memories": "Memories", "calendar": "Calendar", "journal": "Journal", "profile": "Profile", "wallet": "Wallet", "settings": "Settings"}
 ## Apparna i hemskärmens rutnät och i dockan.
-const GRID_APPS := ["journal", "profile", "wallet", "settings"]
+const GRID_APPS := ["calendar", "journal", "profile", "wallet", "settings"]
 ## Hur många rader kontoutdraget i Wallet visar.
 const WALLET_LEDGER_ROWS := 12
+## Kalendern: hur många dagar framåt och hur många händelser "Coming up" visar, och hur
+## många månader framåt man kan bläddra.
+const CALENDAR_UPCOMING_DAYS := 7
+const CALENDAR_UPCOMING_MAX := 8
+const CALENDAR_MONTHS_AHEAD := 2
+## Kalenderrutnätets mått: raden med veckodagar och en rad per vecka.
+const CALENDAR_HEAD := 26.0
+const CALENDAR_ROW := 44.0
 const DOCK_APPS := ["phone", "messages", "memories"]
 ## Vad bakåtknappen heter när den leder till en sida.
-const PAGE_TITLES := {"home": "Home", "phone": "Contacts", "messages": "Messages", "memories": "Memories", "settings": "Settings"}
+const PAGE_TITLES := {"home": "Home", "phone": "Contacts", "messages": "Messages", "memories": "Memories", "calendar": "Calendar", "settings": "Settings"}
 ## Låsskärmen låser upp sig själv efter så här många sekunder när det inte finns notiser.
 const AUTO_UNLOCK := 1.4
 
@@ -44,6 +54,9 @@ var _call_contact := ""
 var _journal_tab := "active"
 var _memories_tab := "all"
 var _memory := ""
+## Månaden och dagen som visas i Calendar; 0 betyder den här månaden och i dag.
+var _calendar_month := 0
+var _calendar_day := 0
 ## Minnet som spelas igen från telefonen (dit kommer man tillbaka efteråt).
 var _relived := ""
 ## Platsen som väljs på bakgrundssidan ("lock" eller "home").
@@ -57,6 +70,7 @@ var _viewer_image: TextureRect
 var _viewer_caption: Label
 var _refresh_queued := false
 var _textures := {}
+var _phone_button: Button
 
 
 func _ready() -> void:
@@ -75,6 +89,8 @@ func _ready() -> void:
 	GameState.phone_changed.connect(_queue_refresh)
 	GameState.social_changed.connect(_queue_refresh)
 	GameState.money_changed.connect(_queue_refresh)
+	GameState.schedules_changed.connect(_queue_refresh)
+	GameState.dialogue_changed.connect(_on_dialogue_changed)
 	GameState.time_of_day_changed.connect(func(_period: String) -> void:
 		_status_bar.queue_redraw()
 		_queue_refresh())
@@ -91,7 +107,7 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	if event.keycode == KEY_P:
+	if event.keycode == KEY_P and not GameState.in_dialogue():
 		toggle()
 		get_viewport().set_input_as_handled()
 	elif event.keycode == KEY_ESCAPE and is_open:
@@ -132,9 +148,11 @@ func toggle() -> void:
 
 
 func open(page := "home") -> void:
-	if is_open or GameState.playing_scene != "" or GameState.replaying_memory != "":
+	if is_open or GameState.playing_scene != "" or GameState.replaying_memory != "" or GameState.in_dialogue():
 		return
 	is_open = true
+	_calendar_month = 0
+	_calendar_day = 0
 	_shade.visible = true
 	_phone.visible = true
 	if page == "home" and _unlocked_period != _period_key():
@@ -156,21 +174,21 @@ func close() -> void:
 	tween.tween_callback(func() -> void: _phone.visible = is_open)
 
 
+## En dialog tar över: telefonen stängs och knappen göms. Allt kommer tillbaka efteråt.
+func _on_dialogue_changed(active: bool) -> void:
+	if active:
+		close()
+	_phone_button.visible = not active
+
+
 func _period_key() -> String:
 	return "%d:%s" % [GameState.day, GameState.get_time_of_day()]
 
 
-## Knappen nere till höger som öppnar telefonen, med en liten ritad telefon och ett
-## rött märke när det finns olästa sms.
+## Knappen nere till höger som öppnar telefonen (ovanför kartans knapp), med en liten
+## ritad telefon och ett rött märke när det finns olästa sms.
 func _build_phone_button() -> void:
-	var button := Button.new()
-	button.text = "      Phone  (P)"
-	button.focus_mode = Control.FOCUS_NONE
-	button.size = Vector2(150, 44)
-	button.position = Vector2(1280 - 16 - 150, 720 - 16 - 44)
-	button.add_theme_font_override("font", PhoneTheme.font(600))
-	button.add_theme_font_size_override("font_size", 16)
-	PhoneTheme.style_button(button, Color(PhoneTheme.BEZEL, 0.92), 22, Color.WHITE, PhoneTheme.BEZEL_EDGE)
+	var button := PhoneTheme.hud_button("      Phone  (P)", 1)
 	button.draw.connect(func() -> void:
 		button.draw_style_box(PhoneTheme.rounded(Color(0, 0, 0, 0), 4, Color.WHITE, 2), Rect2(18, 10, 15, 24))
 		button.draw_line(Vector2(23, 13.5), Vector2(28, 13.5), Color.WHITE, 2.0, true)
@@ -181,6 +199,8 @@ func _build_phone_button() -> void:
 	GameState.phone_changed.connect(button.queue_redraw)
 	add_child(button)
 	move_child(button, 0)
+	button.visible = not GameState.in_dialogue()
+	_phone_button = button
 
 
 # --- Telefonens kropp ---------------------------------------------------------
@@ -384,6 +404,8 @@ func _show(page: String, animate := true) -> void:
 			_profile()
 		"wallet":
 			_wallet()
+		"calendar":
+			_calendar()
 		"journal":
 			_journal()
 		"settings":
@@ -415,7 +437,7 @@ func _lock() -> void:
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.draw.connect(func() -> void:
 		PhoneIcons.draw(head, "lock", Rect2(w / 2 - 9, 0, 18, 18), Color.WHITE)
-		_shadow_string(head, PhoneTheme.font(600), Vector2(0, 46), "%s, Day %d" % [GameState.get_weekday(), GameState.day], w, PhoneTheme.CALLOUT, Color(1, 1, 1, 0.9))
+		_shadow_string(head, PhoneTheme.font(600), Vector2(0, 46), GameState.get_weekday(), w, PhoneTheme.CALLOUT, Color(1, 1, 1, 0.9))
 		_shadow_string(head, PhoneTheme.font(700), Vector2(0, 104), GameState.PERIOD_NAMES[GameState.get_time_of_day()], w, PhoneTheme.CLOCK - 8, Color.WHITE))
 	_fixed.add_child(head)
 	var notes := _notifications()
@@ -524,7 +546,7 @@ func _date_widget() -> Control:
 		widget.draw_style_box(PhoneTheme.rounded(Color(0.12, 0.09, 0.07, 0.3), 22, Color(1, 1, 1, 0.18), 1), Rect2(Vector2.ZERO, widget.size))
 		widget.draw_string(PhoneTheme.font(600), Vector2(18, 30), GameState.get_weekday().to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.CAPTION, faint)
 		widget.draw_string(PhoneTheme.font(700), Vector2(18, 62), GameState.PERIOD_NAMES[GameState.get_time_of_day()], HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.TITLE, Color.WHITE)
-		widget.draw_string(PhoneTheme.font(400), Vector2(18, 82), "Day %d" % GameState.day, HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.FOOTNOTE, faint)
+		widget.draw_string(PhoneTheme.font(400), Vector2(18, 82), Economy.format(GameState.money), HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.FOOTNOTE, faint)
 		PhoneIcons.draw(widget, "journal", Rect2(right - 20, 14, 20, 20), faint)
 		widget.draw_string(PhoneTheme.font(700), Vector2(0, 62), str(active), HORIZONTAL_ALIGNMENT_RIGHT, right, PhoneTheme.TITLE, Color.WHITE)
 		widget.draw_string(PhoneTheme.font(400), Vector2(0, 82), "active quest" if active == 1 else "active quests", HORIZONTAL_ALIGNMENT_RIGHT, right, PhoneTheme.FOOTNOTE, faint))
@@ -1262,9 +1284,7 @@ func _wallet() -> void:
 	var to_payday := GameState.days_until_payday()
 	upcoming.append(_money_row("Payday", "Today" if to_payday == 0 else "In %d day%s" % [to_payday, _plural(to_payday)],
 			"+" + Economy.format(Economy.salary(GameState.flags)), PhoneTheme.TILE["phone"].darkened(0.2)))
-	var bills := Economy.monthly_bills_total()
-	for subscription in GameState.subscriptions:
-		bills += Economy.SUBSCRIPTIONS[subscription]["amount"]
+	var bills := Calendar.monthly_bills_due()
 	var to_bills := GameState.days_until_bills()
 	upcoming.append(_money_row("Monthly bills", "Today" if to_bills == 0 else "In %d day%s" % [to_bills, _plural(to_bills)],
 			Economy.format(-bills), PhoneTheme.INK))
@@ -1330,6 +1350,165 @@ func _money_row(title: String, subtitle: String, amount: String, amount_color: C
 
 func _plural(count: int) -> String:
 	return "" if count == 1 else "s"
+
+
+# --- Calendar -----------------------------------------------------------------
+
+## Månaden som ett rutnät, den valda dagens händelser och det som kommer den närmaste
+## veckan. Händelserna kommer från Calendar, som läser spelets egna system, så sidan
+## följer med när tiden går (den byggs om när tidszonen eller schemana ändras).
+func _calendar() -> void:
+	_header("Calendar")
+	var current_month := Economy.month_of(GameState.day)
+	var month := _calendar_month if _calendar_month > 0 else current_month
+	var selected := _calendar_day if _calendar_day > 0 else GameState.day
+	var nav := HBoxContainer.new()
+	nav.add_child(_calendar_arrow("back", month > 1, func() -> void: _calendar_go(month - 1)))
+	var title := _label("Month %d" % month, PhoneTheme.HEADLINE, PhoneTheme.INK, 700, HORIZONTAL_ALIGNMENT_CENTER)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	nav.add_child(title)
+	nav.add_child(_calendar_arrow("chevron", month < current_month + CALENDAR_MONTHS_AHEAD, func() -> void: _calendar_go(month + 1)))
+	_padded(nav)
+	_group([_calendar_grid(month, selected)])
+
+	var heading := "%s · Day %d" % [GameState.weekday_of(selected), selected]
+	_section(("Today · " + heading) if selected == GameState.day else heading)
+	var events := Calendar.events_on(selected)
+	if events.is_empty():
+		_content.add_child(_label("Nothing planned.", PhoneTheme.SUBHEAD, PhoneTheme.MUTED, 400, HORIZONTAL_ALIGNMENT_CENTER))
+	else:
+		_group(events.map(func(event: Dictionary) -> Control: return _event_row(event, false)))
+
+	_section("Coming up")
+	var upcoming := Calendar.upcoming(CALENDAR_UPCOMING_DAYS, CALENDAR_UPCOMING_MAX)
+	if upcoming.is_empty():
+		_content.add_child(_label("Nothing coming up this week.", PhoneTheme.SUBHEAD, PhoneTheme.MUTED, 400, HORIZONTAL_ALIGNMENT_CENTER))
+	else:
+		_group(upcoming.map(func(event: Dictionary) -> Control: return _event_row(event, true)))
+	_spacer(6)
+
+
+## Bläddrar till en månad. Den här månaden väljer i dag, andra månader sin första dag.
+func _calendar_go(month: int) -> void:
+	var current_month := Economy.month_of(GameState.day)
+	_calendar_month = month
+	_calendar_day = 0 if month == current_month else (month - 1) * Economy.MONTH_DAYS + 1
+	_show("calendar", false)
+
+
+## En pil för att bläddra mellan månaderna; nedtonad och utan verkan när det inte går.
+func _calendar_arrow(glyph: String, enabled: bool, on_pressed: Callable) -> Button:
+	var button := Button.new()
+	button.focus_mode = Control.FOCUS_NONE
+	button.custom_minimum_size = Vector2(36, 36)
+	button.disabled = not enabled
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	button.draw.connect(func() -> void:
+		var color := PhoneTheme.ACCENT if enabled else Color(PhoneTheme.MUTED, 0.35)
+		if button.get_draw_mode() == BaseButton.DRAW_PRESSED:
+			color = color.darkened(0.25)
+		PhoneIcons.draw(button, glyph, Rect2(9, 9, 18, 18), color, 2.6))
+	button.pressed.connect(on_pressed)
+	return button
+
+
+## Månaden som ett rutnät: veckodagarna överst och en rad per vecka (en månad är fyra
+## hela veckor som börjar på en måndag). I dag är en ifylld ring, den valda dagen en
+## ring med kant, passerade dagar är nedtonade och dagar med händelser har prickar i
+## händelsernas färger. Klick väljer dagen.
+func _calendar_grid(month: int, selected: int) -> Control:
+	var week := GameState.WEEKDAYS.size()
+	var first := (month - 1) * Economy.MONTH_DAYS + 1
+	var weeks := Economy.MONTH_DAYS / week
+	var kinds := {}
+	for day in range(first, first + Economy.MONTH_DAYS):
+		var day_kinds: Array[String] = []
+		for event in Calendar.events_on(day):
+			if not event["kind"] in day_kinds:
+				day_kinds.append(event["kind"])
+		kinds[day] = day_kinds
+	var grid := Control.new()
+	grid.custom_minimum_size.y = CALENDAR_HEAD + weeks * CALENDAR_ROW + 6
+	grid.draw.connect(func() -> void:
+		var cell := grid.size.x / week
+		for i in week:
+			grid.draw_string(PhoneTheme.font(600), Vector2(i * cell, 20), GameState.WEEKDAYS[i].left(1), HORIZONTAL_ALIGNMENT_CENTER, cell, PhoneTheme.CAPTION, PhoneTheme.MUTED)
+		for i in Economy.MONTH_DAYS:
+			var day := first + i
+			var center := Vector2((i % week + 0.5) * cell, CALENDAR_HEAD + (i / week) * CALENDAR_ROW + 17)
+			var color := PhoneTheme.INK
+			if day == GameState.day:
+				grid.draw_circle(center, 15, PhoneTheme.ACCENT, true, -1.0, true)
+				color = Color.WHITE
+			elif day == selected:
+				grid.draw_circle(center, 14, PhoneTheme.ACCENT, false, 1.5, true)
+				color = PhoneTheme.ACCENT
+			elif day < GameState.day:
+				color = Color(PhoneTheme.MUTED, 0.7)
+			grid.draw_string(PhoneTheme.font(600), Vector2(center.x - cell / 2, center.y + 5), str(Economy.day_of_month(day)), HORIZONTAL_ALIGNMENT_CENTER, cell, PhoneTheme.SUBHEAD, color)
+			var dots: Array[String] = kinds[day]
+			for d in dots.size():
+				var dot := Vector2(center.x + (d - (dots.size() - 1) / 2.0) * 6, center.y + 21)
+				grid.draw_circle(dot, 2.2, Color(_event_color(dots[d]), 0.45 if day < GameState.day else 1.0), true, -1.0, true))
+	grid.gui_input.connect(func(event: InputEvent) -> void:
+		var click := event as InputEventMouseButton
+		if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+			return
+		var cell := grid.size.x / week
+		var column := int(click.position.x / cell)
+		var row := int((click.position.y - CALENDAR_HEAD) / CALENDAR_ROW)
+		if click.position.y < CALENDAR_HEAD or row >= weeks or column < 0 or column >= week:
+			return
+		_calendar_month = month
+		_calendar_day = first + row * week + column
+		_show("calendar", false))
+	return grid
+
+
+## En händelse: en prick i händelsens färg, rubrik och detalj, och till höger när den
+## händer (med dagen om with_date). Det som redan har hänt är nedtonat.
+func _event_row(event: Dictionary, with_date: bool) -> Control:
+	var past := Calendar.is_past(event)
+	var when: String = "All day" if event["period"] == "" else GameState.PERIOD_NAMES[event["period"]]
+	var date := ""
+	if with_date:
+		var offset: int = event["day"] - GameState.day
+		date = "Today" if offset == 0 else "Tomorrow" if offset == 1 else "%s · Day %d" % [GameState.weekday_of(event["day"]).left(3), event["day"]]
+	var color := _event_color(event["kind"])
+	var row := Control.new()
+	row.custom_minimum_size.y = 52
+	row.draw.connect(func() -> void:
+		var left := float(PhoneTheme.SIDE)
+		var right := row.size.x - left
+		var ink := PhoneTheme.MUTED if past else PhoneTheme.INK
+		var side_width := maxf(PhoneTheme.font(600).get_string_size(date if with_date else when, HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.FOOTNOTE).x,
+				PhoneTheme.font(400).get_string_size(when if with_date else "", HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.FOOTNOTE).x)
+		var width := right - left - 14 - side_width - 10
+		row.draw_circle(Vector2(left + 4, 26), 4, Color(color, 0.45) if past else color, true, -1.0, true)
+		row.draw_string(PhoneTheme.font(600), Vector2(left + 14, 23), _ellipsize(event["title"], PhoneTheme.font(600), PhoneTheme.CALLOUT, width), HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.CALLOUT, ink)
+		row.draw_string(PhoneTheme.font(400), Vector2(left + 14, 41), _ellipsize(event["detail"], PhoneTheme.font(400), PhoneTheme.FOOTNOTE, width), HORIZONTAL_ALIGNMENT_LEFT, -1, PhoneTheme.FOOTNOTE, PhoneTheme.MUTED)
+		if with_date:
+			row.draw_string(PhoneTheme.font(600), Vector2(0, 23), date, HORIZONTAL_ALIGNMENT_RIGHT, right, PhoneTheme.FOOTNOTE, ink)
+			row.draw_string(PhoneTheme.font(400), Vector2(0, 41), when, HORIZONTAL_ALIGNMENT_RIGHT, right, PhoneTheme.FOOTNOTE, PhoneTheme.MUTED)
+		else:
+			row.draw_string(PhoneTheme.font(600), Vector2(0, 32), when, HORIZONTAL_ALIGNMENT_RIGHT, right, PhoneTheme.FOOTNOTE, PhoneTheme.MUTED))
+	return row
+
+
+## Färgen för en sorts händelse, lånad från appen den hör ihop med.
+func _event_color(kind: String) -> Color:
+	match kind:
+		"story":
+			return PhoneTheme.TILE["memories"]
+		"money":
+			return PhoneTheme.TILE["wallet"]
+		"people":
+			return PhoneTheme.TILE["messages"]
+		"place":
+			return PhoneTheme.TILE["journal"]
+	return PhoneTheme.MUTED
 
 
 # --- Journal ------------------------------------------------------------------

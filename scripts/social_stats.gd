@@ -34,11 +34,13 @@ const ATTRACTIVENESS_TITLES := ["Unassuming", "Appealing", "Attractive", "Magnet
 const ATTRACTIVENESS_UNLOCKS := {
 	3: "People warm up to you: +1 ♥ on every relationship action",
 	4: "Magnetic options: people make offers they wouldn't make anyone else",
-	5: "Your Romance meter no longer slips overnight",
+	5: "People pay for your presence: side gigs pay 25% more",
 }
 ## Nivåerna där effekterna ovan börjar gälla.
 const LINK_BONUS_TIER := 3
-const NO_ROMANCE_DECAY_TIER := 5
+const EARNINGS_BONUS_TIER := 5
+## Hur mycket mer handlingar med "earn" ger från EARNINGS_BONUS_TIER.
+const EARNINGS_BONUS := 1.25
 
 
 static func level_for_xp(xp: int) -> int:

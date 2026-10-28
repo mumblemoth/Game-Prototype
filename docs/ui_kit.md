@@ -3,7 +3,7 @@
 Allt spel-UI utanför telefonen bygger på kitet i `scripts/ui/`. Telefonen behåller sin egen stil (`PhoneTheme`), eftersom den är en sak i världen.
 
 ## Grunder: `UiKit` (`ui_kit.gd`)
-- **Färger:** `INK` (svart), `INK_2` (ytor), `YELLOW`, `PAPER` (ljus text och plattor), `RED` (hårda skuggor och varningar), `MUTED` och `METERS` (Home, Work och Romance).
+- **Färger:** `INK` (svart), `INK_2` (ytor), `YELLOW`, `PAPER` (ljus text och plattor), `RED` (hårda skuggor och varningar), `MUTED` och `METERS` (Home och Work).
 - **Typsnitt:** `display_font()` är fett, smalt och lutande (Bahnschrift med lutning och fetma). `body_font(bold)` är brödtexten. Egna filer i `Assets/fonts/ui_display.ttf`, `ui_body.ttf` och `ui_body_bold.ttf` ersätter dem utan kodändring.
 - **Storlekar:** `HERO 88`, `DISPLAY 60`, `TITLE 40`, `MENU 30`, `HEADING 24`, `BODY 18`, `SMALL 15` och `TINY 12`.
 - **Form:** allt lutar med `SLANT` (0.25) och har en hård skugga (`SHADOW`).
@@ -41,7 +41,9 @@ Allt spel-UI utanför telefonen bygger på kitet i `scripts/ui/`. Telefonen beh�
 
 ## Grafikpass 2026-10-27
 Det som låg utanför kitet följer det nu:
+- **Våningspanelen** (`house.gd`): en svart sned platta med våningens eller platsens namn och KitButton-flikar under (Up Q / Down E hemma, Map M / Go Home ute). Flikarna går att klicka på.
 - **HUD-mätarna** har streck som i pausmenyn, och värdet står på en egen svart platta.
+- **Telefonens och kartans knappar** (`PhoneTheme.hud_button`) är kitets svarta sneda plattor med röd skugga. Själva telefonen har kvar sin egen stil.
 - **Rummets meny:** tidszonen står på en gul platta ovanför rummets namn i versaler. Rummens skyltar tonas bort medan menyn är öppen.
 - **Dagens slut** ligger i ett eget lager (6) över telefonens och kartans knappar och står mitt på skärmen.
 - **Kartan:** rubriken står i kartans hörn, kartan har en svart ram med röd skugga och "Stay here" är en action-knapp.

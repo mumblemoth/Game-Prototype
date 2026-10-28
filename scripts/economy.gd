@@ -66,7 +66,7 @@ const TAKEOUT := {"amount": 60, "effects": {"home": -5}, "text": "The fridge is 
 ## Saldot får gå minus till räkningar, men inte till köp. Står kontot på minus när en
 ## räkning dras kommer en avgift, och varje natt på minus ger oro i mätarna.
 const LATE_FEE := 35
-const DEBT_STRESS := {"home": -3, "romance": -3}
+const DEBT_STRESS := {"home": -3}
 const DEBT_TEXT := "Your account is in the red. Money worries keep you up at night."
 
 ## Oväntade räkningar, som mest en i månaden (aldrig den första). Vilken och vilken dag
@@ -128,7 +128,7 @@ const ITEMS := {
 ## Sånt man köper en gång och har kvar. Säljs i rummet "room" (genereras som val där).
 ##   name   – vad saken heter i pausmenyns Items
 ##   decay  – minskar hur mycket en mätare sjunker varje natt
-##   effects/link/link_points/sets_flag – som i RoomActions, sker när man köper
+##   effects/relief/link/link_points/sets_flag – som i RoomActions, sker när man köper
 const PURCHASES := {
 	# Hemmet – beställs på datorn i hemmakontoret.
 	"dishwasher": {"name": "Dishwasher", "room": "home_office", "object": "desk", "label": "Order a new dishwasher", "price": 650,
@@ -136,9 +136,9 @@ const PURCHASES := {
 	"robot_vacuum": {"name": "Robot Vacuum", "room": "home_office", "object": "desk", "label": "Order a robot vacuum", "price": 350,
 		"text": "The dog declares war on it immediately.", "decay": {"home": 1}},
 	"new_mattress": {"name": "New Mattress", "room": "home_office", "object": "desk", "label": "Order a new mattress", "price": 900,
-		"text": "Your back thanks you. So does your husband.", "decay": {"romance": 2}},
+		"text": "Your back thanks you. So does your husband.", "relief": 10},
 	"family_trip": {"name": "Beach Weekend", "room": "home_office", "object": "desk", "label": "Book a family beach weekend", "price": 2400,
-		"text": "You book the trip. The boys pretend not to be excited.", "effects": {"home": 15, "romance": 15},
+		"text": "You book the trip. The boys pretend not to be excited.", "effects": {"home": 15}, "relief": 15,
 		"sets_flag": "family_trip_booked"},
 	# Presenter.
 	"gift_cleats": {"name": "Football Cleats", "room": "home_office", "object": "desk", "label": "Buy Son 2 new football cleats", "price": 120,
@@ -146,7 +146,7 @@ const PURCHASES := {
 	"gift_game": {"name": "Video Game", "room": "home_office", "object": "desk", "label": "Buy Son 1 the game he wants", "price": 70,
 		"text": "He actually hugs you. Then disappears for three days.", "link": "son_1", "link_points": 4},
 	"gift_watch": {"name": "Wristwatch", "room": "boutique", "object": "display_case", "label": "Buy your husband a watch", "price": 250,
-		"text": "You wrap it and hide it in the closet for the right moment.", "link": "husband", "link_points": 4, "effects": {"romance": 10}},
+		"text": "You wrap it and hide it in the closet for the right moment.", "link": "husband", "link_points": 4, "relief": 10},
 	"gift_artbook": {"room": "bookstore", "object": "display_table", "label": "Buy Son 1 the art book for his game", "price": 45,
 		"text": "Concept art, maps and lore. He'll pretend it's no big deal and read it cover to cover.", "link": "son_1", "link_points": 3},
 }

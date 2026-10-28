@@ -102,7 +102,7 @@ static func memory_image(memory_id: String) -> String:
 
 ## Quests som kan startas. Journalen visar startade och avklarade.
 const QUESTS := {
-	"first_week": {"title": "One Day at a Time", "description": "Get through your first week without letting home, work or romance fall apart. (Placeholder quest.)"},
+	"first_week": {"title": "One Day at a Time", "description": "Get through your first week without letting home or work fall apart. (Placeholder quest.)"},
 	"coffee": {"title": "Out of Coffee", "description": "Your husband says you're out of coffee. Pick some up after school. (Placeholder quest.)"},
 	"practice": {"title": "Ride to Practice", "description": "Son 2 needs a ride to practice. (Placeholder quest.)"},
 }

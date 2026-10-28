@@ -113,6 +113,7 @@ Shown the **first time the phone opens in each new period**; after that it opens
 | Memory | 300 px rounded preview, info card (Type, From, When, Where), **Relive** or **View Full Screen**, and **Set as Wallpaper** (sheet: Lock Screen / Home Screen / Both) |
 | Profile | Dark Attractiveness card with a 1–5 meter, a **Skills** card (bar and XP per stat) and a **What Attractiveness unlocks** card (teal check or empty ring) |
 | Wallet | Dark **Balance** card (red amount when negative, next salary below). **Coming up** card: payday, monthly bills (incl. subscriptions), weekly allowance, groceries status (red when takeout is near), each subscription. **Ways to earn · N of M found**: found ones show what they've earned; undiscovered ones show "???" with a vague hint. **Recent activity**: last 12 ledger entries, newest first, income in sage |
+| Calendar | Month N with back/forward arrows (from month 1 to two months ahead). A 7 × 4 grid card (a month is four Monday-to-Sunday weeks): today is a filled teal circle, the selected day a teal ring, past days muted, and days with events get one dot per event kind (story terracotta, money slate blue, people teal, places ochre). Tapping a day shows its events under "Today · Weekday · Day N"; then **Coming up**: the next 8 events within 7 days with "Today"/"Tomorrow"/"Tue · Day 9" and the period ("All day" for money). Events come from `Calendar` (StoryScenes, Economy, Schedules, Locations); surprise bills and chance-based schedule rules are never shown |
 | Journal | Active/Completed tabs. Quest cards have a 4 px left bar (ochre for active, sage plus a check for completed). Empty state shows the journal glyph and "Nothing here yet." |
 | Settings | Card with **Wallpaper** (current home wallpaper's name) and **Close Phone**, a separate card with **Quit Game** in red, then "Saving comes later." |
 | Wallpaper | Two mini-phones (104 × 215) for Lock and Home side by side; the selected slot has a teal rim. Then "Choose for …" with a 3-column grid of 86 × 132 tiles: presets first, then every memory picture. Pictures not collected yet are locked. The chosen one has a teal rim and a check |
@@ -126,6 +127,7 @@ All icons sit on a **24 × 24 grid**. Strokes are **2 units** wide with round ca
 | `phone` | Handset outline | Phone app tile |
 | `messages` | Speech bubble with tail | Messages app tile, notifications |
 | `memories` | Photo with a second photo behind | Memories app tile, notifications |
+| `calendar` | Page with two rings, a header line and a dot | Calendar app tile |
 | `journal` | Book with spine and two lines | Journal app tile, home widget, empty journal |
 | `profile` | Head and shoulders | Profile app tile |
 | `wallet` | Wallet with a bill peeking out and a clasp | Wallet app tile |
@@ -141,8 +143,9 @@ All icons sit on a **24 × 24 grid**. Strokes are **2 units** wide with round ca
 | `heart` | Heart outline | Spare, for relationships |
 | `check` | Check mark | Selected wallpaper, completed quest, unlocked perk |
 | `end_call` | Handset turned 135° | End call button |
+| `map` | Map folded in three panels | Map button on the HUD (bottom right, under the Phone button) |
 
-App tile colors: phone sage `#6FA67A`, messages teal `#3E9C95`, memories terracotta `#E07A5F`, journal ochre `#D4A04C`, profile rose `#C9677F`, wallet slate blue `#4F7CAC`, settings warm gray `#8C8379`.
+App tile colors: phone sage `#6FA67A`, messages teal `#3E9C95`, memories terracotta `#E07A5F`, calendar brick `#C8554B`, journal ochre `#D4A04C`, profile rose `#C9677F`, wallet slate blue `#4F7CAC`, settings warm gray `#8C8379`.
 
 ## Wallpaper slots
 

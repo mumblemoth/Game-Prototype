@@ -248,7 +248,7 @@ func _home(content: Control) -> void:
 		var font := UiKit.display_font()
 		var body := UiKit.body_font(true)
 		UiKit.draw_display(card, Vector2(0, 66), period.to_upper(), UiKit.HERO - 16)
-		var date := "%s · Day %d" % [GameState.get_weekday(), GameState.day]
+		var date := GameState.get_weekday()
 		UiKit.draw_slant(card, Rect2(12, 94, 380, 40), UiKit.PAPER)
 		card.draw_string(font, Vector2(34, 94 + UiKit.baseline(font, UiKit.HEADING + 2, 40)), date.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.HEADING + 2, UiKit.INK)
 		UiKit.draw_slant(card, Rect2(24, 140, 360, 32), UiKit.YELLOW)
@@ -292,7 +292,7 @@ func _balance_row(key: String) -> Control:
 # --- Status -------------------------------------------------------------------------
 
 func _status(content: Control) -> void:
-	_place(content, UiKit.header("Status", "Day %d" % GameState.day), Vector2.ZERO, 800)
+	_place(content, UiKit.header("Status", GameState.get_weekday()), Vector2.ZERO, 800)
 	var left := _column(6)
 	_place(content, left, Vector2(0, 104), 370)
 	left.add_child(_section("Balance"))

@@ -67,3 +67,10 @@ Two separate numbers. Do not use one in place of the other.
 - `GameState.meters[char]` (curves in `Requests`) = how much THEY want her / want things
   from her. Drives requests. For the sons this is the `wants` track only.
 - `links[char]["lust"]` = how physically charged the relationship is. Drives scene gates.
+
+## Change note — Romance meter removed (2026-10-26)
+
+`stats` keeps its name but now holds only `{home, work}`, 0-100. The `romance` key and
+its HUD meter are gone. Anything that used to give Romance now carries `"relief": N`,
+which lowers Mom's own desire meter. Scene EFFECTS in `scripts/balance.gd` use the same
+`relief` key instead of `stats.romance`. No dialogue file referenced `stats.romance`.

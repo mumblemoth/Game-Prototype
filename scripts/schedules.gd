@@ -100,6 +100,8 @@ const RULES := {
 	"dog": [
 		# Hunden följer med Son 2 ut på gården.
 		{"id": "fetch", "periods": ["afternoon"], "if_at": {"son_2": "outside"}, "room": "outside", "activity": "playing"},
+		# Helgkvällar busar han runt i trädgården i stället för att sova på soffan.
+		{"id": "garden_evening", "weekdays": [5, 6], "periods": ["evening"], "room": "backyard", "activity": "playing"},
 	],
 	"neighbor": [
 		{"id": "moving_in", "before_intro": true, "periods": ["afternoon", "evening"], "room": "", "activity": "unpacking"},

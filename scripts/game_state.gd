@@ -39,6 +39,8 @@ signal character_introduced(character_id: String)
 signal money_changed
 ## En mätare, en förfrågan eller en skuld i Requests har ändrats.
 signal requests_changed
+## En dialogruta har öppnats eller stängts. Telefonen göms och spärras medan active är sant.
+signal dialogue_changed(active: bool)
 
 ## Dygnets fasta tidszoner, som i Persona. Bara eftermiddagen och kvällen är spelbara:
 ##   Morgon      – dagen börjar här; en scen visas om dagen har en, annars hoppas den över.
@@ -138,13 +140,12 @@ const NIGHTLY_DECAY := 10
 const STAT_NAMES := {
 	"home": "Home",
 	"work": "Work",
-	"romance": "Romance",
 }
 
 var day := 1
 ## Index i TIME_PERIODS. Lika med TIME_PERIODS.size() när dagen är slut.
 var period := 0
-var stats := {"home": 50, "work": 50, "romance": 50}
+var stats := {"home": 50, "work": 50}
 var current_room := START_ROOM
 var map_open := false
 ## Scenen som spelas just nu, eller tom sträng.
@@ -218,6 +219,8 @@ var income_earned := {}
 var work_log := {"sum": 0, "days": 0}
 ## Dagen då veckohandlingen senast gjordes (annars blir det hämtmat).
 var last_groceries := 1
+## Dagen då trädgårdens rabatter senast vattnades (se Backyard).
+var last_watered := 1
 
 # Förfrågningar (mätare, typer och sysslor finns i Requests).
 ## Mätarna 0–100: person -> värde. Desire för vuxna och mamman, wants för sönerna.
@@ -318,7 +321,7 @@ func action_block_reason(action: Dictionary, room_id: String) -> String:
 
 ## Snabba handlingar som ger något (mätare, egenskap eller relation) går bara en gång per dag.
 func _once_per_day(action: Dictionary) -> bool:
-	return not action.get("time", false) and (not action.get("effects", {}).is_empty() or not action.get("social", {}).is_empty() or action.get("link", "") != "")
+	return not action.get("time", false) and (not action.get("effects", {}).is_empty() or action.get("relief", 0) > 0 or not action.get("social", {}).is_empty() or action.get("link", "") != "")
 
 
 ## Utför en handling från ett rums meny: mätare, relation, dagens användning och tid.
@@ -346,13 +349,13 @@ func do_room_action(action: Dictionary) -> void:
 			continue
 		stats[key] = clampi(stats[key] + delta, 0, STAT_MAX)
 		changes.append("%s %+d" % [STAT_NAMES[key], delta])
-		if key == "romance" and delta > 0:
-			_change_meter("mom", -delta * Requests.MOM_EFFECTS["romance_relief"])
+	_relieve_mom(action.get("relief", 0))
 	for stat in action.get("social", {}):
 		changes.append(add_social_xp(stat, action["social"][stat]))
 	if link_note != "":
 		changes.append(link_note)
 	changes.append_array(_apply_request_action(action))
+	changes.append_array(Backyard.apply_action(action))
 	# Handlingar kan föra storyn framåt: sätta en händelse eller avsluta en quest.
 	if action.get("sets_flag", "") != "":
 		var income_id := Economy.income_for_flag(action["sets_flag"])
@@ -492,7 +495,10 @@ func action_earnings(action: Dictionary) -> int:
 	var levels := {}
 	for stat in social:
 		levels[stat] = social_level(stat)
-	return Economy.scaled(action.get("earn", 0), action.get("earn_scale", {}), levels)
+	var amount := Economy.scaled(action.get("earn", 0), action.get("earn_scale", {}), levels)
+	if attractiveness_tier() >= SocialStats.EARNINGS_BONUS_TIER:
+		amount = roundi(amount * SocialStats.EARNINGS_BONUS)
+	return amount
 
 
 ## Pengar in. income är sidoinkomsten de räknas till ("" för lön och annat).
@@ -649,6 +655,19 @@ func _change_meter(character_id: String, delta: float) -> void:
 		return
 	meters[character_id] = clampf(meters[character_id] + delta, 0.0, 100.0)
 	requests_changed.emit()
+
+
+## Det som får mamman att varva ner (relief i handlingar och scener) sänker hennes egen
+## mätare med amount × Requests.MOM_EFFECTS["relief_scale"]. Kan anropas från dialog:
+## $> GameState.relieve_mom(10)
+func relieve_mom(amount: float) -> void:
+	if amount > 0:
+		_change_meter("mom", -amount * Requests.MOM_EFFECTS["relief_scale"])
+
+
+## Det apply() och do_room_action() anropar; räknar via relieve_mom().
+func _relieve_mom(relief: int) -> void:
+	relieve_mom(relief)
 
 
 ## Hur fort en persons mätare växer just nu, utöver kurvan (se Requests).
@@ -1135,6 +1154,25 @@ func _on_dialogue_ended(_resource: Resource) -> void:
 		stage.clear()
 
 
+## Dialogrutorna som är öppna just nu (nodens instans-id). Både husets dialogruta och
+## storyns balloon anmäler sig här, så att telefonen vet när den ska hålla sig undan.
+var _open_dialogues := {}
+
+
+func set_dialogue_open(source: Object, is_open: bool) -> void:
+	var was_active := in_dialogue()
+	if is_open:
+		_open_dialogues[source.get_instance_id()] = true
+	else:
+		_open_dialogues.erase(source.get_instance_id())
+	if in_dialogue() != was_active:
+		dialogue_changed.emit(in_dialogue())
+
+
+func in_dialogue() -> bool:
+	return not _open_dialogues.is_empty()
+
+
 func start_next_day() -> void:
 	# Kvällens Work räknas till lönebonusen innan natten tär på mätarna.
 	work_log["sum"] += stats["work"]
@@ -1142,14 +1180,10 @@ func start_next_day() -> void:
 	day += 1
 	used_today.clear()
 	for key in stats:
-		if key == "romance" and attractiveness_tier() >= SocialStats.NO_ROMANCE_DECAY_TIER:
-			continue
 		stats[key] = clampi(stats[key] - maxi(NIGHTLY_DECAY - decay_reduction(key), 0), 0, STAT_MAX)
-	if meters["mom"] >= Requests.MOM_EFFECTS["restless"]:
-		stats["romance"] = clampi(stats["romance"] - Requests.MOM_EFFECTS["extra_decay"], 0, STAT_MAX)
 	_expire_requests()
 	var notes := _money_new_day()
-	notes.push_front("Day %d begins. Things slipped a little overnight." % day)
+	notes.push_front("A new day begins. Things slipped a little overnight.")
 	message_posted.emit(" ".join(notes))
 	_decay_social()
 	current_room = START_ROOM
@@ -1281,6 +1315,7 @@ func apply(scene_id: String) -> void:
 		var delta: int = effects["stats"][key]
 		stats[key] = clampi(stats[key] + delta, 0, STAT_MAX)
 		notes.append("%s %+d" % [STAT_NAMES[key], delta])
+	_relieve_mom(effects.get("relief", 0))
 	for flag in effects.get("flags", []):
 		set_flag(flag)
 	set_flag(Dispatcher.DONE_FLAG + base)

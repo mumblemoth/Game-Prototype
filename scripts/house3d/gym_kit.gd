@@ -437,7 +437,7 @@ static func build(n: Node3D, rig: TimeOfDayRig, kind: String, w: float, d: float
 			# Disken: en hög front mot besökarna med gymmets band, en ek-kant att luta sig
 			# mot, och personalens sida med skärm, kortterminal och handdukar att dela ut.
 			var white := StyleKit.mat(StyleKit.WHITE)
-			StyleKit.box(n, Vector3(w, 0.08, d - 0.1), Vector3(0, 0.04, 0), StyleKit.mat(StyleKit.DARK))
+			StyleKit.box(n, Vector3(w - 0.02, 0.08, d - 0.12), Vector3(0, 0.04, 0), StyleKit.mat(StyleKit.DARK))
 			StyleKit.box(n, Vector3(w, 1.0, 0.06), Vector3(0, 0.56, d / 2 - 0.08), white)
 			for s in [-1, 1]:
 				StyleKit.box(n, Vector3(0.06, 1.0, d - 0.1), Vector3(s * (w / 2 - 0.03), 0.56, 0), white)
@@ -475,7 +475,7 @@ static func build(n: Node3D, rig: TimeOfDayRig, kind: String, w: float, d: float
 			for s in [-1, 1]:
 				StyleKit.box(n, Vector3(0.03, 1.5, d), Vector3(s * (w / 2 - 0.015), 0.75, 0), white)
 			for y in [0.1, 0.5, 0.9, 1.3]:
-				StyleKit.box(n, Vector3(w, 0.03, d), Vector3(0, y, 0), StyleKit.mat(StyleKit.OAK))
+				StyleKit.box(n, Vector3(w - 0.06, 0.03, d - 0.03), Vector3(0, y, 0.015), StyleKit.mat(StyleKit.OAK))
 			for i in 4:
 				StyleKit.box(n, Vector3(0.3, 0.13, 0.26), Vector3(-w / 2 + 0.25 + i * 0.4, 0.18, 0), StyleKit.mat(StyleKit.WHITE if i % 2 == 0 else ACCENT.lightened(0.15)))
 			var tubs := [IRON, StyleKit.WHITE, WEIGHT_COLORS[0]]

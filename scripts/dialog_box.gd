@@ -30,28 +30,39 @@ const INK := Color("111014")
 const TEXT_COLOR := Color("f4f1ea")
 const NARRATION_COLOR := Color("c9d0e6")
 const DIM := Color(0.4, 0.4, 0.48)
-const TEXT_SIZE := 26
-const NAME_SIZE := 30
+const TEXT_SIZE := 18
+const NAME_SIZE := 20
 
 # --- Layout, i viewportens koordinater (1280×720) -----------------------------------
-## Textrutans hörn: lite sned, som i Persona.
-const BOX := [Vector2(70, 540), Vector2(1232, 526), Vector2(1212, 702), Vector2(48, 708)]
+## Textrutans hörn: lite sned, som i Persona. Halva bredden mot förr och centrerad, så
+## att mer av rummet syns; texten har ändå plats för tre rader.
+const BOX := [Vector2(346, 590), Vector2(946, 582), Vector2(934, 698), Vector2(334, 702)]
+## Kantens tjocklek, skuggans förskjutning och var den tunna inre linjen går.
+const BOX_EDGE := 4.0
+const BOX_SHADOW := Vector2(6, 6)
+const BOX_INNER := 6.0
 ## Det gula hörnet nere till höger, där pilen för "nästa" sitter.
 const CORNER_ALONG_BOTTOM := 0.12
 const CORNER_ALONG_RIGHT := 0.3
-const ARROW_AT := Vector2(1180, 686)
-const TEXT_RECT := Rect2(112, 568, 1020, 110)
-## Porträttens överkant ligger utanför bild även nedtonad (bilderna är rakt avskurna där),
-## och underkanten bakom textrutan.
-const PORTRAIT_SIZE := Vector2(420, 600)
-const LEFT_SLOT := Vector2(30, -40)
-const RIGHT_SLOT := Vector2(830, -40)
+const ARROW_AT := Vector2(912, 686)
+const TEXT_RECT := Rect2(370, 604, 548, 82)
+## Porträttens överkant ligger utanför bild även nedtonad (bilderna är rakt avskurna där).
+## Underkanten tonas ut från PORTRAIT_FADE (andel av höjden), eftersom den smala
+## textrutan inte längre täcker den.
+const PORTRAIT_SIZE := Vector2(336, 480)
+const PORTRAIT_FADE := 0.68
+const PORTRAIT_SHADER := "res://shaders/portrait_fade.gdshader"
+const LEFT_SLOT := Vector2(110, -40)
+const RIGHT_SLOT := Vector2(834, -40)
 ## Hur den som lyssnar sjunker och krymper.
 const LISTENER_DROP := 14.0
 const LISTENER_SCALE := 0.96
-const PLATE_Y := 498.0
-const PLATE_LEFT_X := 96.0
-const PLATE_RIGHT_END := 1192.0
+## Namnskylten: höjd, var den sitter över textrutan och luft runt namnet.
+const PLATE_HEIGHT := 36.0
+const PLATE_Y := 556.0
+const PLATE_LEFT_X := 366.0
+const PLATE_RIGHT_END := 926.0
+const PLATE_PADDING := 46.0
 
 # --- Fram-skrivning ---------------------------------------------------------------
 const CHARS_PER_SECOND := 48.0
@@ -90,8 +101,8 @@ var _stage_tween: Tween
 func _ready() -> void:
 	layer = 4
 	visible = false
-	_plate_font = _system_font(["Arial Black", "Segoe UI Black", "Impact"], 900, true)
-	_text_font = _system_font(["Segoe UI Semibold", "Segoe UI", "Arial"], 600)
+	_plate_font = UiKit.display_font()
+	_text_font = UiKit.body_font()
 
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -119,10 +130,10 @@ func _ready() -> void:
 	_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_text.add_theme_font_override("font", _text_font)
 	_text.add_theme_font_size_override("font_size", TEXT_SIZE)
-	_text.add_theme_constant_override("line_spacing", 4)
+	_text.add_theme_constant_override("line_spacing", 2)
 	_text.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
-	_text.add_theme_constant_override("shadow_offset_x", 2)
-	_text.add_theme_constant_override("shadow_offset_y", 2)
+	_text.add_theme_constant_override("shadow_offset_x", 1)
+	_text.add_theme_constant_override("shadow_offset_y", 1)
 	_root.add_child(_text)
 
 	_plate = Control.new()
@@ -134,7 +145,7 @@ func _ready() -> void:
 	_arrow.position = ARROW_AT
 	_arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_arrow.draw.connect(func() -> void:
-		_arrow.draw_colored_polygon(PackedVector2Array([Vector2(-9, -6), Vector2(9, -6), Vector2(0, 6)]), INK))
+		_arrow.draw_colored_polygon(PackedVector2Array([Vector2(-7, -5), Vector2(7, -5), Vector2(0, 5)]), INK))
 	_root.add_child(_arrow)
 
 
@@ -162,6 +173,7 @@ func play(lines: Array, partner := "") -> void:
 	_right.visible = _right_id != ""
 	_side = Side.NONE
 	visible = true
+	GameState.set_dialogue_open(self, true)
 	_show_line()
 
 
@@ -169,7 +181,12 @@ func close() -> void:
 	if visible:
 		visible = false
 		_lines = []
+		GameState.set_dialogue_open(self, false)
 		closed.emit()
+
+
+func _exit_tree() -> void:
+	GameState.set_dialogue_open(self, false)
 
 
 func _process(delta: float) -> void:
@@ -284,12 +301,12 @@ func _stage(speaker: String) -> void:
 		return
 	_plate_name = GameState.character_name(speaker)
 	_plate_color = GameState.CHARACTERS[speaker]["color"]
-	var width := _plate_font.get_string_size(_plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x + 70.0
-	_plate.size = Vector2(width, 54)
+	var width := _plate_font.get_string_size(_plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE).x + PLATE_PADDING
+	_plate.size = Vector2(width, PLATE_HEIGHT)
 	var target := Vector2(PLATE_LEFT_X if side == Side.LEFT else PLATE_RIGHT_END - width, PLATE_Y)
 	_plate.queue_redraw()
 	if changed:
-		_plate.position = target + Vector2(-40.0 if side == Side.LEFT else 40.0, 0)
+		_plate.position = target + Vector2(-28.0 if side == Side.LEFT else 28.0, 0)
 		_plate.modulate.a = 0.0
 		_stage_tween.tween_property(_plate, "position", target, 0.18)
 		_stage_tween.tween_property(_plate, "modulate:a", 1.0, 0.12)
@@ -317,6 +334,11 @@ func _portrait_rect(slot: Vector2) -> TextureRect:
 	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR  # Porträtten är målade, inte pixlar.
+	var fade := ShaderMaterial.new()
+	fade.shader = load(PORTRAIT_SHADER)
+	fade.set_shader_parameter("fade_from", PORTRAIT_SIZE.y * PORTRAIT_FADE)
+	fade.set_shader_parameter("fade_to", PORTRAIT_SIZE.y)
+	rect.material = fade
 	_root.add_child(rect)
 	return rect
 
@@ -362,15 +384,15 @@ func _draw_shade() -> void:
 
 func _draw_box(canvas: Control) -> void:
 	var box := PackedVector2Array(BOX)
-	var edge: PackedVector2Array = Geometry2D.offset_polygon(box, 5.0, Geometry2D.JOIN_MITER)[0]
+	var edge: PackedVector2Array = Geometry2D.offset_polygon(box, BOX_EDGE, Geometry2D.JOIN_MITER)[0]
 	var shadow := PackedVector2Array()
 	for point in edge:
-		shadow.append(point + Vector2(8, 8))
+		shadow.append(point + BOX_SHADOW)
 	canvas.draw_colored_polygon(shadow, Color(0, 0, 0, 0.5))
 	canvas.draw_colored_polygon(edge, YELLOW)
 	canvas.draw_colored_polygon(box, BOX_FILL)
 	# Tunn inre linje och det gula hörnet där pilen sitter.
-	var inner: PackedVector2Array = Geometry2D.offset_polygon(box, -9.0, Geometry2D.JOIN_MITER)[0]
+	var inner: PackedVector2Array = Geometry2D.offset_polygon(box, -BOX_INNER, Geometry2D.JOIN_MITER)[0]
 	inner.append(inner[0])
 	canvas.draw_polyline(inner, Color(YELLOW, 0.22), 1.5, true)
 	var bottom_right: Vector2 = BOX[2]
@@ -382,21 +404,16 @@ func _draw_box(canvas: Control) -> void:
 
 
 ## Namnskylten: sned gul skylt med skugga, en rand i talarens färg och svart fet text.
+## Formen är ritad för en 54 px hög skylt och skalas till PLATE_HEIGHT.
 func _draw_plate() -> void:
 	var w := _plate.size.x
-	var shape := PackedVector2Array([Vector2(0, 4), Vector2(w, -2), Vector2(w - 16, 48), Vector2(-14, 54)])
+	var k := PLATE_HEIGHT / 54.0
+	var shape := PackedVector2Array([Vector2(0, 4) * k, Vector2(w, -2 * k), Vector2(w - 16 * k, 48 * k), Vector2(-14, 54) * k])
 	var shadow := PackedVector2Array()
 	for point in shape:
-		shadow.append(point + Vector2(6, 6))
+		shadow.append(point + Vector2(6, 6) * k)
 	_plate.draw_colored_polygon(shadow, INK)
 	_plate.draw_colored_polygon(shape, YELLOW)
-	_plate.draw_colored_polygon(PackedVector2Array([Vector2(6, 8), Vector2(20, 7), Vector2(6, 48), Vector2(-8, 49)]), _plate_color)
-	_plate.draw_string(_plate_font, Vector2(30, 40), _plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE, INK)
+	_plate.draw_colored_polygon(PackedVector2Array([Vector2(6, 8) * k, Vector2(20, 7) * k, Vector2(6, 48) * k, Vector2(-8, 49) * k]), _plate_color)
+	_plate.draw_string(_plate_font, Vector2(30, 40) * k, _plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, NAME_SIZE, INK)
 
-
-func _system_font(names: PackedStringArray, weight: int, italic := false) -> SystemFont:
-	var font := SystemFont.new()
-	font.font_names = names
-	font.font_weight = weight
-	font.font_italic = italic
-	return font

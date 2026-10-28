@@ -1,10 +1,13 @@
 extends CanvasLayer
-## HUD i UI-kitets stil (UiKit): tidszonen, dagen, pengarna och platsen på sneda
+## HUD i UI-kitets stil (UiKit): tidszonen, veckodagen, pengarna och platsen på sneda
 ## plattor uppe till vänster, mammans mätare nere till vänster, en ljus textruta nederst
 ## i mitten för det som händer, en tipsrad ovanför den och sammanfattningen när dagen
-## är slut.
+## är slut. Dagens nummer visas inte; GameState.day räknar ändå som vanligt.
 
 const PAD := 16
+## Textrutan ligger kvar så här länge (sekunder) och tonas sedan bort.
+const MESSAGE_HOLD := 4.0
+const MESSAGE_FADE := 0.8
 const DAY_END_LAYER := 6
 ## Dagens slut: sammanfattningens vänsterkant och hur högt den står (mitt på skärmen).
 const DAY_END_LEFT := 380.0
@@ -13,6 +16,8 @@ const DAY_END_WIDTH := 600.0
 var _place: Control
 var _meters: Control
 var _text: Label
+var _text_panel: PanelContainer
+var _text_tween: Tween
 var _hint: Label
 var _day_end_overlay: Control
 var _day_end_backdrop: KitBackdrop
@@ -34,17 +39,34 @@ func _ready() -> void:
 	GameState.money_changed.connect(_refresh)
 	GameState.room_changed.connect(func(_room_id: String) -> void: _refresh())
 	GameState.time_of_day_changed.connect(func(_period: String) -> void: _refresh())
-	GameState.message_posted.connect(func(text: String) -> void: _text.text = text)
+	GameState.message_posted.connect(_show_message)
 	GameState.action_performed.connect(func(text: String, changes: String) -> void:
-		_text.text = text if changes == "" else "%s  (%s)" % [text, changes])
+		_show_message(text if changes == "" else "%s  (%s)" % [text, changes]))
 	GameState.hint_changed.connect(func(text: String) -> void: _hint.text = text)
+	# Dialogrutan är smalare än textrutan här, så den göms under en dialog i stället för
+	# att sticka ut på sidorna.
+	GameState.dialogue_changed.connect(func(active: bool) -> void:
+		_text_panel.visible = not active
+		_hint.visible = not active)
 	GameState.day_ended.connect(_show_day_end)
-	_text.text = "Click a room to go there."
+	_show_message("Click a room to go there.")
 	_refresh()
 
 
-## Tidszonen stor på en svart platta, dagen och pengarna på en ljus och platsen på en
-## gul, förskjutna snett under varandra.
+## Visar ett nytt meddelande i textrutan, låter det ligga kvar en stund och tonar sedan
+## bort rutan. Ett nytt meddelande startar om tiden.
+func _show_message(text: String) -> void:
+	_text.text = text
+	if _text_tween:
+		_text_tween.kill()
+	_text_panel.modulate.a = 1.0
+	_text_tween = create_tween()
+	_text_tween.tween_interval(MESSAGE_HOLD)
+	_text_tween.tween_property(_text_panel, "modulate:a", 0.0, MESSAGE_FADE).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+
+
+## Tidszonen stor på en svart platta, veckodagen och pengarna på en ljus och platsen på
+## en gul, förskjutna snett under varandra.
 func _build_place() -> void:
 	_place = Control.new()
 	_place.position = Vector2(PAD, 14)
@@ -55,12 +77,12 @@ func _build_place() -> void:
 		var body := UiKit.body_font(true)
 		var period: String = GameState.PERIOD_NAMES[GameState.get_time_of_day()] if not GameState.is_day_over() else "Night"
 		var room: Dictionary = GameState.ROOMS[GameState.current_room]
-		UiKit.draw_slant(_place, Rect2(4, 4, 250, 44), UiKit.RED)
-		UiKit.draw_slant(_place, Rect2(0, 0, 250, 44), UiKit.INK)
-		_place.draw_string(font, Vector2(22, UiKit.baseline(font, 32, 44)), period.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 32, UiKit.YELLOW)
+		UiKit.draw_slant(_place, Rect2(4, 4, 280, 44), UiKit.RED)
+		UiKit.draw_slant(_place, Rect2(0, 0, 280, 44), UiKit.INK)
+		_place.draw_string(font, Vector2(22, UiKit.baseline(font, 30, 44)), period.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, 240, 30, UiKit.YELLOW)
 		var date_rect := Rect2(12, 48, 296, 26)
 		UiKit.draw_slant(_place, date_rect, UiKit.PAPER)
-		_place.draw_string(font, Vector2(28, 48 + UiKit.baseline(font, 17, 26)), ("%s · Day %d" % [GameState.get_weekday(), GameState.day]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 17, UiKit.INK)
+		_place.draw_string(font, Vector2(28, 48 + UiKit.baseline(font, 17, 26)), GameState.get_weekday().to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 17, UiKit.INK)
 		_place.draw_string(font, Vector2(0, 48 + UiKit.baseline(font, 17, 26)), Economy.format(GameState.money), HORIZONTAL_ALIGNMENT_RIGHT, date_rect.end.x - 14, 17, UiKit.RED if GameState.money < 0 else UiKit.INK)
 		UiKit.draw_slant(_place, Rect2(24, 76, 284, 24), UiKit.YELLOW)
 		_place.draw_string(body, Vector2(40, 76 + UiKit.baseline(body, 14, 24)), "%s  —  %s" % [room["name"], room["floor"]], HORIZONTAL_ALIGNMENT_LEFT, 262, 14, UiKit.INK))
@@ -70,7 +92,8 @@ func _build_place() -> void:
 ## Mätarna nere till vänster: namnet på en svart platta, en sned stapel och värdet.
 func _build_stats() -> void:
 	_meters = Control.new()
-	_meters.size = Vector2(290, 96)
+	# En rad på 34 px per mätare, utan luft under den sista.
+	_meters.size = Vector2(290, GameState.STAT_NAMES.size() * 34 - 6)
 	_meters.position = Vector2(PAD, 720 - PAD - _meters.size.y)
 	_meters.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_meters.draw.connect(func() -> void:
@@ -93,6 +116,7 @@ func _build_stats() -> void:
 ## Ljus textruta nederst i mitten, där det som händer berättas.
 func _build_text_box() -> void:
 	var panel := PanelContainer.new()
+	_text_panel = panel
 	panel.add_theme_stylebox_override("panel", UiKit.plate(UiKit.PAPER, 0.0, UiKit.INK, 3, UiKit.INK, Vector2(30, 16)))
 	panel.position = Vector2(300, 610)
 	panel.size = Vector2(680, 96)
@@ -141,10 +165,10 @@ func _refresh() -> void:
 func _show_day_end() -> void:
 	for child in _summary.get_children():
 		child.queue_free()
-	_summary.add_child(UiKit.header("Day's End", "%s · Day %d" % [GameState.get_weekday(), GameState.day]))
+	_summary.add_child(UiKit.header("Day's End", GameState.get_weekday()))
 	var struggling: Array[String] = []
 	var meters := Control.new()
-	meters.custom_minimum_size = Vector2(600, 3 * 46)
+	meters.custom_minimum_size = Vector2(600, GameState.STAT_NAMES.size() * 46)
 	meters.draw.connect(func() -> void:
 		var font := UiKit.display_font()
 		var y := 0.0

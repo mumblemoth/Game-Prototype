@@ -21,7 +21,6 @@ extends Clickable
 @export_group("Effekter")
 @export var home_effect := 0
 @export var work_effect := 0
-@export var romance_effect := 0
 
 
 func _draw() -> void:
@@ -32,7 +31,7 @@ func _draw() -> void:
 	draw_rect(rect, color.lightened(0.25) if _hovered else color)
 	if _hovered:
 		draw_rect(rect, Color.WHITE, false, 3.0)
-	var font := ThemeDB.fallback_font
+	var font := UiKit.body_font()
 	draw_string(font, Vector2(0, size.y / 2 + 7), display_name,
 			HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, Color(0.1, 0.1, 0.1))
 
@@ -41,7 +40,6 @@ func activate() -> void:
 	var effects := {
 		"home": home_effect,
 		"work": work_effect,
-		"romance": romance_effect,
 	}
 	GameState.perform_action(action_text, effects, time_cost_minutes)
 

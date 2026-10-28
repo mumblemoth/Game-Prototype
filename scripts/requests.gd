@@ -50,9 +50,9 @@ const MOM_SIGNAL := {"min": 40, "bonus": 1.15}
 ## Sönerna vill mer på helgen, när de har tid att komma på saker.
 const WEEKEND_WANTS_BONUS := 1.3
 
-## Vad mammans egen mätare gör. restless: från det värdet sjunker Romance lite extra varje
-## natt. Allt hon gör som ger Romance sänker mätaren med romance_relief × ökningen.
-const MOM_EFFECTS := {"restless": 70, "extra_decay": 3, "romance_relief": 2}
+## Vad mammans egen mätare gör. Allt hon gör som har "relief" sänker mätaren med
+## relief_scale × relief.
+const MOM_EFFECTS := {"relief_scale": 2}
 
 const LINK_PENALTY := {"declined": -1, "expired": -2}
 ## När hon säger nej sjunker mätaren bara så här mycket (andel av vägen ner till "after").
@@ -98,22 +98,22 @@ const TYPES := {
 	"husband": [
 		{"id": "husband_date", "weight": 3, "ask": "Kids are out of our hair tonight. Let me take you out. Just us.",
 			"label": "Go out with him tonight", "text": "He books a table and holds your hand across it all evening. On the way home he says the dishes are his for the week. (Placeholder scene.)",
-			"time": true, "periods": ["evening"], "effects": {"romance": 15}, "owes": 3, "link_points": 3},
+			"time": true, "periods": ["evening"], "relief": 15, "owes": 3, "link_points": 3},
 		{"id": "husband_early", "weight": 3, "ask": "Come to bed early tonight?",
 			"label": "Go to bed early with him", "text": "You leave the rest of the evening for tomorrow. (Placeholder scene.)",
-			"time": true, "periods": ["evening"], "room": "bedroom", "effects": {"romance": 12}, "owes": 2, "link_points": 3},
+			"time": true, "periods": ["evening"], "room": "bedroom", "relief": 12, "owes": 2, "link_points": 3},
 		{"id": "husband_dress", "weight": 1, "min_rank": 3, "requires": {"charm": 3}, "ask": "Wear that dress for me tonight? The one from the boutique.",
 			"label": "Put on the dress for him", "text": "He forgets what he was saying halfway through the sentence. Then he offers to cook. Twice. (Placeholder scene.)",
-			"periods": ["evening"], "effects": {"romance": 10}, "social": {"charm": 1}, "owes": 2, "link_points": 2},
+			"periods": ["evening"], "relief": 10, "social": {"charm": 1}, "owes": 2, "link_points": 2},
 	],
 	"neighbor": [
 		{"id": "neighbor_photos", "weight": 2, "requires": {"attractiveness": 3}, "ask": "I'm putting together a portfolio and I'd love you as a model. Paid, of course.",
 			"label": "Model for the neighbor's portfolio", "text": "A few hours of lights and quiet direction. The neighbor pays in cash and says the camera loves you. (Placeholder scene.)",
-			"time": true, "room": "neighbor_living", "effects": {"romance": 5}, "social": {"charm": 2},
+			"time": true, "room": "neighbor_living", "relief": 5, "social": {"charm": 2},
 			"earn": 80, "earn_scale": {"charm": 20}, "income": "modeling", "link_points": 3},
 		{"id": "neighbor_art", "weight": 2, "min_rank": 2, "ask": "Could you help me hang the new art this afternoon? You have a better eye than me. I'll pay for your time.",
 			"label": "Help the neighbor hang the art", "text": "You move every frame twice. Somewhere in there you end up standing very close. The neighbor insists you take the money. (Placeholder scene.)",
-			"time": true, "periods": ["afternoon"], "room": "neighbor_living", "effects": {"romance": 8}, "social": {"charm": 1},
+			"time": true, "periods": ["afternoon"], "room": "neighbor_living", "relief": 8, "social": {"charm": 1},
 			"earn": 50, "earn_scale": {"knowledge": 10}, "link_points": 3},
 	],
 	"principal": [
@@ -123,7 +123,7 @@ const TYPES := {
 			"earn": 60, "earn_scale": {"knowledge": 15}, "link_points": 2},
 		{"id": "principal_gala", "weight": 1, "min_rank": 3, "requires": {"attractiveness": 4}, "ask": "I need a plus-one for the donor gala. You'd make a better impression than anyone. I'll make it worth your while.",
 			"label": "Be the principal's plus-one at the gala", "text": "You work the room on the principal's arm and two donors sign on the spot. An envelope finds its way into your purse. (Placeholder scene.)",
-			"time": true, "periods": ["evening"], "room": "restaurant", "effects": {"work": 15, "romance": 5}, "social": {"charm": 3},
+			"time": true, "periods": ["evening"], "room": "restaurant", "effects": {"work": 15}, "relief": 5, "social": {"charm": 3},
 			"earn": 150, "earn_scale": {"charm": 25}, "link_points": 3},
 	],
 }
@@ -139,6 +139,7 @@ const CHORES := {
 	"attic_boxes": {"helpers": ["son_2", "husband"], "text": "%s hauls the boxes around until the attic looks sorted."},
 	"upstairs_laundry": {"helpers": ["son_1", "son_2"], "text": "%s collects the laundry from the hamper."},
 	"yard_plants": {"helpers": ["son_2"], "text": "%s waters the plants and the dog, too."},
+	"garden_water": {"helpers": ["son_2", "husband"], "text": "%s takes the hose to the flower beds. Most of the water lands on the plants."},
 }
 ## Mest skulder en person kan ha till mamman åt gången.
 const MAX_OWED := 5
@@ -264,5 +265,5 @@ static func _chore_action(chore_id: String, room_id: String) -> Dictionary:
 static func validate() -> void:
 	for character_id in NEVER_DESIRE:
 		assert(not DESIRE.has(character_id) and not TYPES.get(character_id, []).any(
-			func(t: Dictionary) -> bool: return t.get("effects", {}).has("romance")),
+			func(t: Dictionary) -> bool: return t.has("relief")),
 			"%s får aldrig ha desire eller romantiska förfrågningar" % character_id)

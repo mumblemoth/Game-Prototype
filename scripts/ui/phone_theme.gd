@@ -23,6 +23,7 @@ const TILE := {
 	"messages": Color("3e9c95"),
 	"memories": Color("e07a5f"),
 	"journal": Color("d4a04c"),
+	"calendar": Color("c8554b"),
 	"profile": Color("c9677f"),
 	"wallet": Color("4f7cac"),
 	"settings": Color("8c8379"),
@@ -131,6 +132,38 @@ static func style_button(button: Button, color: Color, radius: int, text_color :
 	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
 		button.add_theme_color_override(state, text_color)
+
+
+## Knapparna nere till höger på skärmen (telefonen och kartan), staplade med HUD_GAP
+## emellan. De hör till HUD:en och följer därför UI-kitet (UiKit), inte telefonens
+## egen stil: en svart sned platta med röd hård skugga, kitets typsnitt och plats för
+## en symbol till vänster. Under musen lyser kanten och texten gult.
+const HUD_BUTTON_SIZE := Vector2(150, 44)
+const HUD_GAP := 10
+const HUD_MARGIN := 16
+
+
+## En HUD-knapp. slot räknas nerifrån: 0 är den nedersta.
+static func hud_button(text: String, slot: int) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.focus_mode = Control.FOCUS_NONE
+	button.size = HUD_BUTTON_SIZE
+	button.position = Vector2(1280 - HUD_MARGIN - HUD_BUTTON_SIZE.x, 720 - HUD_MARGIN - HUD_BUTTON_SIZE.y - slot * (HUD_BUTTON_SIZE.y + HUD_GAP))
+	button.add_theme_font_override("font", UiKit.display_font())
+	button.add_theme_font_size_override("font_size", UiKit.BODY)
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	var edge := Color(UiKit.PAPER, 0.25)
+	for state in ["normal", "hover", "pressed", "hover_pressed"]:
+		var lit: bool = state != "normal"
+		var style := UiKit.plate(Color(UiKit.INK, 0.94), UiKit.SLANT, UiKit.YELLOW if lit else edge, 2, UiKit.RED, Vector2(12, 0))
+		style.shadow_offset = UiKit.SHADOW * 0.6
+		button.add_theme_stylebox_override(state, style)
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	button.add_theme_color_override("font_color", UiKit.PAPER)
+	for state in ["font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
+		button.add_theme_color_override(state, UiKit.YELLOW)
+	return button
 
 
 ## Rundar hörnen på allt kontrollen själv ritar (inte dess barn). Används för bilder

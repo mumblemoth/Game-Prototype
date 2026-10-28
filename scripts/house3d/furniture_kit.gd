@@ -589,7 +589,9 @@ static func _table(n: Node3D, w: float, d: float, height: float, color: Color) -
 static func _sofa(n: Node3D, w: float, d: float, wide: bool, c := StyleKit.SAGE) -> void:
 	var arm := 0.18
 	StyleKit.box(n, Vector3(w, 0.32, d), Vector3(0, 0.22, 0), StyleKit.mat(c.darkened(0.12)))
-	StyleKit.box(n, Vector3(w, 0.5, 0.22), Vector3(0, 0.6, -d / 2 + 0.11), StyleKit.mat(c))
+	# Ryggen är en aning smalare och grundare än soffan, så att armstödens sidor och
+	# baksidor inte ligger i samma plan som den (z-fighting).
+	StyleKit.box(n, Vector3(w - 0.02, 0.5, 0.22), Vector3(0, 0.6, -d / 2 + 0.115), StyleKit.mat(c))
 	for s in [-1, 1]:
 		StyleKit.box(n, Vector3(arm, 0.55, d), Vector3(s * (w / 2 - arm / 2), 0.33, 0), StyleKit.mat(c.darkened(0.05)))
 	var seats := 3 if wide and w > 1.8 else (2 if wide else 1)
@@ -715,7 +717,8 @@ static func _concourse_fixture(n: Node3D, rig: TimeOfDayRig, kind: String, w: fl
 				StyleKit.box(n, Vector3(0.03, 1.0, 0.03), Vector3(corner.x * (w / 2 - 0.04), 1.5, corner.y * (d * 0.35 - 0.03)), StyleKit.mat(StyleKit.BRASS, 0.6))
 			var stripes := maxi(4, int(w / 0.2))
 			for i in stripes:
-				StyleKit.box(n, Vector3(w / stripes + 0.005, 0.04, d), Vector3(-w / 2 + (i + 0.5) * w / stripes, 2.02, 0), StyleKit.mat(Color(0.86, 0.5, 0.48) if i % 2 == 0 else StyleKit.WHITE), true, 0.0)
+				# Varannan rand en millimeter högre, så att överlappen inte flimrar.
+				StyleKit.box(n, Vector3(w / stripes + 0.005, 0.04 + (i % 2) * 0.002, d), Vector3(-w / 2 + (i + 0.5) * w / stripes, 2.02, 0), StyleKit.mat(Color(0.86, 0.5, 0.48) if i % 2 == 0 else StyleKit.WHITE), true, 0.0)
 			var goods := [Color(0.2, 0.2, 0.24), Color(0.95, 0.6, 0.7), Color(0.45, 0.7, 0.9), Color(0.95, 0.85, 0.4)]
 			for i in 6:
 				StyleKit.box(n, Vector3(0.1, 0.03 + 0.02 * (i % 2), 0.16), Vector3(-w / 2 + 0.2 + i * (w - 0.4) / 5.0, 1.05, 0.0), StyleKit.mat(goods[i % goods.size()], 0.5))
@@ -1413,6 +1416,43 @@ static func sleeping_dog(parent: Node3D, rig: TimeOfDayRig, at: Vector3, fur := 
 	for i in 5:
 		var angle := PI * 0.6 + i * 0.32
 		StyleKit.sphere(dog, 0.035 - i * 0.003, Vector3(cos(angle) * 0.22, 0.05, sin(angle) * 0.17), StyleKit.mat(fur if i < 4 else light_fur))
+	return dog
+
+
+## Samma hund vaken och lekfull: står på fyra ben med huvudet högt, tungan ute och en
+## svans som viftar. Huvudet pekar mot +x; noden vänds lite mot kameran. `at` är på marken.
+static func playful_dog(parent: Node3D, at: Vector3, fur := Color(0.62, 0.42, 0.28)) -> Node3D:
+	var dog := Node3D.new()
+	dog.position = at
+	dog.rotation_degrees = Vector3(0, -25, 0)
+	parent.add_child(dog)
+	var light_fur := fur.lightened(0.25)
+	var dark_fur := fur.darkened(0.25)
+	for x in [-0.13, 0.13]:
+		for z in [-0.07, 0.07]:
+			StyleKit.cylinder(dog, 0.032, 0.028, 0.22, Vector3(x, 0.11, z), StyleKit.mat(fur if x < 0 else light_fur), 8)
+	StyleKit.sphere(dog, 0.15, Vector3(0, 0.29, 0), StyleKit.mat(fur)).scale = Vector3(1.55, 0.8, 0.85)
+	StyleKit.sphere(dog, 0.08, Vector3(0.08, 0.25, 0), StyleKit.mat(light_fur)).scale = Vector3(1.6, 0.8, 1.0)
+	var head := Node3D.new()
+	head.position = Vector3(0.25, 0.42, 0)
+	dog.add_child(head)
+	StyleKit.sphere(head, 0.1, Vector3.ZERO, StyleKit.mat(fur))
+	StyleKit.sphere(head, 0.055, Vector3(0.09, -0.025, 0), StyleKit.mat(light_fur)).scale = Vector3(1.3, 0.85, 1.0)
+	StyleKit.sphere(head, 0.02, Vector3(0.15, -0.01, 0), StyleKit.mat(StyleKit.DARK, 0.6))
+	StyleKit.box(head, Vector3(0.04, 0.008, 0.03), Vector3(0.11, -0.075, 0), StyleKit.mat(Color(0.92, 0.45, 0.5)), false, 0.0).rotation_degrees.z = -30
+	for side in [-1, 1]:
+		StyleKit.sphere(head, 0.016, Vector3(0.07, 0.03, side * 0.055), StyleKit.mat(StyleKit.DARK, 0.6))
+		var ear := StyleKit.sphere(head, 0.045, Vector3(-0.02, 0.0, side * 0.09), StyleKit.mat(dark_fur))
+		ear.scale = Vector3(0.9, 1.4, 0.45)
+	# Svansen viftar så länge han leker.
+	var tail := Node3D.new()
+	tail.position = Vector3(-0.22, 0.34, 0)
+	dog.add_child(tail)
+	for i in 4:
+		StyleKit.sphere(tail, 0.03 - i * 0.004, Vector3(-0.03 - i * 0.035, 0.03 + i * 0.03, 0), StyleKit.mat(fur if i < 3 else light_fur))
+	var wag := tail.create_tween().set_loops().set_trans(Tween.TRANS_SINE)
+	wag.tween_property(tail, "rotation:y", 0.6, 0.14)
+	wag.tween_property(tail, "rotation:y", -0.6, 0.14)
 	return dog
 
 

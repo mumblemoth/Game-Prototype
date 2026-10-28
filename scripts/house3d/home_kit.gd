@@ -8,7 +8,7 @@ class_name HomeKit
 ## Varje sak ska berätta något om familjen (se minnet om meningsfulla detaljer).
 
 const KINDS := ["coat_stand", "console", "floor_lamp", "side_table", "ironing_board", "cradle",
-		"driveway", "patio", "flower_bed", "grill", "veg_bed", "clothesline", "sun_lounger", "shed"]
+		"driveway", "patio", "flower_bed", "grill", "veg_bed", "clothesline", "sun_lounger", "shed", "pool", "dog_house"]
 
 ## Tygets eller färgens ton per stil, för möbler som bara byter färg (soffor, fåtöljer,
 ## sängkläder, cyklar, bänkskåp).
@@ -43,7 +43,8 @@ const RUGS := {
 
 ## Ungefärlig höjd (meter) för saker som kan stå ute; allt annat räknas som lågt (1 m).
 ## Surroundings hoppar över höga saker framför kameran (dockhusregeln).
-const HEIGHTS := {"tree": 3.4, "shed": 2.6, "clothesline": 1.9, "car": 1.25, "bench": 0.8, "grill": 1.05}
+const HEIGHTS := {"tree": 3.4, "shed": 2.6, "clothesline": 1.9, "car": 1.25, "bench": 0.8, "grill": 1.05, "pool": 0.15, "dog_house": 1.0}
+const PoolWater := preload("res://shaders/pool_water.gdshader")
 
 
 static func tint(style: String, fallback: Color) -> Color:
@@ -320,7 +321,7 @@ static func build(n: Node3D, rig: TimeOfDayRig, kind: String, w: float, d: float
 		"patio":
 			StyleKit.box(n, Vector3(w, 0.05, d), Vector3(0, 0.025, 0), StyleKit.mat(Color(0.8, 0.76, 0.7), 0.0, 1, 0.6, Color(0.68, 0.64, 0.58)), true, 0.0)
 		"flower_bed":
-			_flower_bed(n, w, d)
+			_flower_bed(n, w, d, style)
 		"grill":
 			_grill(n)
 		"veg_bed":
@@ -331,6 +332,10 @@ static func build(n: Node3D, rig: TimeOfDayRig, kind: String, w: float, d: float
 			_sun_lounger(n, w, d, tint(style, Color(0.45, 0.65, 0.85)))
 		"shed":
 			_shed(n, w, d)
+		"pool":
+			_pool(n, rig, w, d)
+		"dog_house":
+			_dog_house(n, w, d)
 
 
 ## Hallens klädhängare: familjens jackor i deras färger och hundens koppel på en krok.
@@ -438,16 +443,33 @@ static func _cradle(n: Node3D, w: float, d: float) -> void:
 		StyleKit.sphere(n, 0.018, Vector3(-w * 0.25 + s * 0.035, 0.75, 0), StyleKit.mat(bear.darkened(0.15)))
 
 
-## Rabatt längs fasaden: jordkant med tuvor och blommor i några färger.
-static func _flower_bed(n: Node3D, w: float, d: float) -> void:
+## Rabatt längs fasaden: jordkant med tuvor och blommor i några färger. Trädgårdens
+## rabatter (stil "garden") är de mamman vattnar: de får också en vissen version som
+## Backyard visar när de har stått torra för länge.
+static func _flower_bed(n: Node3D, w: float, d: float, style := "") -> void:
 	StyleKit.box(n, Vector3(w, 0.1, d), Vector3(0, 0.05, 0), StyleKit.mat(Color(0.5, 0.38, 0.3), 0.0, 7, 0.2), true, 0.0)
+	var fresh := Node3D.new()
+	n.add_child(fresh)
 	var flowers := [Color(0.9, 0.56, 0.6), Color(0.98, 0.86, 0.48), Color(0.76, 0.66, 0.9), Color(0.98, 0.96, 0.94)]
 	var count := maxi(2, int(w / 0.3))
 	for i in count:
 		var x := -w / 2 + w * (i + 0.5) / count
 		var z := sin(i * 2.3) * d * 0.2
-		StyleKit.sphere(n, 0.13, Vector3(x, 0.18, z), StyleKit.mat(StyleKit.LEAF.lightened(0.05 * (i % 3))))
-		StyleKit.sphere(n, 0.065, Vector3(x + 0.03, 0.3, z), StyleKit.mat(flowers[i % flowers.size()]))
+		StyleKit.sphere(fresh, 0.13, Vector3(x, 0.18, z), StyleKit.mat(StyleKit.LEAF.lightened(0.05 * (i % 3))))
+		StyleKit.sphere(fresh, 0.065, Vector3(x + 0.03, 0.3, z), StyleKit.mat(flowers[i % flowers.size()]))
+	if style != "garden":
+		return
+	fresh.add_to_group(Backyard.FRESH_GROUP)
+	# Vissna: lägre, gulbruna tuvor och hängande, bleka blommor.
+	var wilted := Node3D.new()
+	wilted.add_to_group(Backyard.WILTED_GROUP)
+	n.add_child(wilted)
+	for i in count:
+		var x := -w / 2 + w * (i + 0.5) / count
+		var z := sin(i * 2.3) * d * 0.2
+		StyleKit.sphere(wilted, 0.12, Vector3(x, 0.13, z), StyleKit.mat(Color(0.62, 0.6, 0.32))).scale = Vector3(1.1, 0.6, 1.0)
+		StyleKit.sphere(wilted, 0.05, Vector3(x + 0.08, 0.16, z), StyleKit.mat((flowers[i % flowers.size()] as Color).lerp(Color(0.6, 0.5, 0.4), 0.55)))
+	Backyard.show_thirst(fresh, wilted)
 
 
 ## Klotgrill på tre ben, med en tång på sidobordet (pappans sommargrill).
@@ -537,6 +559,75 @@ static func _shed(n: Node3D, w: float, d: float) -> void:
 	StyleKit.box(n, Vector3(0.3, 0.04, 0.04), Vector3(w / 2 - 0.02, 1.4, d / 2 + 0.08), StyleKit.mat(StyleKit.DARK))
 
 
+## Poolen: en kant av ljus sten runt vattnet, en stege i västra kortsidan, en badring som
+## guppar och en poollampa som tänds på kvällen. Vattnet ligger nästan i jämnhöjd med
+## kanten, så den som badar sjunker ned genom ytan (HouseView3D.play_activity).
+static func _pool(n: Node3D, rig: TimeOfDayRig, w: float, d: float) -> void:
+	var stone := StyleKit.mat(Color(0.95, 0.93, 0.88), 0.1, 1, 0.5, Color(0.84, 0.81, 0.75))
+	var rim := 0.28
+	for s in [-1, 1]:
+		StyleKit.box(n, Vector3(w, 0.12, rim), Vector3(0, 0.06, s * (d / 2 - rim / 2)), stone)
+		StyleKit.box(n, Vector3(rim, 0.12, d - rim * 2), Vector3(s * (w / 2 - rim / 2), 0.06, 0), stone)
+	var water := MeshInstance3D.new()
+	var surface := PlaneMesh.new()
+	surface.size = Vector2(w - rim * 2, d - rim * 2)
+	water.mesh = surface
+	var material := ShaderMaterial.new()
+	material.shader = PoolWater
+	material.set_shader_parameter("pool_size", surface.size)
+	water.material_override = material
+	water.position = Vector3(0, 0.09, 0)
+	water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	n.add_child(water)
+	# Stegen: två böjda räcken över kanten.
+	var steel := StyleKit.mat(StyleKit.METAL.lightened(0.2), 0.8)
+	var x := -w / 2 + rim + 0.12
+	for s in [-1, 1]:
+		StyleKit.box(n, Vector3(0.035, 0.5, 0.035), Vector3(x, 0.3, s * 0.22), steel)
+		StyleKit.box(n, Vector3(0.3, 0.035, 0.035), Vector3(x - 0.13, 0.54, s * 0.22), steel)
+		StyleKit.box(n, Vector3(0.035, 0.42, 0.035), Vector3(x - 0.28, 0.33, s * 0.22), steel)
+	# Sönernas gamla badring, som ingen vill erkänna är deras.
+	var ring := Node3D.new()
+	ring.position = Vector3(w * 0.22, 0.12, -d * 0.12)
+	n.add_child(ring)
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.18
+	torus.outer_radius = 0.32
+	StyleKit.add(ring, torus, Vector3.ZERO, StyleKit.mat(Color(0.98, 0.55, 0.45), 0.4))
+	if rig:
+		rig.register_sway(ring)
+	# Poollampan lyser upp vattnet och däcket på kvällen.
+	var lamp := OmniLight3D.new()
+	lamp.position = Vector3(0, 0.45, 0)
+	lamp.light_color = Color(0.55, 0.85, 1.0)
+	lamp.omni_range = maxf(w, d) * 0.7
+	n.add_child(lamp)
+	if rig:
+		rig.register_lamp(lamp, null, 1.2)
+
+
+## Rex hundkoja: plankväggar, sadeltak, en mörk öppning mot framsidan, hans namn över
+## dörren, vattenskålen och tennisbollen han alltid lämnar framför.
+static func _dog_house(n: Node3D, w: float, d: float) -> void:
+	var boards := StyleKit.mat(Color(0.78, 0.55, 0.38), 0.0, 6, 0.12, Color(0.66, 0.45, 0.3))
+	var h := 0.62
+	var body := Rect2(-w * 0.4, -d * 0.45, w * 0.8, d * 0.7)
+	StyleKit.box(n, Vector3(body.size.x, h, body.size.y), Vector3(0, h / 2, body.get_center().y), boards, true, 0.0)
+	Surroundings._gable(n, body, h, Color(0.75, 0.32, 0.28), boards)
+	StyleKit.box(n, Vector3(0.3, 0.38, 0.02), Vector3(0, 0.2, body.end.y + 0.005), StyleKit.mat(StyleKit.DARK), true, 0.0)
+	var sign := Label3D.new()
+	sign.text = "REX"
+	sign.font_size = 40
+	sign.pixel_size = 0.0035
+	sign.modulate = Color(0.98, 0.95, 0.88)
+	sign.outline_modulate = Color(0.4, 0.25, 0.15)
+	sign.position = Vector3(0, 0.5, body.end.y + 0.02)
+	n.add_child(sign)
+	StyleKit.cylinder(n, 0.1, 0.08, 0.06, Vector3(w * 0.32, 0.03, d * 0.38), StyleKit.mat(Color(0.35, 0.55, 0.85), 0.5))
+	StyleKit.cylinder(n, 0.085, 0.085, 0.01, Vector3(w * 0.32, 0.055, d * 0.38), StyleKit.mat(Color(0.6, 0.82, 0.95), 0.7))
+	StyleKit.sphere(n, 0.045, Vector3(-w * 0.3, 0.045, d * 0.42), StyleKit.mat(Color(0.85, 0.95, 0.35), 0.3))
+
+
 # --- Planritningen ----------------------------------------------------------------
 
 ## Symbol ovanifrån för en av hemmets egna typer.
@@ -579,6 +670,12 @@ static func draw_symbol(canvas: CanvasItem, kind: String, r: Rect2) -> void:
 			canvas.draw_line(r.position + Vector2(r.size.x / 2, 0), r.end - Vector2(r.size.x / 2, 0), line, 1.5)
 		"sun_lounger":
 			FloorPlanArt._box(canvas, r, Color(0.45, 0.65, 0.85), 4.0)
+		"pool":
+			FloorPlanArt._box(canvas, r, Color(0.95, 0.93, 0.88), 4.0)
+			FloorPlanArt._box(canvas, r.grow(-minf(r.size.x, r.size.y) * 0.1), Color(0.45, 0.78, 0.9), 3.0)
+		"dog_house":
+			FloorPlanArt._box(canvas, r, Color(0.78, 0.55, 0.38))
+			canvas.draw_line(r.position + Vector2(r.size.x / 2, 0), r.end - Vector2(r.size.x / 2, 0), line, 1.0)
 		"shed":
 			FloorPlanArt._box(canvas, r, Color(0.6, 0.72, 0.62))
 			canvas.draw_line(r.position + Vector2(0, r.size.y / 2), r.end - Vector2(0, r.size.y / 2), line, 1.0)

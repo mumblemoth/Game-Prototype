@@ -17,7 +17,7 @@ func _run() -> void:
 	gs.current_room = "living_room"
 	gs.period = 2
 	var before: Dictionary = gs.links["husband"].duplicate()
-	var romance_before: int = gs.stats["romance"]
+	var mom_before: float = gs.meters["mom"]
 
 	# Gå igenom dialogfilen som balloonen gör, och välj första svaret.
 	var res: Resource = load(Dispatcher.dialogue_path("eric_r1"))
@@ -32,7 +32,7 @@ func _run() -> void:
 		steps += 1
 
 	print("links before %s after %s" % [before, gs.links["husband"]])
-	print("romance %d -> %d" % [romance_before, gs.stats["romance"]])
+	print("mom meter %.1f -> %.1f" % [mom_before, gs.meters["mom"]])
 	print("done flag: %s" % gs.has_flag("scene_done_eric_r1"))
 	print("replay blocked: '%s'" % Dispatcher.resolve_slot(2, "husband"))
 	var stage: Node = gs.get_node_or_null("StoryStage")

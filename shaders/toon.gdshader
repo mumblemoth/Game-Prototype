@@ -18,12 +18,22 @@ uniform int pattern = 0;
 uniform float pattern_size = 0.4;
 uniform vec4 line_color : source_color = vec4(0.6, 0.55, 0.5, 1.0);
 
+// Rang mot z-fighting (sätts per instans av StyleKit.add): när två ytor ligger i samma
+// plan vinner den med högst rang, i stället för att de flimrar om vartannat när kameran
+// rör sig. Mindre saker (detaljer) får högre rang. Varje steg flyttar ytan en bråkdel
+// av avståndet närmare kameran (DEPTH_STEP × 15 m ≈ 0,03 mm), vilket inte syns.
+instance uniform float depth_rank = 0.0;
+const float DEPTH_STEP = 2.0e-6;
+
 varying vec3 world_pos;
 varying vec3 world_normal;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = (MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz;
+	// Omvänt djup (Godot 4.3+): större z är närmare, så ett större z flyttar mot kameran.
+	POSITION = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	POSITION.z *= 1.0 + depth_rank * DEPTH_STEP;
 }
 
 float grid_line(vec2 p, float width) {

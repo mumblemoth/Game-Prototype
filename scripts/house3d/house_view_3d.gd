@@ -31,6 +31,27 @@ const FOG_BEGIN := 6.0
 const FOG_END := 42.0
 const INK_FADE_BEGIN := 4.0
 const INK_FADE_END := 28.0
+## Panorering med WASD: farten är en andel av kamerans avstånd per sekund (samma känsla
+## inzoomad som i översikten), och hur snabbt farten når målet (högre = kvickare).
+const PAN_SPEED := 0.85
+const PAN_RESPONSE := 12.0
+## Hur långt (meter) mitten av bilden får gå utanför platsens rum innan den stannar.
+## Husets våningar får titta lite ut genom väggarna, tomten och de stora platserna
+## lite mer; allt bortom det är kulisser som inte är byggda för att ses på nära håll.
+const PAN_MARGIN_DEFAULT := 1.5
+const PAN_MARGINS := {
+	"Vind": 1.0,
+	"Övervåning": 2.0,
+	"Entréplan": 2.0,
+	"Källare": 1.0,
+	"Utanför": 2.5,
+	"Gymmet": 2.0,
+	"Köpcentret": 2.0,
+	"Skolan": 1.5,
+	"Grannen": 1.0,
+	"Parken": 3.0,
+}
+const PAN_KEYS := {KEY_W: Vector2(0, -1), KEY_S: Vector2(0, 1), KEY_A: Vector2(-1, 0), KEY_D: Vector2(1, 0)}
 ## Saker man kan stå på när figurerna placeras ut.
 const WALKABLE := ["rug", "field_rug", "path", "patio", "driveway", "gym_mat", "poster", "pennant", "photo_wall", "whiteboard", "mirror_wall", "entry_mat", "rubber_floor", "turf"]
 
@@ -48,6 +69,9 @@ var _room_nodes := {}
 var _windows := {}
 var _overlays := {}
 var _people: Node3D
+## Mammans bild och hunden som de står just nu (för aktiviteternas animationer).
+var _mom: Node3D
+var _dog: Node3D
 var _labels: Control
 var _labels_tween: Tween
 ## Skyltar i 2D som följer punkter i 3D: [{node: Control, at: Vector3}].
@@ -57,6 +81,13 @@ var _distance := 15.0
 var _overview_target := Vector3.ZERO
 var _overview_distance := 15.0
 var _glide: Tween
+## Spelarens panorering ovanpå det kameran glider mot (bara x och z), farten den har
+## just nu och rutan (x, z) som mitten av bilden måste hålla sig inom på våningen.
+var _pan := Vector3.ZERO
+var _pan_velocity := Vector2.ZERO
+var _pan_bounds := Rect2()
+## Sätts av house.gd: får spelaren panorera just nu (inga menyer eller scener öppna)?
+var can_pan := Callable()
 
 
 func _init() -> void:
@@ -64,7 +95,7 @@ func _init() -> void:
 	stretch = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_viewport = SubViewport.new()
-	_viewport.msaa_3d = Viewport.MSAA_4X
+	_viewport.msaa_3d = Viewport.MSAA_8X
 	_viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_SMAA
 	_viewport.positional_shadow_atlas_size = 4096
 	add_child(_viewport)
@@ -84,15 +115,18 @@ func _ready() -> void:
 	mouse_exited.connect(func() -> void: _set_hover(""))
 	GameState.time_of_day_changed.connect(func(_period: String) -> void:
 		refresh_people()
-		refresh_curtains())
+		refresh_curtains()
+		Backyard.refresh_plants(get_tree()))
 	GameState.appearance_changed.connect(refresh_people)
 	GameState.schedules_changed.connect(refresh_people)
 	GameState.schedules_changed.connect(refresh_curtains)
 
 
-func _process(_delta: float) -> void:
-	_camera.position = _target + VIEW_DIRECTION.normalized() * _distance
-	_camera.look_at(_target)
+func _process(delta: float) -> void:
+	_update_pan(delta)
+	var aim := _target + _pan
+	_camera.position = aim + VIEW_DIRECTION.normalized() * _distance
+	_camera.look_at(aim)
 	if _rig:
 		_rig.environment.fog_depth_begin = _distance + FOG_BEGIN
 		_rig.environment.fog_depth_end = _distance + FOG_END
@@ -152,6 +186,8 @@ func show_floor(new_floor: String) -> void:
 	_frame_floor()
 	_target = _overview_target
 	_distance = _overview_distance
+	_pan = Vector3.ZERO
+	_pan_velocity = Vector2.ZERO
 	# Takens skuggor håller solen ute ur rummen; de måste nå hela våningen även när
 	# kameran står långt bort över en stor plats (köpcentret), annars blir rummen solbelysta.
 	_rig.sun.directional_shadow_max_distance = maxf(_rig.sun.directional_shadow_max_distance, _overview_distance + 20.0)
@@ -213,6 +249,7 @@ func _frame_floor() -> void:
 		first = false
 	# Lite extra avstånd: den närmaste kanten ser bredare ut i perspektiv.
 	_overview_distance = _fit_distance(outer.size, 0.8) * 1.12
+	_pan_bounds = outer.grow(PAN_MARGINS.get(floor_name, PAN_MARGIN_DEFAULT))
 	_overview_target = Vector3(outer.get_center().x, 0.3, outer.get_center().y + 0.3) - _area_offset(_overview_distance)
 
 
@@ -260,12 +297,57 @@ func _fade_labels(alpha: float) -> void:
 	_labels_tween.tween_property(_labels, "modulate:a", alpha, GLIDE_SECONDS * 0.5)
 
 
+## Panoreringen glider tillbaka till noll samtidigt, så att rummet hamnar mitt i bild.
 func _glide_to(target: Vector3, distance: float) -> void:
 	if _glide:
 		_glide.kill()
+	_pan_velocity = Vector2.ZERO
 	_glide = create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	_glide.tween_property(self, "_target", target, GLIDE_SECONDS)
 	_glide.tween_property(self, "_distance", distance, GLIDE_SECONDS)
+	_glide.tween_property(self, "_pan", Vector3.ZERO, GLIDE_SECONDS)
+
+
+## WASD flyttar kameran längs marken (W bort mot norr, S mot söder, A väster, D öster).
+## Farten mjukas upp åt båda hållen och mitten av bilden hålls inom våningens ruta.
+## Medan kameran glider mot ett rum väntar panoreringen.
+func _update_pan(delta: float) -> void:
+	var wanted := Vector2.ZERO
+	var gliding := _glide != null and _glide.is_running()
+	if not gliding and _pan_allowed():
+		for key in PAN_KEYS:
+			if Input.is_physical_key_pressed(key):
+				wanted += PAN_KEYS[key]
+	wanted = wanted.normalized() * PAN_SPEED * _distance
+	_pan_velocity = _pan_velocity.lerp(wanted, 1.0 - exp(-PAN_RESPONSE * delta))
+	if _pan_velocity.length_squared() < 0.0001:
+		_pan_velocity = Vector2.ZERO
+		return
+	_pan += Vector3(_pan_velocity.x, 0, _pan_velocity.y) * delta
+	# Mitten av den synliga ytan (inte skärmens mitt) får inte lämna rutan.
+	var center := _target + _pan + _area_offset(_distance)
+	var clamped := Vector2(clampf(center.x, _pan_bounds.position.x, _pan_bounds.end.x), clampf(center.z, _pan_bounds.position.y, _pan_bounds.end.y))
+	if clamped.x != center.x:
+		_pan.x += clamped.x - center.x
+		_pan_velocity.x = 0.0
+	if clamped.y != center.z:
+		_pan.z += clamped.y - center.z
+		_pan_velocity.y = 0.0
+	# Rummet under musen byts när golvet glider förbi under den.
+	var mouse := get_local_mouse_position()
+	if Rect2(Vector2.ZERO, size).has_point(mouse):
+		_set_hover(room_at(mouse))
+
+
+func _pan_allowed() -> bool:
+	if not is_visible_in_tree() or _pan_bounds.size == Vector2.ZERO:
+		return false
+	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_ALT) or Input.is_key_pressed(KEY_META):
+		return false
+	var focus := get_viewport().gui_get_focus_owner()
+	if focus is LineEdit or focus is TextEdit:
+		return false
+	return not can_pan.is_valid() or can_pan.call()
 
 
 # --- Musen --------------------------------------------------------------------
@@ -396,6 +478,8 @@ func refresh_people() -> void:
 		return
 	for child in _people.get_children():
 		child.free()
+	_mom = null
+	_dog = null
 	for i in range(_tags.size() - 1, -1, -1):
 		if _tags[i].get("person", false):
 			_tags[i]["node"].free()
@@ -432,6 +516,7 @@ func _place_person(character_id: String, at: Vector3) -> void:
 		sprite.position = at
 		_people.add_child(sprite)
 		_rig.register_tinted(sprite)
+		_mom = sprite
 		_shadow(at, 0.7)
 		return
 	# Familjen som enkla figurer i sin färg tills det finns bilder av dem.
@@ -446,9 +531,21 @@ func _place_person(character_id: String, at: Vector3) -> void:
 	_add_person_tag(GameState.character_initials(character_id), color, at + Vector3(0, 1.65, 0))
 
 
-## Hunden sover i sin bädd om rummet har en, annars hoprullad på golvet.
+## Hunden sover i sin bädd om rummet har en, annars hoprullad på golvet. När han leker
+## står han i stället vaken och viftar på svansen, framför kojan om rummet har en.
 func _place_dog(room_id: String) -> void:
 	var plan: Rect2 = _plans[room_id]
+	if GameState.whereabouts.get("dog", {}).get("activity", "") == "playing":
+		var house := FloorPlanArt.furniture_rect(room_id, "dog_house")
+		var spot: Vector3
+		if house.size != Vector2.ZERO:
+			spot = Vector3(plan.position.x + house.get_center().x - 0.9, 0, plan.position.y + house.end.y + 0.5)
+		else:
+			var spots := _free_spots(room_id, 6)
+			spot = spots[spots.size() - 1]
+		_dog = FurnitureKit.playful_dog(_people, spot)
+		_shadow(spot, 0.6)
+		return
 	var bed := FloorPlanArt.furniture_rect(room_id, "dog_bed")
 	var at: Vector3
 	if bed.size != Vector2.ZERO:
@@ -456,7 +553,7 @@ func _place_dog(room_id: String) -> void:
 	else:
 		var spots := _free_spots(room_id, 6)
 		at = spots[spots.size() - 1] - Vector3(0, 0.1, 0)
-	FurnitureKit.sleeping_dog(_people, _rig, at)
+	_dog = FurnitureKit.sleeping_dog(_people, _rig, at)
 
 
 func _shadow(at: Vector3, width: float) -> void:
@@ -519,3 +616,164 @@ func _free_spots(room_id: String, count: int) -> Array[Vector3]:
 	while chosen.size() < count:
 		chosen.append(chosen[0] if not chosen.is_empty() else Vector3(plan.get_center().x, 0, plan.get_center().y))
 	return chosen
+
+
+# --- Aktiviteter --------------------------------------------------------------
+
+## Spelar en aktivitet i trädgården (RoomActions "fx") på ungefär Backyard.FX_SECONDS:
+## mamman går till saken och gör det där. Returnerar när den är klar; house.gd genomför
+## handlingen efteråt och ställer ut familjen igen.
+##   swim  – hon kliver ned i poolen och simmar en bit, med plask
+##   sun   – hon lägger sig på solstolen i ett varmt sken
+##   water – hon vattnar rabatten med slangen
+##   fetch – hon kastar bollen och Rex springer efter (han kommer ut om han är inne)
+func play_activity(room_id: String, object: String, fx: String) -> void:
+	var rect := FloorPlanArt.furniture_rect(room_id, object)
+	if _mom == null or not _plans.has(room_id) or rect.size == Vector2.ZERO:
+		await get_tree().create_timer(Backyard.FX_SECONDS * 0.4).timeout
+		return
+	var plan: Rect2 = _plans[room_id]
+	var center := Vector3(plan.position.x + rect.get_center().x, 0, plan.position.y + rect.get_center().y)
+	var walk := Backyard.FX_SECONDS * 0.3
+	var act := Backyard.FX_SECONDS - walk
+	var tween := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	match fx:
+		"swim":
+			var edge := center + Vector3(-rect.size.x * 0.3, 0, 0)
+			tween.tween_property(_mom, "position", edge, walk)
+			tween.tween_property(_mom, "position:y", -0.95, act * 0.25)
+			tween.tween_callback(func() -> void: _burst(edge + Vector3(0, 0.15, 0), Color(0.88, 0.97, 1.0), 40, 2.4, 50.0))
+			tween.tween_property(_mom, "position:x", center.x + rect.size.x * 0.3, act * 0.75)
+			tween.parallel().tween_callback(func() -> void: _trail(_mom, Color(0.9, 0.98, 1.0), act * 0.75))
+		"sun":
+			# Fötterna mot solstolens fotände; hon lägger sig på rygg med huvudet mot ryggstödet.
+			var feet := center + Vector3(0, 0.38, rect.size.y / 2 - 0.1)
+			tween.tween_property(_mom, "position", feet - Vector3(0, 0.38, -0.25), walk)
+			tween.tween_callback(func() -> void:
+				var sprite := _mom as Sprite3D
+				sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+				sprite.rotation_degrees = Vector3(-84, 0, 0)
+				sprite.position = feet
+				_glow(center + Vector3(0, 0.5, 0), Color(1.0, 0.85, 0.45), act))
+			tween.tween_interval(act)
+		"water":
+			# Hon står på gräset framför rabatten och sprutar mot den.
+			var stand := center + Vector3(-rect.size.x * 0.25, 0, -0.75)
+			tween.tween_property(_mom, "position", stand, walk)
+			tween.tween_callback(func() -> void:
+				_spray(stand + Vector3(0.2, 0.9, 0.1), center - stand, Color(0.55, 0.8, 1.0), act))
+			tween.tween_interval(act)
+		"fetch":
+			var door := center + Vector3(0, 0, rect.size.y / 2 + 0.4)
+			var stand := door + Vector3(-1.0, 0, 0.3)
+			var landing := door + Vector3(-4.0, 0, -0.6)
+			var dog := _dog if _dog != null and GameState.get_character_room("dog") == room_id else FurnitureKit.playful_dog(_people, door)
+			tween.tween_property(_mom, "position", stand, walk)
+			tween.tween_callback(func() -> void: _throw_ball(stand + Vector3(0, 1.2, 0), landing, act * 0.45))
+			tween.tween_callback(func() -> void: _face(dog, landing))
+			tween.tween_property(dog, "position", landing, act * 0.5).set_delay(act * 0.1)
+			tween.tween_callback(func() -> void: _face(dog, stand))
+			tween.tween_property(dog, "position", stand + Vector3(0.45, 0, 0.1), act * 0.4)
+		_:
+			tween.tween_interval(Backyard.FX_SECONDS * 0.4)
+	# En timer i stället för tween.finished: byggs figurerna om mitt i (schemat ändras)
+	# försvinner tweenens mål, och då får house.gd ändå inte vänta för evigt.
+	await get_tree().create_timer(Backyard.FX_SECONDS).timeout
+
+
+## Vänder hunden (huvudet längs +x) mot en punkt.
+func _face(dog: Node3D, toward: Vector3) -> void:
+	var direction := toward - dog.position
+	dog.rotation.y = atan2(-direction.z, direction.x)
+
+
+## Ett plask: droppar som skjuts uppåt och faller tillbaka.
+func _burst(at: Vector3, color: Color, amount: int, speed: float, spread: float) -> void:
+	var particles := _particles(at, color, amount, 0.9, 0.045)
+	particles.one_shot = true
+	particles.explosiveness = 0.9
+	particles.spread = spread
+	particles.initial_velocity_min = speed * 0.5
+	particles.initial_velocity_max = speed
+	particles.emitting = true
+
+
+## Små vågor efter den som simmar.
+func _trail(follow: Node3D, color: Color, seconds: float) -> void:
+	var particles := _particles(Vector3(0, 0.15, 0), color, 30, 0.6, 0.035)
+	particles.spread = 70.0
+	particles.initial_velocity_min = 0.6
+	particles.initial_velocity_max = 1.2
+	# Följer med figuren, strax ovanför vattenytan när hon har sjunkit ned.
+	_people.remove_child(particles)
+	follow.add_child(particles)
+	particles.position = Vector3(0, 1.1, 0)
+	particles.emitting = true
+	get_tree().create_timer(seconds).timeout.connect(func() -> void:
+		if is_instance_valid(particles):
+			particles.emitting = false)
+
+
+## Solens varma sken: ljusa korn som stiger långsamt, och ett mjukt ljus.
+func _glow(at: Vector3, color: Color, seconds: float) -> void:
+	var particles := _particles(at, color, 24, 1.4, 0.03)
+	particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	particles.emission_box_extents = Vector3(0.4, 0.1, 0.9)
+	particles.gravity = Vector3(0, 0.25, 0)
+	particles.initial_velocity_min = 0.05
+	particles.initial_velocity_max = 0.2
+	particles.emitting = true
+	var light := OmniLight3D.new()
+	light.light_color = color
+	light.omni_range = 2.0
+	light.light_energy = 0.0
+	light.position = at + Vector3(0, 0.6, 0)
+	_people.add_child(light)
+	var shine := light.create_tween()
+	shine.tween_property(light, "light_energy", 1.2, seconds * 0.5)
+	shine.tween_property(light, "light_energy", 0.4, seconds * 0.5)
+
+
+## Vatten ur slangen i en båge mot en punkt.
+func _spray(at: Vector3, toward: Vector3, color: Color, seconds: float) -> void:
+	var particles := _particles(at, color, 60, 0.7, 0.03)
+	particles.direction = Vector3(toward.x, 1.2, toward.z).normalized()
+	particles.spread = 8.0
+	particles.initial_velocity_min = 3.0
+	particles.initial_velocity_max = 3.4
+	particles.emitting = true
+	get_tree().create_timer(seconds * 0.9).timeout.connect(func() -> void:
+		if is_instance_valid(particles):
+			particles.emitting = false)
+
+
+## Tennisbollen i en båge från handen till marken.
+func _throw_ball(from: Vector3, to: Vector3, seconds: float) -> void:
+	var ball := Node3D.new()
+	_people.add_child(ball)
+	StyleKit.sphere(ball, 0.06, Vector3.ZERO, StyleKit.mat(Color(0.85, 0.95, 0.35), 0.3))
+	var arc := ball.create_tween()
+	arc.tween_method(func(t: float) -> void:
+		ball.position = from.lerp(to + Vector3(0, 0.06, 0), t) + Vector3(0, sin(t * PI) * 1.6, 0), 0.0, 1.0, seconds)
+
+
+## Partiklar i husets stil: små, oskuggade kulor som tas bort när de är klara.
+func _particles(at: Vector3, color: Color, amount: int, lifetime: float, radius: float) -> CPUParticles3D:
+	var particles := CPUParticles3D.new()
+	particles.amount = amount
+	particles.lifetime = lifetime
+	particles.emitting = false
+	particles.gravity = Vector3(0, -7.0, 0)
+	var mesh := SphereMesh.new()
+	mesh.radius = radius
+	mesh.height = radius * 2
+	mesh.radial_segments = 6
+	mesh.rings = 3
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = color
+	mesh.material = material
+	particles.mesh = mesh
+	particles.position = at
+	_people.add_child(particles)
+	return particles

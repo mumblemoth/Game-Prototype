@@ -5,8 +5,17 @@ extends Node
 ## aktiviteter, samtal med familjemedlemmarna som är där och att vänta till nästa
 ## tidszon. Familjen står i rummen enligt sina scheman.
 
+## Våningspanelen till vänster, under HUD:ens plattor: läge och bredd på namnplattan.
+const FLOOR_PANEL_POS := Vector2(16, 118)
+const FLOOR_PLATE_SIZE := Vector2(250, 36)
+
 var _view: HouseView3D
-var _floor_buttons := {}
+## Namnplattan visar våningen som syns (hemma) eller platsen (ute).
+var _floor_plate: Control
+var _floor_name := ""
+## Q och E byter våning; knapparna gör samma sak med musen.
+var _floor_up_hint: KitButton
+var _floor_down_hint: KitButton
 var _menu_layer: CanvasLayer
 var _menu_title: Label
 ## Tidszonen på en liten gul platta ovanför rummets namn.
@@ -17,10 +26,9 @@ var _phone: CanvasLayer
 var _appearance: CanvasLayer
 var _map: CanvasLayer
 var _pause: CanvasLayer
-## Våningsknapparna (hemma) och platsens panel med karta och hemresa (ute).
-var _floor_column: VBoxContainer
-var _location_panel: VBoxContainer
-var _location_title: Label
+## Våningsknapparna (hemma) och kartan och hemresan (ute), under namnplattan.
+var _floor_column: HBoxContainer
+var _location_panel: HBoxContainer
 var _menu_room := ""
 ## Saken i planen som valet under musen hör till (skärmkoordinater), och lagret som
 ## ritar markeringen ovanpå den nedtonade planen.
@@ -30,6 +38,8 @@ var _highlight: Control
 var _floor_fade: ColorRect
 ## Tonar mellan dagarna och mjukar upp bytet av tidszon.
 var _transition: TimeTransition
+## En aktivitet spelas upp i 3D-vyn; klick på rum väntar tills den är klar.
+var _playing_fx := false
 
 
 func _ready() -> void:
@@ -37,13 +47,14 @@ func _ready() -> void:
 	add_child(_view)
 	_view.room_hovered.connect(_set_hover)
 	_view.room_clicked.connect(_on_room_clicked)
+	_view.can_pan = _can_pan
 	_floor_fade = ColorRect.new()
 	_floor_fade.color = PlanDrawer.PAPER
 	_floor_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_floor_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_floor_fade.modulate.a = 0.0
 	add_child(_floor_fade)
-	_build_floor_buttons()
+	_build_floor_label()
 
 	_transition = TimeTransition.new()
 	add_child(load("res://scripts/hud.gd").new(_transition))
@@ -61,6 +72,7 @@ func _ready() -> void:
 	_pause = load("res://scripts/ui/pause_menu.gd").new()
 	add_child(_pause)
 	_build_pause_button()
+	_build_map_button()
 	add_child(_transition)
 
 	GameState.room_changed.connect(func(room_id: String) -> void:
@@ -79,13 +91,28 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Esc stänger rummets meny; annars öppnar den pausmenyn (telefonen, kartan och de
-	# andra panelerna tar Esc själva när de är öppna).
+	# andra panelerna tar Esc själva när de är öppna). M öppnar och stänger kartan.
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if _menu_layer.visible:
 			_close_menu()
 		else:
 			_open_pause()
 		get_viewport().set_input_as_handled()
+	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_M:
+		_toggle_map()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("floor_up") or event.is_action_pressed("floor_down"):
+		_step_floor(-1 if event.is_action_pressed("floor_up") else 1)
+		get_viewport().set_input_as_handled()
+
+
+## WASD panorerar bara när ingen meny, panel eller scen har spelarens uppmärksamhet.
+func _can_pan() -> bool:
+	if _menu_layer.visible or _dialog.visible or _appearance.visible or _transition.is_playing():
+		return false
+	if _phone.is_open or _pause.is_open or _map.is_open:
+		return false
+	return GameState.is_playable()
 
 
 ## MENU uppe till höger öppnar pausmenyn med musen.
@@ -98,53 +125,100 @@ func _build_pause_button() -> void:
 
 
 func _open_pause() -> void:
-	if _dialog.visible or _transition.is_playing():
+	if _dialog.visible or _transition.is_playing() or _playing_fx:
 		return
 	_pause.open()
 
 
+## Kartknappen nere till höger, under telefonens knapp och i samma stil, med kartans
+## symbol. Den göms under en dialog, som telefonens.
+func _build_map_button() -> void:
+	var button := PhoneTheme.hud_button("      Map  (M)", 0)
+	button.draw.connect(func() -> void: PhoneIcons.draw(button, "map", Rect2(14, 10, 24, 24), Color.WHITE))
+	button.pressed.connect(_toggle_map)
+	button.visible = not GameState.in_dialogue()
+	GameState.dialogue_changed.connect(func(active: bool) -> void: button.visible = not active)
+	add_child(button)
+
+
+## M och kartknappen: stänger kartan om den är öppen, annars öppnas den (och rummets
+## meny och telefonen stängs) när inget annat har spelarens uppmärksamhet.
+func _toggle_map() -> void:
+	if _map.is_open:
+		_map.close_map()
+		return
+	if _dialog.visible or _appearance.visible or _pause.is_open or _transition.is_playing() or GameState.in_dialogue():
+		return
+	if not GameState.is_playable():
+		return
+	_close_menu()
+	_phone.close()
+	_map.open()
+
+
 # --- Planen -------------------------------------------------------------------
 
-## Våningsknapparna står i husets ordning uppifrån och ned, som i en hiss.
-func _build_floor_buttons() -> void:
-	var column := VBoxContainer.new()
-	column.position = Vector2(36, 120)
-	column.add_theme_constant_override("separation", 10)
-	add_child(column)
-	_floor_column = column
-	_build_location_panel()
-	var group := ButtonGroup.new()
-	for floor_name in PlanDrawer.FLOORS:
-		var button := KitButton.new(PlanDrawer.FLOOR_LABELS[floor_name], "", "tab", UiKit.BODY)
-		button.toggle_mode = true
-		button.button_group = group
-		button.focus_mode = Control.FOCUS_NONE
-		button.custom_minimum_size = Vector2(170, 40)
-		button.pressed.connect(_show_floor.bind(floor_name))
-		column.add_child(button)
-		_floor_buttons[floor_name] = button
+## Våningspanelen: en svart sned platta med namnet på det som syns, och under den
+## knappar i kitets stil. Hemma byter de våning (som Q och E, och den som inte leder
+## någonstans är avstängd); ute öppnar de kartan eller går hem.
+func _build_floor_label() -> void:
+	var panel := VBoxContainer.new()
+	panel.position = FLOOR_PANEL_POS
+	panel.add_theme_constant_override("separation", 8)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_floor_plate = Control.new()
+	_floor_plate.custom_minimum_size = FLOOR_PLATE_SIZE + UiKit.SHADOW * 0.5
+	_floor_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_floor_plate.draw.connect(func() -> void:
+		var font := UiKit.display_font()
+		var rect := Rect2(Vector2.ZERO, FLOOR_PLATE_SIZE)
+		UiKit.draw_slant(_floor_plate, Rect2(UiKit.SHADOW * 0.5, rect.size), UiKit.RED)
+		UiKit.draw_slant(_floor_plate, rect, UiKit.INK)
+		_floor_plate.draw_string(font, Vector2(20, UiKit.baseline(font, UiKit.HEADING - 4, rect.size.y)), _floor_name.to_upper(),
+				HORIZONTAL_ALIGNMENT_LEFT, rect.size.x - 36, UiKit.HEADING - 4, UiKit.PAPER))
+	panel.add_child(_floor_plate)
+	_floor_column = HBoxContainer.new()
+	_floor_column.add_theme_constant_override("separation", 8)
+	panel.add_child(_floor_column)
+	_floor_up_hint = _floor_button("Up", "Q", func() -> void: _step_floor(-1), _floor_column)
+	_floor_down_hint = _floor_button("Down", "E", func() -> void: _step_floor(1), _floor_column)
+	_build_location_panel(panel)
 
 
-## Ute på en plats ersätts våningsknapparna av platsens namn, kartan och vägen hem.
-func _build_location_panel() -> void:
-	_location_panel = VBoxContainer.new()
-	_location_panel.position = Vector2(36, 120)
-	_location_panel.add_theme_constant_override("separation", 10)
+func _floor_button(text: String, key: String, on_pressed: Callable, row: HBoxContainer) -> KitButton:
+	var button := KitButton.new(text, key, "tab")
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(on_pressed)
+	row.add_child(button)
+	return button
+
+
+## Q går uppåt (mot vinden), E nedåt (mot utanför) i GameState.HOME_FLOORS; stannar
+## vid ändarna. Bara när huset syns och ingen dialog eller panel har uppmärksamheten.
+func _step_floor(step: int) -> void:
+	if not _can_pan() or GameState.in_dialogue() or _playing_fx:
+		return
+	var index := GameState.HOME_FLOORS.find(PlanDrawer.FLOOR_LABELS.get(_view.floor_name, ""))
+	if index == -1:
+		return
+	var target: int = clampi(index + step, 0, GameState.HOME_FLOORS.size() - 1)
+	if target == index:
+		return
+	_show_floor(PlanDrawer.FLOOR_LABELS.find_key(GameState.HOME_FLOORS[target]))
+
+
+## Ute på en plats ersätts våningsknapparna av kartan och vägen hem.
+func _build_location_panel(panel: VBoxContainer) -> void:
+	_location_panel = HBoxContainer.new()
+	_location_panel.add_theme_constant_override("separation", 8)
 	_location_panel.visible = false
-	add_child(_location_panel)
-	_location_title = UiKit.display("", UiKit.HEADING + 2)
-	_location_title.custom_minimum_size = Vector2(200, 0)
-	_location_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_location_panel.add_child(_location_title)
-	for item in [["Neighborhood Map", func() -> void: _map.open()], ["Go Home", func() -> void: GameState.return_home()]]:
-		var button := KitButton.new(item[0], "", "tab", UiKit.BODY)
-		button.focus_mode = Control.FOCUS_NONE
-		button.custom_minimum_size = Vector2(200, 40)
-		button.pressed.connect(func() -> void:
+	panel.add_child(_location_panel)
+	for item in [["Map", "M", func() -> void: _map.open()], ["Go Home", "", func() -> void: GameState.return_home()]]:
+		_floor_button(item[0], item[1], func() -> void:
 			if GameState.is_playable():
 				_close_menu()
-				item[1].call())
-		_location_panel.add_child(button)
+				item[2].call(), _location_panel)
 
 
 func _show_floor(floor_name: String) -> void:
@@ -153,22 +227,24 @@ func _show_floor(floor_name: String) -> void:
 	var away := not floor_name in PlanDrawer.FLOORS
 	_floor_column.visible = not away
 	_location_panel.visible = away
-	if away:
-		_location_title.text = PlanDrawer.FLOOR_LABELS.get(floor_name, floor_name)
+	_floor_name = PlanDrawer.FLOOR_LABELS.get(floor_name, floor_name)
+	_floor_plate.queue_redraw()
 	if floor_name != _view.floor_name:
 		if is_inside_tree():
 			# Den nya våningen tonar fram.
 			_floor_fade.modulate.a = 1.0
 			create_tween().tween_property(_floor_fade, "modulate:a", 0.0, 0.35)
 		_view.show_floor(floor_name)
-	if _floor_buttons.has(floor_name):
-		_floor_buttons[floor_name].button_pressed = true
+	if not away:
+		var index := GameState.HOME_FLOORS.find(PlanDrawer.FLOOR_LABELS[floor_name])
+		_floor_up_hint.disabled = index <= 0
+		_floor_down_hint.disabled = index >= GameState.HOME_FLOORS.size() - 1
 	_set_hover("")
 
 
 ## Klick på ett rum i 3D-vyn: mamman går dit, kameran glider in och rummets meny öppnas.
 func _on_room_clicked(room_id: String) -> void:
-	if not GameState.is_playable():
+	if not GameState.is_playable() or _playing_fx:
 		return
 	if room_id != GameState.current_room:
 		var from_floor := PlanDrawer.floor_of(GameState.current_room)
@@ -271,7 +347,8 @@ func _open_menu(room_id: String) -> void:
 		var talk := {"id": "talk_" + character_id, "object": "", "label": "Talk to %s" % character_name,
 				"text": "You chat with %s." % character_name}
 		if character_id == "dog":
-			talk = {"id": "pet_dog", "object": "dog_bed", "label": "Pet the dog", "text": "You scratch the dog behind the ears. Its tail thumps happily."}
+			var bed := "dog_bed" if FloorPlanArt.furniture_rect(room_id, "dog_bed").size != Vector2.ZERO else "dog_house"
+			talk = {"id": "pet_dog", "object": bed, "label": "Pet the dog", "text": "You scratch the dog behind the ears. Its tail thumps happily."}
 		if GameState.links.has(character_id):
 			talk["link"] = character_id
 			talk["link_points"] = 1
@@ -323,7 +400,14 @@ func _add_action(action: Dictionary, room_id: String, after := Callable()) -> vo
 		if panel != "":
 			_appearance.open(panel)
 			return
+		if action.get("fx", "") != "":
+			# Trädgårdens aktiviteter spelas upp i 3D-vyn först (simma, sola, vattna, apport).
+			_playing_fx = true
+			await _view.play_activity(room_id, action.get("object", ""), action["fx"])
+			_playing_fx = false
 		GameState.do_room_action(action)
+		_view.refresh_people()
+		Backyard.refresh_plants(get_tree())
 		if after.is_valid():
 			after.call()
 	var button := _add_choice(action["label"], reason if reason != "" else RoomActions.tags(action), run, reason != "")
@@ -375,4 +459,4 @@ func _on_time_of_day_changed(period: String) -> void:
 		await _transition.finished
 		if GameState.get_time_of_day() != period:
 			return
-	UiTransition.banner(self, GameState.PERIOD_NAMES[period], "%s · Day %d" % [GameState.get_weekday(), GameState.day])
+	UiTransition.banner(self, GameState.PERIOD_NAMES[period], GameState.get_weekday())

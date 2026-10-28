@@ -17,7 +17,7 @@ const RED := Color("e5412f")
 const MUTED := Color("958d9c")
 const SCRIM := Color(0.05, 0.04, 0.07, 0.72)
 ## Mammans mätare (GameState.STAT_NAMES).
-const METERS := {"home": Color("ff9f2e"), "work": Color("4ea8ff"), "romance": Color("ff5c9a")}
+const METERS := {"home": Color("ff9f2e"), "work": Color("4ea8ff")}
 
 # --- Textstorlekar -----------------------------------------------------------------
 const HERO := 88
@@ -43,15 +43,16 @@ const SLOW := 0.42
 const STAGGER := 0.045
 
 # --- Typsnitt ------------------------------------------------------------------------
-## Egna typsnittsfiler som ersätter systemtypsnitten om de finns. Display ska vara ett
-## fett, smalt och kursivt typsnitt; systemets får lutning och fetma här.
+## Spelets typsnitt är Libre Baskerville (variabelt, wght 400–700, SIL OFL). Display är
+## den kursiva filen i fet vikt, brödtexten den raka. Saknas filerna används systemets
+## typsnitt, som då får lutning här.
 const FONT_FILES := {
-	"display": "res://Assets/fonts/ui_display.ttf",
-	"body": "res://Assets/fonts/ui_body.ttf",
-	"body_bold": "res://Assets/fonts/ui_body_bold.ttf",
+	"display": "res://Assets/fonts/LibreBaskerville-Italic.ttf",
+	"body": "res://Assets/fonts/LibreBaskerville.ttf",
+	"body_bold": "res://Assets/fonts/LibreBaskerville.ttf",
 }
-const DISPLAY_FONTS := ["Bahnschrift", "Impact", "Arial Black", "Arial"]
-const BODY_FONTS := ["Bahnschrift", "Segoe UI", "Arial"]
+const DISPLAY_FONTS := ["Libre Baskerville", "Georgia", "Times New Roman"]
+const BODY_FONTS := ["Libre Baskerville", "Georgia", "Times New Roman"]
 const ITALIC := 0.2
 
 # --- Inställningar -----------------------------------------------------------------
@@ -64,38 +65,35 @@ static var _fonts := {}
 static var _theme: Theme
 
 
-## Rubriktypsnittet: fett, smalt och lutande.
+## Rubriktypsnittet: fett och kursivt.
 static func display_font() -> Font:
-	return _font("display", DISPLAY_FONTS, 700, 75, ITALIC, 0.35)
+	return _font("display", DISPLAY_FONTS, 700, ITALIC)
 
 
 ## Brödtexten (bold för etiketter, antal och taggar).
 static func body_font(bold := false) -> Font:
-	return _font("body_bold" if bold else "body", BODY_FONTS, 600 if bold else 400, 87 if bold else 100, 0.0, 0.0)
+	return _font("body_bold" if bold else "body", BODY_FONTS, 700 if bold else 400, 0.0)
 
 
-static func _font(key: String, names: Array, weight: int, stretch: int, slant: float, embolden: float) -> Font:
+static func _font(key: String, names: Array, weight: int, slant: float) -> Font:
 	if _fonts.has(key):
 		return _fonts[key]
-	var font: Font
+	# Libre Baskerville är variabelt: vikten väljs med axeln. Den kursiva filen lutar
+	# redan, så bara systemets reservtypsnitt får lutning.
+	var variation := FontVariation.new()
+	variation.variation_opentype = {"wght": weight}
 	if ResourceLoader.exists(FONT_FILES[key]):
-		font = load(FONT_FILES[key])
+		variation.base_font = load(FONT_FILES[key])
 	else:
 		var system := SystemFont.new()
 		system.font_names = PackedStringArray(names)
 		system.font_weight = weight
-		system.font_stretch = stretch
 		system.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
 		system.hinting = TextServer.HINTING_LIGHT
-		# Bahnschrift är ett variabelt typsnitt: vikt och bredd väljs med axlarna.
-		var variation := FontVariation.new()
 		variation.base_font = system
-		variation.variation_opentype = {"wght": weight, "wdth": stretch}
 		variation.variation_transform = Transform2D(Vector2(1.0, slant), Vector2(0.0, 1.0), Vector2.ZERO)
-		variation.variation_embolden = embolden
-		font = variation
-	_fonts[key] = font
-	return font
+	_fonts[key] = variation
+	return variation
 
 
 ## Temat för kitets skärmar, så att vanliga etiketter och rullister får stilen.

@@ -33,6 +33,9 @@ func _ready() -> void:
 			GameState.finish_scene()
 		await get_tree().create_timer(0.5).timeout
 	await _snap("03_hud", 2.5)
+	GameState.message_posted.emit("You do the dishes.  (Home +15)")
+	await _snap("03b_hud_message", 0.4)
+	await _snap("03c_hud_message_faded", 5.0)
 	house._on_room_clicked("kitchen")
 	await _snap("04_room_menu", 1.0)
 	house._close_menu()
@@ -53,10 +56,10 @@ func _ready() -> void:
 	pause._back()
 	pause.close()
 	await get_tree().create_timer(0.4).timeout
-	UiTransition.banner(self, "Evening", "Monday · Day 1")
+	UiTransition.banner(self, "Evening", "Monday")
 	await _snap("10_banner", 0.35)
 	await get_tree().create_timer(1.6).timeout
-	UiTransition.wipe(self, func() -> void: pass, "Day 2 · Tuesday")
+	UiTransition.wipe(self, func() -> void: pass, "Tuesday")
 	await _snap("11_wipe", 0.5)
 	await get_tree().create_timer(1.2).timeout
 	GameState.day_ended.emit()

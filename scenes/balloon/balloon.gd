@@ -67,6 +67,7 @@ var dialogue_line: DialogueLine:
 			apply_dialogue_line()
 		else:
 			# The dialogue has finished so close the balloon
+			GameState.set_dialogue_open(self, false)
 			if owner == null:
 				queue_free()
 			else:
@@ -112,6 +113,10 @@ func _ready() -> void:
 		start()
 
 
+func _exit_tree() -> void:
+	GameState.set_dialogue_open(self, false)
+
+
 func _process(_delta: float) -> void:
 	if is_instance_valid(dialogue_line):
 		progress.visible = not dialogue_label.is_typing and dialogue_line.responses.size() == 0 and not dialogue_line.has_tag("voice")
@@ -141,6 +146,8 @@ func start(with_dialogue_resource: DialogueResource = null, cue: String = "", ex
 		dialogue_resource = with_dialogue_resource
 	if not cue.is_empty():
 		start_from_cue = cue
+	# Telefonen hålls undan tills dialogen är slut (se GameState.set_dialogue_open).
+	GameState.set_dialogue_open(self, true)
 	dialogue_line = await dialogue_resource.get_next_dialogue_line(start_from_cue, temporary_game_states)
 	show()
 

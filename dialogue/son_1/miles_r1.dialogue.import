@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://fvs2dxj32ppp"
+path="res://.godot/imported/miles_r1.dialogue-1a8ee939d02d169bb16516d8bd64fdd8.tres"
+
+[deps]
+
+source_file="res://dialogue/son_1/miles_r1.dialogue"
+dest_files=["res://.godot/imported/miles_r1.dialogue-1a8ee939d02d169bb16516d8bd64fdd8.tres"]
+
+[params]
+
+defaults=true

@@ -89,7 +89,7 @@ func play_new_day(change: Callable) -> void:
 	_tween.tween_callback(func() -> void:
 		change.call()
 		_weekday = GameState.get_weekday().to_upper()
-		_kicker = ("Day %d" % GameState.day).to_upper())
+		_kicker = GameState.PERIOD_NAMES[GameState.get_time_of_day()].to_upper())
 	# Gryningen: natten ljusnar och dagens namn stiger fram.
 	_tween.tween_property(_shade, "color", DAWN, UiKit.t(CARD_HOLD + 0.5)).set_trans(Tween.TRANS_SINE)
 	_tween.parallel().tween_property(_card, "modulate:a", 1.0, UiKit.t(0.5)).set_trans(Tween.TRANS_SINE)

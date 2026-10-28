@@ -4,6 +4,9 @@ extends CanvasLayer
 ## Nålen under musen lyfts upp och får ett kort med namn, beskrivning och om platsen är
 ## öppen eller varför den är stängd. Klick på en öppen plats tonar ut, reser dit
 ## (GameState.travel_to_location) och tonar in. Klick på hemmet åker hem.
+## M och kartknappen nere till höger (house.gd) öppnar och stänger den också. Om kartan
+## är öppen står i GameState.map_open; stänger något annat den där (dagens slut) stängs
+## den här också.
 ##
 ## Kartbilden är en platshållare ritad i kod (gräs, vägar, kvarter, damm och träd).
 ## Finns res://Assets/map/neighborhood.png (eller .webp/.jpg) visas den i stället, och
@@ -45,6 +48,10 @@ func _ready() -> void:
 	var shade := ColorRect.new()
 	shade.color = Color(0.05, 0.05, 0.08, 0.65)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Klick utanför kartan stänger den, som telefonen (kartknappen ligger under skuggan).
+	shade.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			close_map())
 	add_child(shade)
 	var frame := Control.new()
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -62,6 +69,7 @@ func _ready() -> void:
 	_map.gui_input.connect(_on_map_input)
 	_map.mouse_exited.connect(func() -> void: _set_hover(""))
 	add_child(_map)
+	# Rubriken och knappen följer UI-kitet; själva kartan är målad i världens stil.
 	# Rubriken står i kartans övre vänstra hörn, så att den inte krockar med HUD:en.
 	var title := UiKit.header("Neighborhood", "", UiKit.HEADING + 8)
 	title.position = MAP_RECT.position + Vector2(14, 8)
@@ -82,6 +90,9 @@ func _ready() -> void:
 	add_child(_fade)
 	GameState.locations_changed.connect(func() -> void: _map.queue_redraw())
 	GameState.time_of_day_changed.connect(func(_period: String) -> void: _map.queue_redraw())
+	GameState.map_toggled.connect(func(map_is_open: bool) -> void:
+		if not map_is_open:
+			close_map())
 
 
 func _process(delta: float) -> void:
@@ -117,6 +128,7 @@ func open() -> void:
 	_traveling = false
 	_set_hover("")
 	_map.queue_redraw()
+	GameState.set_map_open(true)
 
 
 func close_map() -> void:
@@ -124,6 +136,7 @@ func close_map() -> void:
 		return
 	is_open = false
 	visible = false
+	GameState.set_map_open(false)
 	closed.emit()
 
 
@@ -204,6 +217,7 @@ func _travel(go: Callable) -> void:
 	tween.tween_callback(func() -> void:
 		visible = false
 		is_open = false
+		GameState.set_map_open(false)
 		go.call()
 		closed.emit())
 	tween.tween_property(_fade, "modulate:a", 0.0, 0.01)
