@@ -345,6 +345,11 @@ func do_room_action(action: Dictionary) -> void:
 	if cost > 0:
 		changes.append(Economy.format(-cost))
 	changes.append_array(_apply_money_action(action))
+	var lust_gain: float = action.get("lust", 0.0)
+	if lust_gain > 0.0 and link != "":
+		links[link]["lust"] = clampf(links[link]["lust"] + lust_gain, 0.0, Balance.LUST_MAX)
+		link_changed.emit(link)
+		changes.append("♥ %+.0f" % lust_gain)
 	for key in action.get("effects", {}):
 		var delta: int = action["effects"][key]
 		if delta == 0:
@@ -1373,4 +1378,5 @@ func mood(char_id: String, mood_id: String) -> void:
 		push_error("mood(): okÃƒÂ¤nd person %s" % char_id)
 		return
 	_stage().show_mood(char_id, mood_id)
+
 

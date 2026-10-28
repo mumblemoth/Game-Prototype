@@ -77,6 +77,9 @@ const ACTIONS := {
 	"bathroom": [
 		{"id": "bath_bath", "object": "bathtub", "label": "Take a long bath", "text": "You light a candle and soak until the water cools.", "time": true, "relief": 5, "social": {"charm": 3}},
 		{"id": "bath_freshen", "object": "basin", "label": "Freshen up", "text": "You wash your face and brush your hair."},
+	{"id": "bath_peep_son1", "object": "bathtub", "label": "Soak with the door open", "text": "The door stays open a crack. Miles's footsteps pass twice.", "lust": 3.0, "link": "son_1", "link_points": 0, "periods": ["evening"], "reveal_flag": "peep_miles", "hidden_flag": "peep_miles_2"},
+	{"id": "bath_peep_son1_2", "object": "bathtub", "label": "Soak with the door open", "text": "The footsteps stop this time. He doesn't come in.", "lust": 5.0, "link": "son_1", "link_points": 0, "periods": ["evening"], "reveal_flag": "peep_miles_2", "hidden_flag": "peep_miles_3"},
+	{"id": "bath_peep_son1_3", "object": "bathtub", "label": "Soak with the door open", "text": "He knocks this time. She tells him to come in.", "lust": 8.0, "link": "son_1", "link_points": 0, "periods": ["evening"], "reveal_flag": "peep_miles_3"},
 	],
 	"bedroom": [
 		{"id": "bedroom_wardrobe", "object": "wardrobe", "label": "Change clothes", "text": "", "panel": "wardrobe"},
@@ -251,9 +254,13 @@ static func tags(action: Dictionary) -> String:
 			parts.append("+" + GameState.STAT_NAMES[key])
 	for key in action.get("social", {}):
 		parts.append("+" + SocialStats.STATS[key]["name"])
+	if action.get("lust", 0.0) > 0.0:
+		parts.append("♥ +%.0f" % action["lust"])
 	if action.get("link", "") != "":
 		parts.append("â™¥ " + GameState.CHARACTERS[action["link"]]["name"])
 	return "  Â·  ".join(parts)
+
+
 
 
 
