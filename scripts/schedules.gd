@@ -1,28 +1,28 @@
-class_name Schedules
-## Scheman för familjen och huvud-NPC:erna (de med en planerad social link). Allt här
-## är data plus en ren uppslagsfunktion; resultatet för just nu cachas i
-## GameState.whereabouts och frågas därifrån ("var är X nu?").
+﻿class_name Schedules
+## Scheman fÃ¶r familjen och huvud-NPC:erna (de med en planerad social link). Allt hÃ¤r
+## Ã¤r data plus en ren uppslagsfunktion; resultatet fÃ¶r just nu cachas i
+## GameState.whereabouts och frÃ¥gas dÃ¤rifrÃ¥n ("var Ã¤r X nu?").
 ##
-## Tiden går i GameState:s fyra tidszoner, inte i timmar, så ett schema säger var
-## personen är under varje tidszon.
+## Tiden gÃ¥r i GameState:s fyra tidszoner, inte i timmar, sÃ¥ ett schema sÃ¤ger var
+## personen Ã¤r under varje tidszon.
 ##
-## Ett schema byggs av tre lager. Det första lagret som ger ett svar vinner:
-##   1. Storyöverstyrning – GameState.schedule_overrides, sätts av scener och händelser
-##      under spelet ("maken är på tjänsteresa dag 8–10"). Sparas med spelet.
-##   2. Regler (RULES) – undantag med villkor, i den ordning de står.
-##   3. Rutin (ROUTINES) – veckans vanliga upplägg.
-## Hittas inget är personen borta från kartan.
+## Ett schema byggs av tre lager. Det fÃ¶rsta lagret som ger ett svar vinner:
+##   1. StoryÃ¶verstyrning â€“ GameState.schedule_overrides, sÃ¤tts av scener och hÃ¤ndelser
+##      under spelet ("maken Ã¤r pÃ¥ tjÃ¤nsteresa dag 8â€“10"). Sparas med spelet.
+##   2. Regler (RULES) â€“ undantag med villkor, i den ordning de stÃ¥r.
+##   3. Rutin (ROUTINES) â€“ veckans vanliga upplÃ¤gg.
+## Hittas inget Ã¤r personen borta frÃ¥n kartan.
 ##
 ## Framtida NPC:er: en person med "introduced_by" i GameState.CHARACTERS finns i datan
-## från början, men är inte med i världen förrän händelsen har satts. Före det gäller
-## bara storyöverstyrningar och regler med "before_intro" (personen syns då som
-## främling, t.ex. "New Neighbor"). När händelsen sätts kliver personen in i sin rutin,
-## får en social link och läggs till i telefonen.
-## All text spelaren ser är på engelska.
+## frÃ¥n bÃ¶rjan, men Ã¤r inte med i vÃ¤rlden fÃ¶rrÃ¤n hÃ¤ndelsen har satts. FÃ¶re det gÃ¤ller
+## bara storyÃ¶verstyrningar och regler med "before_intro" (personen syns dÃ¥ som
+## frÃ¤mling, t.ex. "New Neighbor"). NÃ¤r hÃ¤ndelsen sÃ¤tts kliver personen in i sin rutin,
+## fÃ¥r en social link och lÃ¤ggs till i telefonen.
+## All text spelaren ser Ã¤r pÃ¥ engelska.
 
-## Vad personerna gör. label syns för spelaren. busy: det går inte att prata med
-## personen eller göra något ihop just då. Är personen borta (rum "") är label
-## svaret på "var är X?".
+## Vad personerna gÃ¶r. label syns fÃ¶r spelaren. busy: det gÃ¥r inte att prata med
+## personen eller gÃ¶ra nÃ¥got ihop just dÃ¥. Ã„r personen borta (rum "") Ã¤r label
+## svaret pÃ¥ "var Ã¤r X?".
 const ACTIVITIES := {
 	"": {"label": "Away"},
 	"breakfast": {"label": "Having breakfast"},
@@ -46,9 +46,9 @@ const ACTIVITIES := {
 }
 
 ## Veckorutiner: person -> dagnyckel -> tidszon -> [rum, aktivitet]. Rum "" betyder
-## borta från kartan. Dagnycklarna slås upp i ordningen veckodag ("saturday"),
-## "weekday"/"weekend" och sist "default"; den första som har tidszonen gäller, så en
-## dag behöver bara ange det som skiljer sig.
+## borta frÃ¥n kartan. Dagnycklarna slÃ¥s upp i ordningen veckodag ("saturday"),
+## "weekday"/"weekend" och sist "default"; den fÃ¶rsta som har tidszonen gÃ¤ller, sÃ¥ en
+## dag behÃ¶ver bara ange det som skiljer sig.
 const ROUTINES := {
 	"husband": {
 		"default": {"morning": ["kitchen", "breakfast"], "afternoon": ["", "work"], "evening": ["living_room", "tv"], "night": ["bedroom", "sleeping"]},
@@ -64,7 +64,7 @@ const ROUTINES := {
 	"dog": {
 		"default": {"morning": ["kitchen", "breakfast"], "afternoon": ["living_room", "napping"], "evening": ["living_room", "napping"], "night": ["hall", "sleeping"]},
 	},
-	# Framtida NPC:er (platshållare tills storyn skrivs).
+	# Framtida NPC:er (platshÃ¥llare tills storyn skrivs).
 	"neighbor": {
 		"default": {"afternoon": ["neighbor_living", "unpacking"], "evening": ["neighbor_living", "at_home"]},
 		"weekend": {"afternoon": ["park", "walking"]},
@@ -78,19 +78,22 @@ const ROUTINES := {
 	},
 }
 
-## Undantag: person -> [regel], den första regeln som stämmer gäller. En regel har id,
-## rum och aktivitet ("room", "activity") och villkor, som alla är valfria:
-##   periods      – bara under dessa tidszoner
-##   weekdays     – bara dessa veckodagar (index 0 = måndag)
-##   min_day      – från och med dag; max_day – till och med dag
-##   flags        – händelser som måste ha hänt ("met_neighbor") eller inte ("!met_neighbor")
-##   quests       – questers läge: {"practice": "active"} eller "completed"
-##   link_rank    – lägsta rank i relationer: {"neighbor": 3}
-##   if_at        – andra personer måste vara i ett visst rum: {"son_2": "outside"}
-##   chance       – sannolikhet 0–1. Slås fast per dag och tidszon, så svaret är detsamma
-##                  hur många gånger man frågar, och prognoser stämmer.
-##   before_intro – regeln gäller (bara) innan en framtida NPC är introducerad
+## Undantag: person -> [regel], den fÃ¶rsta regeln som stÃ¤mmer gÃ¤ller. En regel har id,
+## rum och aktivitet ("room", "activity") och villkor, som alla Ã¤r valfria:
+##   periods      â€“ bara under dessa tidszoner
+##   weekdays     â€“ bara dessa veckodagar (index 0 = mÃ¥ndag)
+##   min_day      â€“ frÃ¥n och med dag; max_day â€“ till och med dag
+##   flags        â€“ hÃ¤ndelser som mÃ¥ste ha hÃ¤nt ("met_neighbor") eller inte ("!met_neighbor")
+##   quests       â€“ questers lÃ¤ge: {"practice": "active"} eller "completed"
+##   link_rank    â€“ lÃ¤gsta rank i relationer: {"neighbor": 3}
+##   if_at        â€“ andra personer mÃ¥ste vara i ett visst rum: {"son_2": "outside"}
+##   chance       â€“ sannolikhet 0â€“1. SlÃ¥s fast per dag och tidszon, sÃ¥ svaret Ã¤r detsamma
+##                  hur mÃ¥nga gÃ¥nger man frÃ¥gar, och prognoser stÃ¤mmer.
+##   before_intro â€“ regeln gÃ¤ller (bara) innan en framtida NPC Ã¤r introducerad
 const RULES := {
+	"son_1": [
+		{"id": "school", "weekdays": [0, 1, 2, 3, 4], "periods": ["afternoon"], "room": "classroom", "activity": "homework"},
+	],
 	"son_2": [
 		{"id": "practice", "weekdays": [1, 3], "periods": ["afternoon"], "room": "", "activity": "practice"},
 	],
@@ -98,9 +101,9 @@ const RULES := {
 		{"id": "late_shift", "weekdays": [0, 1, 2, 3], "periods": ["evening"], "chance": 0.2, "room": "", "activity": "work"},
 	],
 	"dog": [
-		# Hunden följer med Son 2 ut på gården.
+		# Hunden fÃ¶ljer med Son 2 ut pÃ¥ gÃ¥rden.
 		{"id": "fetch", "periods": ["afternoon"], "if_at": {"son_2": "outside"}, "room": "outside", "activity": "playing"},
-		# Helgkvällar busar han runt i trädgården i stället för att sova på soffan.
+		# HelgkvÃ¤llar busar han runt i trÃ¤dgÃ¥rden i stÃ¤llet fÃ¶r att sova pÃ¥ soffan.
 		{"id": "garden_evening", "weekdays": [5, 6], "periods": ["evening"], "room": "backyard", "activity": "playing"},
 	],
 	"neighbor": [
@@ -110,15 +113,15 @@ const RULES := {
 	],
 }
 
-## Hur djupt if_at får följa andra personers scheman (skydd mot cirklar).
+## Hur djupt if_at fÃ¥r fÃ¶lja andra personers scheman (skydd mot cirklar).
 const MAX_DEPTH := 3
 
 
-## Var en person är och vad den gör en viss dag och tidszon:
+## Var en person Ã¤r och vad den gÃ¶r en viss dag och tidszon:
 ##   {"room": String, "activity": String, "source": String, "stranger": bool}
-## room är ett id i GameState.ROOMS, eller "" om personen är borta. source säger vad som
-## bestämde det: "story:<id>", "rule:<id>", "routine" eller "" (inget schema).
-## stranger: en framtida NPC som syns innan spelaren har träffat personen.
+## room Ã¤r ett id i GameState.ROOMS, eller "" om personen Ã¤r borta. source sÃ¤ger vad som
+## bestÃ¤mde det: "story:<id>", "rule:<id>", "routine" eller "" (inget schema).
+## stranger: en framtida NPC som syns innan spelaren har trÃ¤ffat personen.
 static func resolve(character_id: String, day: int, period: String, depth := 0) -> Dictionary:
 	var introduced := GameState.is_introduced(character_id)
 	var result := _story_slot(character_id, day, period)
@@ -132,23 +135,23 @@ static func resolve(character_id: String, day: int, period: String, depth := 0) 
 	return result
 
 
-## Text för "var är X?", t.ex. "Kitchen · Having breakfast" eller "At football practice".
+## Text fÃ¶r "var Ã¤r X?", t.ex. "Kitchen Â· Having breakfast" eller "At football practice".
 static func describe(slot: Dictionary) -> String:
 	var label: String = ACTIVITIES.get(slot.get("activity", ""), ACTIVITIES[""])["label"]
 	var room: String = slot.get("room", "")
 	if room == "":
 		return label
 	var room_name: String = GameState.ROOMS[room]["name"]
-	return room_name if slot.get("activity", "") == "" else "%s · %s" % [room_name, label]
+	return room_name if slot.get("activity", "") == "" else "%s Â· %s" % [room_name, label]
 
 
 static func is_busy(slot: Dictionary) -> bool:
 	return ACTIVITIES.get(slot.get("activity", ""), {}).get("busy", false)
 
 
-## Nästa gång personen är i ett rum (eller på en plats i Locations), räknat från och med
-## en dag och tidszon: {"day": int, "period": String}, eller {} om det inte händer inom
-## horizon_days. Utgår från att storyn står still (dagens händelser och quests).
+## NÃ¤sta gÃ¥ng personen Ã¤r i ett rum (eller pÃ¥ en plats i Locations), rÃ¤knat frÃ¥n och med
+## en dag och tidszon: {"day": int, "period": String}, eller {} om det inte hÃ¤nder inom
+## horizon_days. UtgÃ¥r frÃ¥n att storyn stÃ¥r still (dagens hÃ¤ndelser och quests).
 static func next_time_at(character_id: String, place: String, from_day: int, from_period: String, horizon_days := 7) -> Dictionary:
 	var start := GameState.TIME_PERIODS.find(from_period)
 	for offset in horizon_days * GameState.TIME_PERIODS.size():
@@ -216,3 +219,4 @@ static func _routine_slot(character_id: String, day: int, period: String) -> Dic
 			var slot: Array = routine[key][period]
 			return {"room": slot[0], "activity": slot[1], "source": "routine"}
 	return {}
+
