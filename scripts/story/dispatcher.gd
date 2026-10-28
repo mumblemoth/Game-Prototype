@@ -1,25 +1,25 @@
-class_name Dispatcher
-## Väljer vilken rankscen som spelas i en tidszon. Läser villkoren i Balance.GATES; en
-## scen som har en rad där är registrerad. Dialogfilen hittas på
-## res://dialogue/<char>/<scen_id>.dialogue om SCENES inte säger något annat.
+﻿class_name Dispatcher
+## VÃ¤ljer vilken rankscen som spelas i en tidszon. LÃ¤ser villkoren i Balance.GATES; en
+## scen som har en rad dÃ¤r Ã¤r registrerad. Dialogfilen hittas pÃ¥
+## res://dialogue/<char>/<scen_id>.dialogue om SCENES inte sÃ¤ger nÃ¥got annat.
 
 ## Var dialogfilerna ligger: mapp per person (id i GameState.CHARACTERS).
 const DIALOGUE_PATH := "res://dialogue/%s/%s.dialogue"
-## Cuen scenerna börjar på om SCENES inte säger något annat.
+## Cuen scenerna bÃ¶rjar pÃ¥ om SCENES inte sÃ¤ger nÃ¥got annat.
 const DEFAULT_CUE := "start"
-## Händelsen (GameState.flags) som sätts när en scen är spelad: prefix + scen_id.
+## HÃ¤ndelsen (GameState.flags) som sÃ¤tts nÃ¤r en scen Ã¤r spelad: prefix + scen_id.
 const DONE_FLAG := "scene_done_"
-## Suffixet för en scens bonusvariant (CONTRACT.md, avsnitt 3).
+## Suffixet fÃ¶r en scens bonusvariant (CONTRACT.md, avsnitt 3).
 const BONUS_SUFFIX := "_bonus"
 
-## Undantag från standardvägen: scen_id -> {"dialogue": sökväg, "cue": cue}.
+## Undantag frÃ¥n standardvÃ¤gen: scen_id -> {"dialogue": sÃ¶kvÃ¤g, "cue": cue}.
 const SCENES := {
 }
 
 
 ## Scenen som ska spelas i tidszonen (index i GameState.TIME_PERIODS), eller "" om ingen.
-## Med char_id väljs bara bland den personens scener. Finns flera klara scener vinner
-## den med högst rank.
+## Med char_id vÃ¤ljs bara bland den personens scener. Finns flera klara scener vinner
+## den med hÃ¶gst rank.
 static func resolve_slot(period: int, char_id := "") -> String:
 	var best := ""
 	var best_rank := 0
@@ -33,9 +33,11 @@ static func resolve_slot(period: int, char_id := "") -> String:
 	return best
 
 
-## Om scenen kan spelas nu: rätt tidszon och rum, inte redan spelad, föregående rank
-## spelad, och relationen och mamman når upp till villkoren.
+## Om scenen kan spelas nu: rÃ¤tt tidszon och rum, inte redan spelad, fÃ¶regÃ¥ende rank
+## spelad, och relationen och mamman nÃ¥r upp till villkoren.
 static func is_ready(scene_id: String, period: int) -> bool:
+	if not Balance.GATES.has(scene_id):
+		return false
 	var gate: Dictionary = Balance.GATES[scene_id]
 	var char_id: String = gate["char"]
 	var rank: int = gate["rank"]
@@ -54,7 +56,7 @@ static func is_ready(scene_id: String, period: int) -> bool:
 		and GameState.attractiveness_tier() >= gate["attr"]
 
 
-## Personens scen för en rank, eller "".
+## Personens scen fÃ¶r en rank, eller "".
 static func scene_for(char_id: String, rank: int) -> String:
 	for scene_id in Balance.GATES:
 		var gate: Dictionary = Balance.GATES[scene_id]
@@ -67,7 +69,7 @@ static func is_done(scene_id: String) -> bool:
 	return GameState.has_flag(DONE_FLAG + base_id(scene_id))
 
 
-## Grundscenen för en bonusvariant ("eric_r1_bonus" -> "eric_r1").
+## Grundscenen fÃ¶r en bonusvariant ("eric_r1_bonus" -> "eric_r1").
 static func base_id(scene_id: String) -> String:
 	return scene_id.trim_suffix(BONUS_SUFFIX)
 

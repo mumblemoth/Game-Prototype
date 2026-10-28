@@ -19,8 +19,8 @@ const LUST_MAX := 100.0
 ##   attr   – kräver GameState.attractiveness_tier() >= attr
 const GATES := {
 	"eric_r1": {"char": "husband", "rank": 1, "period": "evening", "room": "living_room", "lust": 0.0, "attr": 1},
+	"miles_r1": {"char": "son_1", "rank": 1, "period": "afternoon", "room": "bedroom", "lust": 0.0, "attr": 1},
 }
-#	"miles_r1": {"char": "son_1", "rank": 1, "period": "afternoon", "room": "classroom", "lust": 0.0, "attr": 1},
 
 ## scen_id -> effekter som GameState.apply() lägger på (alla nycklar valfria):
 ##   link_points – poäng i relationen till GATES[scen_id].char
