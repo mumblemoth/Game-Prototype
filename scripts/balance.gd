@@ -20,6 +20,7 @@ const LUST_MAX := 100.0
 const GATES := {
 	"eric_r1": {"char": "husband", "rank": 1, "period": "evening", "room": "living_room", "lust": 0.0, "attr": 1},
 	"miles_r1": {"char": "son_1", "rank": 1, "period": "afternoon", "room": "classroom", "lust": 0.0, "attr": 1},
+	"miles_r2": {"char": "son_1", "rank": 2, "period": "evening", "room": "son_room_1", "lust": 5.0, "attr": 1},
 }
 
 ## scen_id -> effekter som GameState.apply() lÃ¤gger pÃ¥ (alla nycklar valfria):
@@ -33,6 +34,9 @@ const EFFECTS := {
 	"eric_r1": {"link_points": 2, "lust": 2.0, "relief": 5, "flags": []},
 	"eric_r1_bonus": {"link_points": 3, "lust": 4.0, "relief": 8, "flags": []},
 	"miles_r1": {"link_points": 2, "lust": 2.0, "relief": 5, "flags": []},
+	"miles_r2": {"link_points": 3, "lust": 4.0, "relief": 6, "flags": []},
 	"miles_r1_bonus": {"link_points": 3, "lust": 4.0, "relief": 8, "flags": []},
 }
+
+
 
