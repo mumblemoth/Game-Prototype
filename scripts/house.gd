@@ -97,6 +97,7 @@ func _ready() -> void:
 		_dialog.visible = active)
 	
 	# Set up the initial state
+	_build_menu_ui()
 	_highlight = ColorRect.new()
 	_highlight.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -108,19 +109,20 @@ func _ready() -> void:
 	_view.can_pan = _can_pan
 
 func _can_pan() -> bool:
-	return not _dialog.visible and not _phone.visible and not _appearance.visible and not _map.visible and not _pause.is_open and not _transition.is_playing() and not GameState.in_dialogue()
+	return not _dialog.visible and not _phone.is_open and not _appearance.visible and not _map.visible and not _pause.is_open and not _transition.is_playing() and not GameState.in_dialogue()
 
 func _set_hover(room: String) -> void:
 	_highlight_rect = PlanDrawer.highlight_rect_of(room)
 	_highlight.visible = room != ""
 
 func _on_room_clicked(room: String) -> void:
-	print("click ", room, " trans=", _transition.is_playing(), " dlg=", GameState.in_dialogue(), " playable=", GameState.is_playable())
+	print("click ", room, " period=", GameState.period, " scene=[", GameState.playing_scene, "] replay=[", GameState.replaying_memory, "] over=", GameState.is_day_over(), " playable=", GameState.is_playable())
 	if _transition.is_playing() or GameState.in_dialogue():
 		return
 	if not GameState.is_playable():
 		return
-	if _dialog.visible or _appearance.visible or _phone.visible or _map.visible or _pause.is_open:
+	print("dlgvis=", _dialog.visible, " appvis=", _appearance.visible, " phonevis=", _phone.is_open, " mapvis=", _map.visible, " pause=", _pause.is_open)
+	if _dialog.visible or _appearance.visible or _phone.is_open or _map.visible or _pause.is_open:
 		return
 	_close_menu()
 	_phone.close()
@@ -131,12 +133,18 @@ func _on_room_clicked(room: String) -> void:
 	
 	# Update the menu
 	_menu_room = room
+	print("layer=", _menu_layer, " list=", _menu_list)
 	_build_menu()
+	print("built ok")
+	_menu_layer.visible = true
+	print("menu vis=", _menu_layer.visible, " kids=", _menu_layer.get_child_count())
+	if _menu_layer.get_child_count() > 0:
+		print("panel rect=", (_menu_layer.get_child(0) as Control).get_global_rect())
 
 func _build_menu() -> void:
 	_menu_list.clear()
 	_menu_title.text = _floor_name
-	_menu_period.text = GameState.time_of_day
+	_menu_period.text = GameState.get_time_of_day()
 	
 	# Add the menu items
 	var menu_items = [
@@ -152,11 +160,11 @@ func _build_menu() -> void:
 		button.pressed.connect(func() -> void:
 			match item.action:
 				"talk":
-					# Start a dialogue
-					pass
+					var here := GameState.get_characters_in(_menu_room).filter(func(c: String) -> bool: return c != "mom")
+					if not here.is_empty():
+						GameState.talk_to(here[0])
 				"wait":
-					# Wait for a while
-					pass
+					GameState.advance_period()
 				"phone":
 					_phone.open()
 				"appearance":
@@ -213,6 +221,7 @@ func _toggle_map() -> void:
 	if _map.is_open:
 		_map.close_map()
 		return
+	print("dlgvis=", _dialog.visible, " appvis=", _appearance.visible, " phonevis=", _phone.is_open, " mapvis=", _map.visible, " pause=", _pause.is_open)
 	if _dialog.visible or _appearance.visible or _pause.is_open or _transition.is_playing() or GameState.in_dialogue():
 		return
 	if not GameState.is_playable():
@@ -274,3 +283,33 @@ func _unhandled_input(event: InputEvent) -> void:
 		print("F1 room=", GameState.current_room, " here=", here, " period=", GameState.get_time_of_day())
 		if not here.is_empty():
 			print("talk_to -> ", GameState.talk_to(here[0]))
+func _build_menu_ui() -> void:
+	print("BUILD UI RAN")
+	_menu_layer = CanvasLayer.new()
+	_menu_layer.layer = 4
+	_menu_layer.visible = false
+	add_child(_menu_layer)
+	var panel := PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+	panel.offset_left = 24
+	panel.offset_top = -180
+	panel.offset_right = 300
+	panel.offset_bottom = 180
+	panel.add_theme_stylebox_override("panel", UiKit.plate(UiKit.PAPER, UiKit.SLANT, UiKit.INK, 3, UiKit.RED, Vector2(18, 14)))
+	_menu_layer.add_child(panel)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	panel.add_child(column)
+	_menu_title = Label.new()
+	_menu_title.add_theme_font_override("font", UiKit.display_font())
+	_menu_title.add_theme_font_size_override("font_size", UiKit.HEADING)
+	_menu_title.add_theme_color_override("font_color", UiKit.INK)
+	column.add_child(_menu_title)
+	_menu_period = Label.new()
+	_menu_period.add_theme_font_override("font", UiKit.body_font())
+	_menu_period.add_theme_font_size_override("font_size", UiKit.SMALL)
+	_menu_period.add_theme_color_override("font_color", UiKit.MUTED)
+	column.add_child(_menu_period)
+	_menu_list = VBoxContainer.new()
+	_menu_list.add_theme_constant_override("separation", 4)
+	column.add_child(_menu_list)
