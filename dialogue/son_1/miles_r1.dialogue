@@ -1,0 +1,72 @@
+# =========================================================
+# RANK 1 - "After the bell"
+# GATE: char son_1, rank 1, period afternoon, room classroom
+# =========================================================
+
+~ start
+
+$> locals.tone = 0
+$> GameState.location("Classroom · After the bell")
+$> GameState.sprite("son_1", "desk")
+
+The room empties in about ninety seconds. He doesn't move.
+
+Miles: [#mood=averted, #pose=desk] You don't have to wait.
+
+Mom: [#mood=neutral, #pose=standing] I'm not waiting. I have marking.
+
+Miles: [#mood=averted] Right.
+
+He doesn't believe her. He's right not to.
+
+She sits down at the desk next to his and pulls the pile over.
+
+Miles: [#mood=neutral] Worksheet four.
+
+Mom: [#mood=neutral] Worksheet four.
+
+Miles: [#mood=averted] I got question seven wrong. On purpose, maybe.
+
+Mom: [#mood=surprised] On purpose.
+
+Miles: [#mood=averted] So you'd have something to say to me.
+
+He says it like it's nothing. Then goes very red.
+
+- "That's a lot of work for a conversation."
+	$> locals.tone += 1
+	Mom: [#mood=soft] That's a lot of work for a conversation.
+	Miles: [#mood=flushed] It's not. It's one question.
+	Mom: [#mood=soft] It's one question a week for a term.
+	Miles: [#mood=flushed] ...Yeah.
+- "You could just say hello."
+	Mom: [#mood=neutral] You could just say hello.
+	Miles: [#mood=averted] Hello is harder.
+- Say nothing and mark.
+	Mom: [#mood=neutral] Mm.
+	She marks. He watches her mark.
+
+He's got his hand on the mouse, not using it. The screen's asleep.
+
+Miles: [#mood=averted] You're the only one who calls on me.
+
+Mom: [#mood=surprised] I call on everyone.
+
+Miles: [#mood=averted] You call on everyone else twice.
+
+She has no answer for that, so she keeps marking.
+
+The clock in the corridor does the loud thing it does at ten past four.
+
+Miles: [#mood=soft] Same time Thursday?
+
+Mom: [#mood=soft] Same time Thursday.
+
+He leaves first. She waits until she can't hear his shoes, then looks up.
+
+$> GameState.apply("miles_r1", locals.tone)
+
+$> GameState.rank_card("son_1", 1)
+
+=> END
+

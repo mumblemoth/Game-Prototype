@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/hotspot.gd" id="1_hotspot"]
+[ext_resource type="Script" path="res://scripts/room.gd" id="2_room"]
+[ext_resource type="Script" path="res://scripts/room_exit.gd" id="3_exit"]
+
+[node name="Kitchen" type="Node2D"]
+script = ExtResource("2_room")
+room_id = "kitchen"
+
+[node name="Sink" type="Area2D" parent="."]
+script = ExtResource("1_hotspot")
+display_name = "Diskhon"
+furniture_kind = "sink"
+action_text = "Du diskar."
+time_cost_minutes = 60
+home_effect = 15
+
+[node name="Stove" type="Area2D" parent="."]
+script = ExtResource("1_hotspot")
+display_name = "Spisen"
+furniture_kind = "stove"
+action_text = "Du lagar middag."
+time_cost_minutes = 90
+home_effect = 20
+
+[node name="Fridge" type="Area2D" parent="."]
+script = ExtResource("1_hotspot")
+display_name = "Kylskåpet"
+furniture_kind = "fridge"
+action_text = "Du går igenom kylskåpet och skriver en inköpslista."
+time_cost_minutes = 15
+home_effect = 5
+
+[node name="Table" type="Area2D" parent="."]
+script = ExtResource("1_hotspot")
+display_name = "Matbordet"
+furniture_kind = "table"
+action_text = "Du sätter dig vid bordet en stund."
+time_cost_minutes = 30
+
+[node name="ToHall" type="Area2D" parent="."]
+script = ExtResource("3_exit")
+target_room = "hall"
+
+[node name="ToBackyard" type="Area2D" parent="."]
+script = ExtResource("3_exit")
+target_room = "backyard"

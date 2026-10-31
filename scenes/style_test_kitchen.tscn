@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/style_test/kitchen_3d.gd" id="1_kitchen"]
+
+[node name="StyleTestKitchen" type="Node3D"]
+script = ExtResource("1_kitchen")

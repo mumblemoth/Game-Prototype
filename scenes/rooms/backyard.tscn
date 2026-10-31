@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/room_exit.gd" id="2_exit"]
+
+[node name="Backyard" type="Node2D"]
+script = ExtResource("1_room")
+room_id = "backyard"
+
+[node name="ToLivingRoom" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "living_room"
+
+[node name="ToKitchen" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "kitchen"
+
+[node name="ToOutside" type="Area2D" parent="."]
+script = ExtResource("2_exit")
+target_room = "outside"

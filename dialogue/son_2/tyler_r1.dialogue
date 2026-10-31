@@ -1,0 +1,92 @@
+﻿# =========================================================
+# RANK 1 - "Doorway"
+# GATE: char son_2, rank 1, period afternoon, room kitchen
+# =========================================================
+
+~ start
+
+$> locals.tone = 0
+$> GameState.location("Kitchen · Afternoon")
+$> GameState.sprite("son_2", "doorway")
+
+The back door bangs. Then boots. Then he's in the frame.
+
+Tyler: [#mood=neutral, #pose=doorway] Practice got out early.
+
+Mom: [#mood=neutral, #pose=standing] Mm.
+
+He doesn't come in. He stands where the frame cuts him in half.
+
+Tyler: [#mood=neutral] Coach made us run the hill. Six times.
+
+Mom: [#mood=neutral] Good.
+
+Tyler: [#mood=neutral] It's not good. It's stupid. It's October.
+
+Mom: [#mood=neutral] It's October.
+
+Tyler: [#mood=surprised] ...Point is, six.
+
+She keeps her eyes down. The pan needs turning and the pan is a good excuse.
+
+Tyler: [#mood=neutral] I'm not even tired.
+
+Mom: [#mood=neutral] You're dripping on the floor.
+
+Tyler: [#mood=soft] I'll mop it.
+
+He doesn't move. He's waiting.
+
+- Look up.
+	$> locals.tone += 1
+	She looks up. He's flushed and pleased and pretending not to be.
+	Tyler: [#mood=flushed] What.
+	Mom: [#mood=neutral] Nothing. You wanted me to look.
+	Tyler: [#mood=flushed] I didn't say that.
+	Mom: [#mood=soft] You didn't have to.
+- Keep not looking.
+	Mom: [#mood=neutral] Mop it, then.
+	Tyler: [#mood=strain] ...Yeah.
+	He gets the mop out. He's loud about it. He wants her to hear the effort.
+- Ask about the six.
+	Mom: [#mood=neutral] Six times up the hill.
+	Tyler: [#mood=surprised] You were listening.
+	Mom: [#mood=neutral] I was in the room.
+
+He mops. The floor is already clean where he's mopping.
+
+Tyler: [#mood=neutral] Coach says I could go regional.
+
+Mom: [#mood=neutral] Coach says a lot of things.
+
+Tyler: [#mood=strain] He means it though.
+
+Mom: [#mood=neutral] Mm.
+
+He stops. The mop handle is between both hands and he's holding it too hard.
+
+Tyler: [#mood=averted] You didn't say anything. About regional.
+
+Mom: [#mood=neutral] Regional's good.
+
+Tyler: [#mood=averted] Right.
+
+He puts the mop away. He takes a while about it.
+
+Tyler: [#mood=neutral] I'm gonna be outside.
+
+Mom: [#mood=neutral] Mm.
+
+He's at the door.
+
+Then he stops there, one hand on the frame.
+
+Tyler: [#mood=averted] You could come out. Watch. If you wanted.
+
+He doesn't wait for the answer.
+
+$> GameState.apply("tyler_r1", locals.tone)
+
+$> GameState.rank_card("son_2", 1)
+
+=> END

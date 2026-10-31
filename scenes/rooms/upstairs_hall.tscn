@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/room_exit.gd" id="2_exit"]
+
+[node name="UpstairsHall" type="Node2D"]
+script = ExtResource("1_room")
+room_id = "upstairs_hall"
+
+[node name="ToSonRoom1" type="Area2D" parent="."]
+position = Vector2(60, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "son_room_1"
+
+[node name="ToSonRoom2" type="Area2D" parent="."]
+position = Vector2(264, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "son_room_2"
+
+[node name="ToBathroom" type="Area2D" parent="."]
+position = Vector2(468, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "bathroom"
+
+[node name="ToBedroom" type="Area2D" parent="."]
+position = Vector2(672, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "bedroom"
+
+[node name="ToAttic" type="Area2D" parent="."]
+position = Vector2(876, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "attic"
+direction = 1
+travel_minutes = 2
+
+[node name="ToHall" type="Area2D" parent="."]
+position = Vector2(1080, 230)
+script = ExtResource("2_exit")
+size = Vector2(140, 250)
+target_room = "hall"
+direction = 2
+travel_minutes = 2
